@@ -253,11 +253,15 @@ pre.css-out{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0
 .ex-explain{padding:0 14px 14px;font-size:14.5px;max-width:78ch}
 .ex-explain p{margin:.4em 0}
 footer{margin-top:48px;color:var(--muted);font-size:13px}
+.topnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.topnav a{font:600 13px var(--font-body);padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--surface)}
+.topnav a:hover{border-color:var(--muted)}
+.topnav a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
+
 </head>
 <body>
-
 <div class="shell">
 <details class="toc" open id="toc">
   <summary>Sommaire</summary>
@@ -287,6 +291,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
     <li><a href="#s17"><span>17</span>span vs &amp; span</a></li>
     <li><a href="#s18"><span>18</span>Erreurs avec &amp;</a></li>
     <li><a href="#sng"><span>★</span>Spécial Angular</a></li>
+    <li><a href="angular.html"><span>→</span>Partie Angular &amp; Material</a></li>
   </ol>
   <div class="grp">Synthèse</div>
   <ol>
@@ -298,6 +303,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 
 <main>
 <header class="hero">
+  <nav class="topnav" aria-label="Parties du cours"><a href="index.html" aria-current="page">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html">2 · Angular &amp; Material</a></nav>
   <div class="kicker">Cours interactif · CSS d'abord, SCSS ensuite</div>
   <h1>Les <span class="hl">sélecteurs</span> CSS &amp; SCSS, vus de près</h1>
   <p class="lead">Chaque leçon montre un petit HTML à gauche et une vue « boîtes » à droite. Le sélecteur surligne exactement ce qu'il attrape. Dans chaque atelier tu peux taper ton propre sélecteur : tout se recalcule en direct, avec le vrai moteur du navigateur.</p>
@@ -717,12 +723,14 @@ app-child  ← reçoit _nghost-c (son « :host ») et _ngcontent-p (il est dans 
     <tr><td><code>:host ::ng-deep .x</code></td><td><code>.x</code> n'importe où sous le composant, y compris dans ses composants enfants (déprécié mais encore très répandu)</td></tr>
   </table></div>
   <div class="codes">
-    <div class="cblock"><div class="cap" style="color:var(--bad)"><span>✗ Piège avec &amp;</span></div><pre class="code" data-hl>:host {
+    <div class="cblock"><div class="cap" style="color:var(--cand)"><span>⚠ Fragile avec &amp;</span></div><pre class="code" data-hl>:host {
   &amp;.active { border: 1px solid; }
 }
 /* devient :host.active
-   → ne correspond jamais */</pre></div>
-    <div class="cblock"><div class="cap" style="color:var(--ok)"><span>✓ Correct</span></div><pre class="code" data-hl>:host(.active) {
+   Angular (mode Emulated) le traduit,
+   mais ce n'est pas du CSS standard :
+   en ShadowDom, ça ne correspond jamais */</pre></div>
+    <div class="cblock"><div class="cap" style="color:var(--ok)"><span>✓ Forme standard</span></div><pre class="code" data-hl>:host(.active) {
   border: 1px solid;
 }
 :host {
@@ -730,6 +738,7 @@ app-child  ← reçoit _nghost-c (son « :host ») et _ngcontent-p (il est dans 
   /* → :host .title : OK */
 }</pre></div>
   </div>
+  <div class="callout good"><b>Pour aller plus loin</b>La <a href="angular.html">partie Angular &amp; Material</a> détaille l'encapsulation, le DOM interne de Material, les overlays, le theming M3, les overrides et l'organisation du SCSS d'un projet.</div>
 </section>
 
 <!-- ============ 19 ============ -->
@@ -1080,7 +1089,7 @@ function Lab(host,cfg,key){
   var id='in-'+key;
   host.classList.add('lab');
   host.innerHTML='<div class="lab-top"><div class="chips" role="group" aria-label="Sélecteurs à essayer"></div>'+
-    '<div class="try"><label for="'+id+'">Ton sélecteur</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
+    '<div class="try"><label for="'+id+'">'+esc(cfg.inputLabel||'Ton sélecteur')+'</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
     '<div class="lab-panes'+(cfg.compact?' compact':'')+'"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code"></div></div>'+
     '<div class="pane pane-box"><div class="pane-cap">Aperçu en boîtes · une boîte = une balise</div><div class="boxes"></div></div></div>'+
     '<div class="lab-foot"><div class="read"></div><div class="verdict" role="status"></div><pre class="rule"></pre></div>';

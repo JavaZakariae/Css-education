@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Angular &amp; Material : le style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : sommaire collant à gauche, colonne de leçons à droite ; chaque atelier = HTML à gauche, boîtes à droite. Motif : le surligneur. */
+:root{
+  --paper:#F4F6F9; --surface:#FFFFFF; --surface-2:#ECF0F5; --ink:#172031; --muted:#5A6679; --line:#D6DCE5;
+  --mark:#FFE05A; --mark-ink:#3A2B00; --mark-edge:#D9AE00;
+  --ref:#2356D3; --ref-soft:rgba(35,86,211,.09);
+  --cand:#C2410C; --cand-soft:rgba(194,65,12,.09);
+  --ok:#157A3A; --ok-soft:rgba(21,122,58,.12); --bad:#BE2A31; --bad-soft:rgba(190,42,49,.10);
+  --syn-tag:#8B2C91; --syn-attr:#965700; --syn-val:#0A6C4E; --syn-text:#172031; --syn-punct:#7A8597;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+    --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+    --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+    --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+    --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+    --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+  --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+  --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+  --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+  --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+  --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--ref)}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);padding:.08em .35em;border-radius:4px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:44px;max-width:1260px;margin:0 auto;padding-inline:24px;padding-block:28px 96px}
+main{min-width:0}
+
+/* Sommaire */
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:14px;padding-right:4px}
+.toc summary{display:none}
+.toc .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 6px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);padding:3px 8px;border-radius:5px;line-height:1.35}
+.toc a span{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:1.6em}
+.toc a:hover{background:var(--surface-2)}
+.toc a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.toc a[aria-current="true"] span{color:inherit;opacity:.7}
+.toc .score{margin-top:18px;font-size:13px;color:var(--muted)}
+@media (max-width:980px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:8px;padding-inline:16px}
+  .toc{position:static;max-height:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px}
+  .toc summary{display:block;cursor:pointer;font-weight:600}
+}
+
+/* En-tête */
+.hero{padding-block:4px 30px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2.3rem,6vw,3.7rem);line-height:1.02;letter-spacing:-.025em;margin:.25em 0 .35em;text-wrap:balance}
+h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%);padding-inline:.06em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;font-size:14px}
+.sw{display:inline-block;width:20px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:7px}
+.sw.sel{background:var(--mark);border:1px solid var(--mark-edge)}
+.sw.ref{border:2px dashed var(--ref)}
+.sw.cand{border:2px dotted var(--cand);background:var(--cand-soft)}
+
+/* Parties et leçons */
+.part{margin-block:52px 4px;padding:22px 24px;border-radius:12px;background:var(--ink);color:var(--paper)}
+.part .kicker{color:inherit;opacity:.65}
+.part h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;margin:.15em 0 .3em;letter-spacing:-.015em}
+.part p{margin:0;opacity:.85;max-width:66ch}
+.part code{background:transparent;color:inherit;border-color:currentColor}
+section.lesson{padding-block:38px;border-bottom:1px solid var(--line);scroll-margin-top:12px}
+.lesson-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.num{font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--muted);min-width:2em}
+.lesson h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.45rem,3.2vw,1.95rem);line-height:1.15;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.syntax{font-family:var(--font-mono);font-size:14px;color:var(--muted)}
+.lesson h3{font-size:1.08rem;font-weight:600;margin:30px 0 6px}
+.prose{max-width:70ch}
+.prose p{margin:.55em 0}
+.big{font-size:1.05em}
+.callout{border-left:3px solid var(--ref);background:var(--ref-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:74ch;margin:16px 0;font-size:15px}
+.callout.warn{border-color:var(--cand);background:var(--cand-soft)}
+.callout.good{border-color:var(--ok);background:var(--ok-soft)}
+.callout > b:first-child{display:block;margin-bottom:2px}
+pre.ascii{font-family:var(--font-mono);font-size:13px;line-height:1.6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;overflow-x:auto;margin:16px 0;white-space:pre;color:var(--ink)}
+.a-ok{color:var(--ok);font-weight:600}.a-no{color:var(--bad);font-weight:600}.a-ref{color:var(--ref);font-weight:600}
+.a-sel{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+.a-amp{color:var(--cand);font-weight:700}.a-dim{color:var(--muted)}.a-tag{color:var(--syn-tag)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.t{border-collapse:collapse;font-size:14px;width:100%}
+.t th,.t td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+.codes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0}
+.cblock{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.cblock .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px}
+pre.code{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.cblock pre.code{background:transparent}
+pre.code.solo{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:14px 0}
+.amp{color:var(--cand);font-weight:700}
+.cm{color:var(--muted);font-style:italic}
+.pr{color:var(--syn-attr)}
+.br{color:var(--syn-punct)}
+
+/* Atelier */
+.lab{margin:20px 0 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.lab-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{font-family:var(--font-mono);font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;white-space:pre-wrap}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.try{display:flex;align-items:center;gap:8px;flex:1 1 240px;max-width:380px;min-width:0}
+.try label{font-size:12px;color:var(--muted);white-space:nowrap}
+.try input{flex:1;min-width:0;font-family:var(--font-mono);font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,.bx:focus-visible,.toc a:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
+.lab-panes{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.lab-panes.compact{grid-template-columns:minmax(0,1fr)}
+.lab-panes.compact .pane-code{display:none}
+.pane{min-width:0;padding:12px 14px}
+.pane-code{border-right:1px solid var(--line)}
+.pane-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+@media (max-width:760px){.lab-panes{grid-template-columns:minmax(0,1fr)}.pane-code{border-right:0;border-bottom:1px solid var(--line)}}
+.code{font-family:var(--font-mono);font-size:12.5px;line-height:1.8;overflow-x:auto}
+.ln{display:flex;white-space:pre;min-width:max-content}
+.gut{width:1.5em;flex:none;text-align:center;font-size:10px}
+.ln.on-sel .gut::before{content:"▶";color:var(--ink)}
+.ln.on-cand .gut::before{content:"▷";color:var(--cand)}
+.ln.on-ref:not(.on-sel):not(.on-cand) .gut::before{content:"◇";color:var(--ref)}
+.el{border-radius:3px}
+.el.sel{background:var(--mark);box-shadow:0 0 0 1px var(--mark-edge)}
+.code .el.sel span{color:var(--mark-ink)}
+.el.ref{outline:1.5px dashed var(--ref);outline-offset:1px}
+.el.cand{outline:1.5px dotted var(--cand);outline-offset:1px;background:var(--cand-soft)}
+.el.hov{text-decoration:underline;text-decoration-color:var(--muted);text-underline-offset:3px}
+.s-tag{color:var(--syn-tag)}.s-attr{color:var(--syn-attr)}.s-val{color:var(--syn-val)}.s-p{color:var(--syn-punct)}.s-text{color:var(--syn-text)}
+.s-cls{color:var(--syn-val)}.s-id{color:var(--syn-attr)}.s-attrb{color:var(--syn-attr);font-size:11px}
+.boxes{display:flex;flex-direction:column;gap:8px}
+.bx{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:background-color .15s,box-shadow .15s}
+.bx-head{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;min-width:0}
+.bx-lbl{display:flex;flex-wrap:wrap;min-width:0;word-break:break-all}
+.bx-text{font-family:var(--font-body);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.bx-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.badge{font-family:var(--font-body);font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap;line-height:1.6}
+.bx-kids{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:1px dashed var(--line);margin-left:2px}
+.bx-inl > .bx-kids{flex-direction:row;flex-wrap:wrap;align-items:center;border-left:0;padding-left:0;margin-left:0}
+.bx.sel{background:var(--mark);border-color:var(--mark-edge)}
+.bx.sel > .bx-head .bx-lbl span,.bx.sel > .bx-head .bx-text,.bx.sel > .bx-kids > .bx-text{color:var(--mark-ink)}
+.badge.b-sel{background:var(--ink);color:var(--paper)}
+.bx.ref{outline:2px dashed var(--ref);outline-offset:2px}
+.badge.b-ref{background:var(--ref);color:var(--surface)}
+.bx.cand{outline:2px dotted var(--cand);outline-offset:2px;background:var(--cand-soft)}
+.badge.b-cand{background:var(--cand);color:var(--surface)}
+.ghost{border:1.5px dashed var(--cand);color:var(--cand);font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:5px;align-self:flex-start;background:var(--surface)}
+.bx.hov{box-shadow:0 0 0 2px var(--muted)}
+.lab-foot{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:8px;font-size:14px}
+.read b,.verdict b{font-weight:600}
+.read code,.verdict code{white-space:normal}
+.verdict{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:5px;background:var(--mark);color:var(--mark-ink)}
+.pill.c{background:var(--cand-soft);color:var(--cand);outline:1px dotted var(--cand)}
+.err{color:var(--bad);font-weight:600}
+.rule{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rule .sx{color:var(--ink);font-weight:600}
+
+/* Démo vivante */
+.live{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;background:var(--surface)}
+.live-stage{padding:18px;min-width:0}
+.live-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.live pre.code{background:var(--surface-2);border-left:1px solid var(--line)}
+@media (max-width:760px){.live{grid-template-columns:minmax(0,1fr)}.live pre.code{border-left:0;border-top:1px solid var(--line)}}
+
+/* Transformateur SCSS */
+.xf{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin:20px 0 0}
+.xf-col{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.xf-col + .xf-col{border-left:1px solid var(--line)}
+@media (max-width:760px){.xf{grid-template-columns:minmax(0,1fr)}.xf-col + .xf-col{border-left:0;border-top:1px solid var(--line)}}
+.xf textarea{width:100%;min-height:250px;font-family:var(--font-mono);font-size:13px;line-height:1.6;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:12px;resize:vertical;tab-size:2}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:500 12.5px var(--font-body);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.trace{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tr{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;display:grid;gap:3px;min-width:0}
+.tr-src{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tr code{white-space:normal;overflow-wrap:anywhere}
+.tg{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px}
+.tg-amp{background:var(--cand-soft);color:var(--cand)}
+.tg-sp{background:var(--ref-soft);color:var(--ref)}
+.tg-root{background:var(--surface-2);color:var(--muted)}
+.tr-how{color:var(--muted)}
+.tr-res{font-family:var(--font-mono);font-size:13px;overflow-wrap:anywhere}
+mark.par{background:var(--ref-soft);color:var(--ref);border-bottom:2px solid var(--ref);padding:0 2px;border-radius:2px}
+.spc{color:var(--cand);font-weight:700}
+.xf-err{color:var(--bad);font-size:13px}
+pre.css-out{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:10px 12px;background:var(--surface-2);border-radius:8px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.sub-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* Cartes d'erreurs */
+.errc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;margin:18px 0}
+.errc h3{margin:0 0 6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}
+.duo > div{min-width:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.duo .cap{font-size:12px;font-weight:600;padding:6px 12px;border-bottom:1px solid var(--line)}
+.duo .no .cap{background:var(--bad-soft);color:var(--bad)}
+.duo .yes .cap{background:var(--ok-soft);color:var(--ok)}
+.duo .out{font-family:var(--font-mono);font-size:13px;padding:8px 12px;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.errc .lab{margin-bottom:0}
+
+/* Exercices */
+.scorebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.meter{flex:1 1 200px;max-width:320px;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.ex{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden}
+.ex-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ex-n{font-weight:600}
+.lvl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 9px;border-radius:999px;border:1px solid currentColor}
+.lvl-1{color:var(--ok)}.lvl-2{color:var(--ref)}.lvl-3{color:var(--cand)}.lvl-4{color:var(--bad)}
+.ex-status{margin-left:auto;font-size:13px;font-weight:600;color:var(--ok)}
+.ex-q{padding:12px 14px 4px}
+.ex-q p{margin:.3em 0}
+.ex-tip{font-size:13px;color:var(--muted)}
+.ex .bx,.ex .el{cursor:pointer}
+.bx.picked{background:var(--ref-soft);border-color:var(--ref);box-shadow:inset 0 0 0 1px var(--ref)}
+.el.picked{background:var(--ref-soft);box-shadow:0 0 0 1px var(--ref)}
+.badge.b-pick{background:var(--ref);color:var(--surface)}
+.bx.r-ok{background:var(--ok-soft);border-color:var(--ok)}
+.bx.r-miss{outline:2px dashed var(--ok);outline-offset:2px}
+.bx.r-wrong{background:var(--bad-soft);border-color:var(--bad)}
+.el.r-ok{background:var(--ok-soft);box-shadow:0 0 0 1px var(--ok)}
+.el.r-miss{outline:1.5px dashed var(--ok);outline-offset:1px}
+.el.r-wrong{background:var(--bad-soft);box-shadow:0 0 0 1px var(--bad)}
+.badge.b-ok{background:var(--ok);color:var(--surface)}
+.badge.b-wrong{background:var(--bad);color:var(--surface)}
+.badge.b-miss{background:transparent;color:var(--ok);outline:1.5px dashed var(--ok)}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.btn{font:600 14px var(--font-body);padding:7px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+.ex-fb{font-size:14px;font-weight:600}
+.ex-fb.good{color:var(--ok)}.ex-fb.bad{color:var(--bad)}
+.ex-explain{padding:0 14px 14px;font-size:14.5px;max-width:78ch}
+.ex-explain p{margin:.4em 0}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+.topnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.topnav a{font:600 13px var(--font-body);padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--surface)}
+.topnav a:hover{border-color:var(--muted)}
+.topnav a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+<style>
+.ng{color:var(--cand);font-weight:600}
+.layers{display:grid;gap:8px;margin:18px 0;max-width:760px}
+.layer{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px}
+.layer b{font-family:var(--font-display);font-size:1.05rem}
+.layer p{margin:0;font-size:14.5px;color:var(--muted)}
+.layer .q{display:block;color:var(--ink);font-weight:500;margin-top:2px}
+@media (max-width:620px){.layer{grid-template-columns:minmax(0,1fr)}}
+.pipe{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:20px 0 0;overflow:hidden}
+.pipe-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.files,.presets{display:flex;flex-wrap:wrap;gap:6px}
+.files button{font:500 12.5px var(--font-mono);padding:4px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.files button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pipe-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.pipe-col{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.pipe-col + .pipe-col{border-left:1px solid var(--line)}
+@media (max-width:760px){.pipe-body{grid-template-columns:minmax(0,1fr)}.pipe-col + .pipe-col{border-left:0;border-top:1px solid var(--line)}}
+.pipe textarea{width:100%;min-height:200px;font-family:var(--font-mono);font-size:13px;line-height:1.6;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:12px;resize:vertical;tab-size:2}
+.stage{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stage .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:6px 10px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.stage ol{margin:0;padding:8px 10px 8px 30px;font-family:var(--font-mono);font-size:13px;display:grid;gap:4px}
+.stage li{overflow-wrap:anywhere}
+.arrow{font-size:12px;color:var(--muted);text-align:center}
+.tl{display:grid;gap:0;margin:18px 0;border-left:2px solid var(--line);padding-left:18px;max-width:780px}
+.tl > div{position:relative;padding:4px 0 14px}
+.tl > div::before{content:"";position:absolute;left:-25px;top:10px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--ref)}
+.tl b{font-family:var(--font-mono);font-size:13px;color:var(--ref)}
+.tl p{margin:2px 0 0;font-size:15px}
+.tokdemo{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden;--mat-sys-primary:var(--ref);--mat-sys-on-primary:var(--surface)}
+.tok-ctl{display:grid;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);font-size:14px}
+.tok-ctl label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.tok-ctl input{margin-top:4px}
+.tok-zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:16px 14px}
+.zone{border:1.5px dashed var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:10px;justify-items:start}
+.zone .zl{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.tokdemo.r-root{--mat-button-filled-container-color:var(--ok);--mat-button-filled-label-text-color:var(--surface)}
+.tokdemo.r-zone .zone-fiscal{--mat-button-filled-container-color:var(--mark);--mat-button-filled-label-text-color:var(--mark-ink);--mat-button-filled-container-shape:6px}
+.tokdemo.r-direct .mdc-button__label{color:red;text-decoration:underline}
+.tok-code{margin:0 14px 14px}
+.quiz{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:16px 0;padding:14px 16px}
+.quiz fieldset{border:0;margin:0;padding:0;display:grid;gap:8px}
+.quiz legend{font-weight:600;margin-bottom:8px;padding:0}
+.quiz label{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:14.5px}
+.quiz label:hover{border-color:var(--muted)}
+.quiz input{margin-top:4px}
+.quiz label.good{border-color:var(--ok);background:var(--ok-soft)}
+.quiz label.bad{border-color:var(--bad);background:var(--bad-soft)}
+.quiz .qa{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.quiz .qx{margin-top:8px;font-size:14.5px}
+.check{display:grid;gap:6px;margin:12px 0;padding:0;list-style:none;max-width:76ch}
+.check li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start}
+.check li > span:first-child{font-family:var(--font-mono);font-weight:600;color:var(--ref)}
+</style>
+
+</head>
+<body>
+<div class="shell">
+<details class="toc" open id="toc">
+  <summary>Sommaire</summary>
+  <div class="grp">Comprendre</div>
+  <ol>
+    <li><a href="#a0"><span>0</span>Les 4 couches</a></li>
+    <li><a href="#a1"><span>1</span>Global ou composant</a></li>
+    <li><a href="#a2"><span>2</span>L'encapsulation en vrai</a></li>
+    <li><a href="#a3"><span>3</span>Dans un composant Material</a></li>
+    <li><a href="#a4"><span>4</span>::ng-deep sans casse</a></li>
+    <li><a href="#a5"><span>5</span>Parent → enfant</a></li>
+    <li><a href="#a6"><span>6</span>Dialogs, menus, select</a></li>
+  </ol>
+  <div class="grp">Material</div>
+  <ol>
+    <li><a href="#a7"><span>7</span>Le thème M3</a></li>
+    <li><a href="#a8"><span>8</span>Les overrides</a></li>
+    <li><a href="#a9"><span>9</span>Pourquoi ça casse</a></li>
+  </ol>
+  <div class="grp">Projet</div>
+  <ol>
+    <li><a href="#a10"><span>10</span>Qui gagne ?</a></li>
+    <li><a href="#a11"><span>11</span>Organiser le SCSS</a></li>
+    <li><a href="#a12"><span>12</span>Arbre de décision</a></li>
+    <li><a href="#a13"><span>13</span>Exercices</a></li>
+  </ol>
+  <div class="score">Réussis : <b class="score-n">0</b> / <span class="score-t">0</span></div>
+</details>
+
+<main>
+<header class="hero">
+  <nav class="topnav" aria-label="Parties du cours"><a href="index.html">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html" aria-current="page">2 · Angular &amp; Material</a></nav>
+  <div class="kicker">Partie 2 · Angular 21 · Angular Material (Material 3)</div>
+  <h1>Angular &amp; Material : <span class="hl">où va</span> mon style ?</h1>
+  <p class="lead">Dans un projet Angular, un sélecteur ne part pas tel quel au navigateur. Sass l'aplatit, Angular le réécrit, et Material ajoute son propre DOM par-dessus. Cette partie montre chaque transformation, avec le même surlignage en direct que la partie 1.</p>
+  <div class="legend" aria-label="Légende des couleurs">
+    <span><i class="sw sel"></i>Sélectionné</span>
+    <span><i class="sw ref"></i>Repère / condition</span>
+    <span><span class="ng">[_ngcontent-p]</span> attribut ajouté par Angular</span>
+  </div>
+</header>
+
+<!-- A0 -->
+<section class="lesson" id="a0">
+  <div class="lesson-head"><span class="num">0</span><h2>Les 4 couches entre ton SCSS et l'écran</h2></div>
+  <div class="prose"><p>Quand un style « ne marche pas », une de ces quatre couches l'a bloqué. Le reste de la page en fait le tour, une par une.</p></div>
+  <div class="layers">
+    <div class="layer"><b>1 · Sass</b><p>Aplatit l'imbrication et remplace les <code>&amp;</code> (partie 1). <span class="q">Mon sélecteur final est-il celui que je crois ?</span></p></div>
+    <div class="layer"><b>2 · Angular</b><p>Ajoute un attribut <span class="ng">[_ngcontent-xxx]</span> à chaque morceau de tes sélecteurs de composant. <span class="q">L'élément visé porte-t-il cet attribut ?</span></p></div>
+    <div class="layer"><b>3 · Material</b><p>Fabrique un DOM interne (<code>.mat-mdc-*</code>, <code>.mdc-*</code>) que ton template n'a pas écrit, et place certains panneaux hors de ton composant. <span class="q">L'élément est-il à moi, à Material, ou dans un overlay ?</span></p></div>
+    <div class="layer"><b>4 · La cascade</b><p>Si plusieurs règles visent le même élément, la plus spécifique gagne, puis la dernière écrite. <span class="q">Ma règle est-elle barrée dans DevTools ?</span></p></div>
+  </div>
+  <div class="callout"><b>La méthode de debug en 3 gestes</b>Clic droit sur l'élément → <b>Inspecter</b> → onglet <b>Styles</b>.<br>
+  Ta règle <b>n'apparaît pas</b> : le sélecteur ne correspond pas (couches 1 à 3). Compare le sélecteur final avec les attributs de l'élément.<br>
+  Ta règle apparaît <b>barrée</b> : une autre règle gagne (couche 4, leçon 10).</div>
+</section>
+
+<!-- A1 -->
+<section class="lesson" id="a1">
+  <div class="lesson-head"><span class="num">1</span><h2>Styles globaux ou styles de composant</h2></div>
+  <div class="prose"><p>Il n'y a que deux sortes de fichiers de style dans une app Angular, et ils ne suivent pas les mêmes règles.</p></div>
+<pre class="ascii">angular.json
+ └── "styles": ["src/styles.scss"]      ← <b>GLOBAL</b> : copié tel quel, aucun attribut ajouté
+                                           touche TOUTE l'app, overlays compris
+
+src/app/dossier/dossier.component.ts
+ └── styleUrl: './dossier.component.scss' ← <b>COMPOSANT</b> : réécrit par Angular
+                                           ne touche QUE le template de ce composant</pre>
+  <div class="tbl"><table class="t">
+    <tr><th></th><th>styles.scss (global)</th><th>xxx.component.scss</th></tr>
+    <tr><td>Sélecteur écrit</td><td><code>.title</code></td><td><code>.title</code></td></tr>
+    <tr><td>Sélecteur envoyé</td><td><code>.title</code></td><td><code>.title<span class="ng">[_ngcontent-p]</span></code></td></tr>
+    <tr><td>Portée</td><td>toute la page</td><td>les balises écrites dans <b>ce</b> template</td></tr>
+    <tr><td>À y mettre</td><td>thème, reset, polices, styles des overlays, overrides Material généraux</td><td>mise en page du composant, ses classes, <code>:host</code></td></tr>
+  </table></div>
+  <div class="callout"><b>Depuis Angular 17</b><code>styleUrl</code> (au singulier) accepte un seul fichier. <code>styleUrls: [...]</code> reste accepté pour plusieurs fichiers, et <code>styles: `...`</code> pour du CSS directement dans le décorateur.</div>
+</section>
+
+<!-- A2 -->
+<section class="lesson" id="a2">
+  <div class="lesson-head"><span class="num">2</span><h2>L'encapsulation, transformation par transformation</h2><span class="syntax">ViewEncapsulation.Emulated (par défaut)</span></div>
+  <div class="prose"><p>Angular donne à chaque composant un identifiant. Chaque balise écrite dans son template reçoit <span class="ng">_ngcontent-id</span>, et la balise hôte du composant reçoit <span class="ng">_nghost-id</span>. Puis il colle l'attribut à <b>chaque morceau</b> de tes sélecteurs. C'est un sélecteur d'attribut collé (partie 1, leçons 9 et 10).</p></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Écrit dans dossier.component.scss</th><th>Envoyé au navigateur</th><th>À retenir</th></tr>
+    <tr><td><code>.title</code></td><td><code>.title<span class="ng">[_ngcontent-p]</span></code></td><td>la classe ET l'attribut du template</td></tr>
+    <tr><td><code>.a .b</code></td><td><code>.a<span class="ng">[_ngcontent-p]</span> .b<span class="ng">[_ngcontent-p]</span></code></td><td><b>chaque</b> morceau reçoit l'attribut</td></tr>
+    <tr><td><code>.btn:hover</code></td><td><code>.btn<span class="ng">[_ngcontent-p]</span>:hover</code></td><td>inséré avant les pseudo-classes</td></tr>
+    <tr><td><code>.btn::after</code></td><td><code>.btn<span class="ng">[_ngcontent-p]</span>::after</code></td><td>et avant les pseudo-éléments</td></tr>
+    <tr><td><code>:host</code></td><td><code><span class="ng">[_nghost-p]</span></code></td><td>la balise hôte <code>&lt;app-dossier&gt;</code></td></tr>
+    <tr><td><code>:host(.compact)</code></td><td><code>.compact<span class="ng">[_nghost-p]</span></code></td><td>l'hôte, s'il a la classe</td></tr>
+    <tr><td><code>:host-context(.dark) .x</code></td><td><code>.dark<span class="ng">[_nghost-p]</span> .x<span class="ng">[…]</span>, .dark <span class="ng">[_nghost-p]</span> .x<span class="ng">[…]</span></code></td><td>l'hôte ou un de ses ancêtres a la classe</td></tr>
+    <tr><td><code>:host ::ng-deep .x</code></td><td><code><span class="ng">[_nghost-p]</span> .x</code></td><td>plus d'attribut <b>après</b> ::ng-deep</td></tr>
+    <tr><td><code>::ng-deep .x</code></td><td><code>.x</code></td><td><b>devient global</b> (leçon 4)</td></tr>
+  </table></div>
+  <div class="prose"><p>Voici le DOM réel d'un petit écran : <code>app-dossier</code> (id <b>p</b>) contient un champ Material et un composant enfant <code>app-party-card</code> (id <b>c</b>). Les vrais attributs ressemblent à <code>_ngcontent-ng-c3428157</code> ; ici ils sont raccourcis.</p></div>
+  <div data-alab="ENC"></div>
+
+  <h3>Le transformateur à trois étages : SCSS → Sass → Angular → écran</h3>
+  <div class="prose"><p>Choisis le fichier dans lequel le code est écrit, tape du SCSS, et regarde le sélecteur à chaque étage. En bas, le DOM complet de l'écran, overlays compris.</p></div>
+  <div class="pipe">
+    <div class="pipe-top">
+      <div><div class="sub-cap" style="margin-bottom:6px">Fichier</div><div class="files" id="pp-files" role="group" aria-label="Fichier"></div></div>
+      <div><div class="sub-cap" style="margin-bottom:6px">Exemples</div><div class="presets" id="pp-presets" role="group" aria-label="Exemples"></div></div>
+    </div>
+    <div class="pipe-body">
+      <div class="pipe-col">
+        <label for="pp-src" class="sub-cap" id="pp-fname">SCSS</label>
+        <textarea id="pp-src" spellcheck="false"></textarea>
+      </div>
+      <div class="pipe-col">
+        <div class="stage"><div class="cap">Étage 1 · Sass aplatit</div><ol id="pp-s1"></ol></div>
+        <div class="arrow">▼ Angular ajoute les attributs</div>
+        <div class="stage"><div class="cap">Étage 2 · Envoyé au navigateur</div><ol id="pp-s2"></ol></div>
+      </div>
+    </div>
+  </div>
+  <div id="pp-lab"></div>
+</section>
+
+<!-- A3 -->
+<section class="lesson" id="a3">
+  <div class="lesson-head"><span class="num">3</span><h2>Ce qu'il y a vraiment dans un composant Material</h2></div>
+  <div class="prose"><p>Quand tu écris <code>&lt;mat-form-field&gt;</code>, Material génère des balises supplémentaires à l'intérieur. Ces balises viennent du template de Material, pas du tien : elles n'ont <b>pas</b> ton attribut. Par contre, ce que tu écris toi-même entre les balises (<code>&lt;mat-label&gt;</code>, <code>&lt;input matInput&gt;</code>) est du <b>contenu projeté</b> : il garde ton attribut.</p></div>
+<pre class="ascii"><span class="a-dim">Ton template (dossier.component.html)</span>         <span class="a-dim">Le DOM final</span>
+&lt;mat-form-field class="amount"&gt;               mat-form-field.amount        <span class="ng">[_ngcontent-p]</span>  ← à toi
+  &lt;mat-label&gt;Montant&lt;/mat-label&gt;               └── div.mat-mdc-text-field-wrapper            ← à Material
+  &lt;input matInput&gt;                                   ├── label.mdc-floating-label              ← à Material
+&lt;/mat-form-field&gt;                                    │    └── mat-label  <span class="ng">[_ngcontent-p]</span>         ← à toi (projeté)
+                                                     └── input          <span class="ng">[_ngcontent-p]</span>         ← à toi (projeté)</pre>
+  <div data-alab="MAT"></div>
+  <div class="callout warn"><b>Les classes .mat-mdc-* et .mdc-* ne sont pas une API</b>La documentation d'Angular Material considère ce DOM interne comme un détail d'implémentation : il peut changer à n'importe quelle version. Le cibler marche aujourd'hui, et casse sans prévenir à la prochaine montée de version. La leçon 8 montre la voie supportée.</div>
+</section>
+
+<!-- A4 -->
+<section class="lesson" id="a4">
+  <div class="lesson-head"><span class="num">4</span><h2>::ng-deep sans casser l'app</h2></div>
+  <div class="prose"><p><code>::ng-deep</code> dit à Angular : « à partir d'ici, n'ajoute plus d'attribut ». La partie après lui peut donc toucher n'importe quel descendant, y compris le DOM interne de Material et tes composants enfants. L'équipe Angular déconseille fortement de l'utiliser dans du nouveau code ; il n'est conservé que pour la compatibilité, mais aucune alternative directe ne l'a remplacé.</p></div>
+  <div data-alab="DEEP"></div>
+  <div class="callout warn"><b>Le bug « ça marche seulement après être passé par tel écran »</b>Un <code>::ng-deep</code> sans <code>:host</code> devant devient une règle globale. Angular injecte le style du composant quand il s'affiche, et le retire quand plus aucune instance n'existe. Résultat : un autre écran change d'apparence selon la navigation. Si tu vois ce symptôme, cherche un <code>::ng-deep</code> orphelin.</div>
+  <div class="callout good"><b>Si tu dois l'utiliser, la forme sûre</b><code>:host ::ng-deep .classe-precise { … }</code>, accompagné d'un commentaire qui explique pourquoi aucun token ne suffit. La portée reste limitée à ton composant et à ses descendants.</div>
+</section>
+
+<!-- A5 -->
+<section class="lesson" id="a5">
+  <div class="lesson-head"><span class="num">5</span><h2>Styler un composant enfant depuis le parent</h2></div>
+  <div class="prose"><p>Principe simple : <b>le parent gère la boîte de l'enfant</b> (marge, largeur, position : la balise hôte est dans son template), <b>l'enfant gère son intérieur</b>.</p></div>
+  <div data-alab="CHILD"></div>
+  <h3>Les 4 façons propres, de la meilleure à la moins bonne</h3>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>1 · Variable CSS</span><span>recommandé</span></div><pre class="code" data-hl>/* party-card.component.scss */
+.name {
+  font-weight: var(--party-name-weight, 400);
+}
+
+/* dossier.component.scss */
+app-party-card {
+  --party-name-weight: 700;
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>2 · Classe sur l'hôte</span></div><pre class="code" data-hl>&lt;!-- dossier.component.html --&gt;
+&lt;app-party-card class="highlight"/&gt;
+
+/* party-card.component.scss */
+:host(.highlight) .name {
+  font-weight: 700;
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>3 · Input + classe</span></div><pre class="code" data-hl>// party-card.component.ts
+highlight = input(false);
+// host: { '[class.highlight]': 'highlight()' }
+
+/* même SCSS qu'en 2 */</pre></div>
+    <div class="cblock"><div class="cap"><span>4 · Dernier recours</span></div><pre class="code" data-hl>/* dossier.component.scss */
+:host ::ng-deep app-party-card .name {
+  font-weight: 700;
+}</pre></div>
+  </div>
+  <div class="callout"><b>Pourquoi la variable CSS traverse l'encapsulation</b>L'encapsulation filtre les <b>sélecteurs</b>, pas l'<b>héritage</b>. Une variable posée sur <code>app-party-card</code> descend dans tous ses enfants, comme <code>color</code> ou <code>font-family</code>. C'est exactement ce mécanisme qu'utilise le thème Material (leçons 7 et 8).</div>
+</section>
+
+<!-- A6 -->
+<section class="lesson" id="a6">
+  <div class="lesson-head"><span class="num">6</span><h2>Dialogs, menus, select, autocomplete : les overlays</h2></div>
+  <div class="prose"><p>Le panneau d'un <code>mat-select</code>, un <code>mat-menu</code>, un <code>mat-autocomplete</code>, un dialog, un tooltip ou un snackbar n'est <b>pas</b> affiché dans ton composant. Le CDK le place dans <code>&lt;div class="cdk-overlay-container"&gt;</code>, tout en bas du <code>&lt;body&gt;</code>. Il n'est donc ni dans ton template, ni sous ton <code>:host</code> : même <code>:host ::ng-deep</code> ne l'atteint pas.</p></div>
+<pre class="ascii">&lt;body&gt;
+ ├── app-root
+ │    └── app-dossier <span class="ng">[_nghost-p]</span>
+ │         └── mat-select <span class="ng">[_ngcontent-p]</span>   ← le champ fermé est ici
+ └── div.cdk-overlay-container                ← ajouté à la fin du body
+      ├── div.cdk-overlay-pane
+      │    └── div.mat-mdc-select-panel.<span class="a-sel">article-panel</span>   ← ta panelClass
+      │         └── mat-option × n            ← <span class="a-no">hors de app-dossier</span>
+      └── div.cdk-overlay-pane.<span class="a-sel">confirm-dialog</span>        ← panelClass du dialog
+           └── mat-dialog-container
+                └── app-confirm-dialog <span class="ng">[_nghost-d]</span>     ← son propre SCSS marche</pre>
+  <div data-alab="OVL"></div>
+  <div class="prose"><p>La solution supportée : <b>poser ta propre classe sur le panneau</b>, puis écrire le style dans un fichier <b>global</b>.</p></div>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>Template / TS</span></div><pre class="code">&lt;mat-select panelClass="article-panel"&gt;…
+&lt;mat-autocomplete class="party-panel"&gt;…
+&lt;mat-menu class="row-menu"&gt;…
+
+this.dialog.open(ConfirmDialogComponent, {
+  panelClass: 'confirm-dialog',
+});</pre></div>
+    <div class="cblock"><div class="cap"><span>src/styles/_overlays.scss</span><span>global</span></div><pre class="code" data-hl>.article-panel {
+  .mat-mdc-option {
+    min-height: 32px;
+  }
+}
+.confirm-dialog {
+  max-width: 480px;
+}</pre></div>
+  </div>
+  <div class="callout"><b>Et le contenu du dialog ?</b>Le composant que tu ouvres dans le dialog (<code>app-confirm-dialog</code>) a son propre template : son SCSS de composant marche normalement pour ses balises à lui.</div>
+</section>
+
+<!-- A7 -->
+<section class="lesson" id="a7">
+  <div class="lesson-head"><span class="num">7</span><h2>Le thème Material 3 : une seule fois, dans styles.scss</h2><span class="syntax">mat.theme · --mat-sys-*</span></div>
+  <div class="prose"><p>Depuis la version 19, le mixin <code>mat.theme()</code> prend tes couleurs, ta typographie et ta densité, et génère des <b>variables CSS système</b> (<code>--mat-sys-primary</code>, <code>--mat-sys-surface</code>…). Tous les composants Material lisent ces variables. Tes composants peuvent les lire aussi.</p></div>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>src/styles.scss</span><span>global</span></div><pre class="code" data-hl>@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;   /* "light dark" = suit l'OS */
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>n'importe quel composant</span></div><pre class="code" data-hl>.title {
+  color: var(--mat-sys-primary);
+  font: var(--mat-sys-title-medium);
+}
+.card {
+  background: var(--mat-sys-surface-container);
+  border-radius: var(--mat-sys-corner-medium);
+}
+.hint {
+  color: var(--mat-sys-on-surface-variant);
+}</pre></div>
+  </div>
+<pre class="ascii">html  ← mat.theme() pose ici  --mat-sys-primary, --mat-sys-surface, …
+ │        (variables CSS = héritées par TOUS les descendants)
+ ├── app-dossier [_nghost-p]         lit var(--mat-sys-primary)  <span class="a-ok">✔</span> l'héritage ignore l'encapsulation
+ │    └── mat-form-field
+ │         └── div.mat-mdc-text-field-wrapper   Material lit ses variables  <span class="a-ok">✔</span>
+ └── div.cdk-overlay-container        les overlays aussi  <span class="a-ok">✔</span></pre>
+  <div class="tbl"><table class="t">
+    <tr><th>Variable</th><th>Usage typique</th></tr>
+    <tr><td><code>--mat-sys-primary</code> / <code>--mat-sys-on-primary</code></td><td>couleur d'accent / texte posé dessus</td></tr>
+    <tr><td><code>--mat-sys-surface</code> / <code>--mat-sys-on-surface</code></td><td>fond de page / texte courant</td></tr>
+    <tr><td><code>--mat-sys-surface-container</code></td><td>fond de carte, panneau</td></tr>
+    <tr><td><code>--mat-sys-outline-variant</code></td><td>bordures discrètes</td></tr>
+    <tr><td><code>--mat-sys-error</code></td><td>messages d'erreur</td></tr>
+    <tr><td><code>--mat-sys-body-medium</code>, <code>--mat-sys-title-medium</code></td><td>raccourcis <code>font</code> complets</td></tr>
+    <tr><td><code>--mat-sys-corner-medium</code></td><td>arrondis cohérents</td></tr>
+  </table></div>
+  <div class="callout"><b>La règle qui simplifie tout</b>Dans tes composants : jamais de couleur en dur (<code>#1976d2</code>). Toujours <code>var(--mat-sys-…)</code> ou tes propres variables <code>--app-…</code>. Le jour où le thème change, tu ne touches à aucun composant.</div>
+</section>
+
+<!-- A8 -->
+<section class="lesson" id="a8">
+  <div class="lesson-head"><span class="num">8</span><h2>Changer un composant Material : les overrides</h2><span class="syntax">mat.&lt;composant&gt;-overrides(…)</span></div>
+  <div class="prose"><p>Chaque composant Material expose des <b>tokens</b> : des variables CSS pour sa couleur, sa forme, sa taille… Le mixin <code>mat.button-overrides()</code> (et ses équivalents <code>form-field</code>, <code>table</code>, <code>expansion</code>, <code>dialog</code>…) écrit ces variables sur le sélecteur de ton choix. Toutes les balises en dessous en héritent. Tu n'as besoin de connaître aucune classe interne.</p></div>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>Toute l'app</span><span>styles.scss</span></div><pre class="code" data-hl>@use '@angular/material' as mat;
+
+:root {
+  @include mat.button-overrides((
+    filled-container-shape: 6px,
+  ));
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>Une zone seulement</span></div><pre class="code" data-hl>.zone-fiscal {
+  @include mat.button-overrides((
+    filled-container-color: gold,
+    filled-label-text-color: black,
+  ));
+}
+/* génère :
+.zone-fiscal {
+  --mat-button-filled-container-color: gold;
+  --mat-button-filled-label-text-color: black;
+} */</pre></div>
+  </div>
+  <div class="prose"><p>Démo vivante. L'intérieur de ces boutons est vraiment isolé (Shadow DOM), comme l'intérieur de Material l'est pour ton SCSS de composant. Active chaque option et compare.</p></div>
+  <div class="tokdemo" id="tokdemo">
+    <div class="tok-ctl">
+      <label><input type="checkbox" id="tk-direct"> <span>Règle directe <code>.mdc-button__label { color: red }</code> (ce qu'on écrit sans token)</span></label>
+      <label><input type="checkbox" id="tk-zone" checked> <span><code>mat.button-overrides</code> sur <code>.zone-fiscal</code></span></label>
+      <label><input type="checkbox" id="tk-root"> <span><code>mat.button-overrides</code> sur <code>:root</code> (toute l'app)</span></label>
+    </div>
+    <div class="tok-zones">
+      <div class="zone zone-fiscal"><span class="zl">.zone-fiscal</span><span class="fake-btn" data-label="Enregistrer"></span></div>
+      <div class="zone zone-other"><span class="zl">.zone-succession</span><span class="fake-btn" data-label="Enregistrer"></span></div>
+    </div>
+    <p class="tok-code" id="tk-msg" role="status"></p>
+  </div>
+  <div class="callout"><b>Trouver le nom exact d'un token</b>Dans la doc d'Angular Material, chaque composant a un onglet <b>Styling</b> qui liste ses tokens. Dans DevTools, sélectionne l'élément : les variables <code>--mat-…</code> apparaissent dans l'onglet Styles et tu peux les modifier en direct pour tester.</div>
+  <div class="callout warn"><b>Où l'inclure</b>Dans un fichier global, ou dans un SCSS de composant sous <code>:host</code> (<code>:host { @include mat.button-overrides(…) }</code>). Les variables posées sur l'hôte descendent dans tout le composant, sans <code>::ng-deep</code>.</div>
+</section>
+
+<!-- A9 -->
+<section class="lesson" id="a9">
+  <div class="lesson-head"><span class="num">9</span><h2>Pourquoi tes styles cassent à chaque montée de version</h2></div>
+  <div class="prose"><p>Ta sensation que « les règles changent » est juste : Material a changé de fondations plusieurs fois. Chaque étape a cassé du code qui ciblait des classes internes.</p></div>
+  <div class="tl">
+    <div><b>v15 · 2022</b><p>Passage aux composants basés sur MDC. Le DOM change et les classes sont renommées (<code>.mat-form-field-wrapper</code> devient <code>.mat-mdc-text-field-wrapper</code>…). Les anciens composants restent disponibles en « legacy ».</p></div>
+    <div><b>v17</b><p>Les composants legacy sont supprimés. Tout le CSS qui visait l'ancien DOM ne correspond plus à rien.</p></div>
+    <div><b>v18</b><p>Material 3 devient stable. Les API de thème Material 2 sont préfixées <code>m2-</code> (<code>mat.m2-define-light-theme</code>…).</p></div>
+    <div><b>v19</b><p>Arrivée de <code>mat.theme()</code>, des variables <code>--mat-sys-*</code> et des mixins <code>mat.&lt;composant&gt;-overrides()</code>.</p></div>
+    <div><b>v20</b><p>Les variables <code>--mdc-*</code> sont renommées en <code>--mat-*</code>, avec le nom du composant en premier. Une migration existe : <code>ng generate @angular/material:token-rename</code>.</p></div>
+    <div><b>Sass</b><p><code>@import</code> est déprécié depuis Dart Sass 1.80 et disparaîtra avec Dart Sass 3. Remplace-le par <code>@use</code> / <code>@forward</code>.</p></div>
+  </div>
+  <div class="callout good"><b>La règle d'or qui t'évite 90 % de la casse</b>Ne cible que ce qui est <b>à toi</b> (tes classes, tes balises, la balise hôte) ou ce qui est <b>une API</b> (<code>mat.theme</code>, <code>--mat-sys-*</code>, overrides, <code>panelClass</code>). Chaque <code>.mat-mdc-*</code> dans ton code est une dette pour la prochaine montée de version : liste-les avec une recherche dans le projet avant chaque upgrade.</div>
+</section>
+
+<!-- A10 -->
+<section class="lesson" id="a10">
+  <div class="lesson-head"><span class="num">10</span><h2>Qui gagne quand deux règles se battent ?</h2><span class="syntax">spécificité · ordre</span></div>
+  <div class="prose"><p>Ta règle apparaît barrée dans DevTools ? Le navigateur compare le <b>poids</b> des sélecteurs (partie 1, leçon 3). Un piège propre à Angular : l'attribut ajouté compte comme une classe. Un même sélecteur pèse donc plus lourd écrit dans un composant que dans <code>styles.scss</code>.</p></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Écrit dans</th><th>Sélecteur final</th><th>Poids</th><th></th></tr>
+    <tr><td>styles.scss</td><td><code>.title</code></td><td>0 · 1 · 0</td><td><span class="a-no">perd</span></td></tr>
+    <tr><td>dossier.component.scss</td><td><code>.title<span class="ng">[_ngcontent-p]</span></code></td><td>0 · 2 · 0</td><td><span class="a-ok">gagne</span></td></tr>
+    <tr><td>styles.scss</td><td><code>app-dossier .title</code></td><td>0 · 1 · 1</td><td><span class="a-no">perd encore</span></td></tr>
+    <tr><td>styles.scss</td><td><code>.dossier .title</code></td><td>0 · 2 · 0</td><td>égalité : la règle écrite <b>après</b> gagne</td></tr>
+  </table></div>
+  <ul class="check">
+    <li><span>1</span><span>À poids égal, la dernière règle chargée gagne. Ne compte pas sur l'ordre d'injection entre global et composants : rends tes sélecteurs explicites.</span></li>
+    <li><span>2</span><span>Pour battre une règle Material, n'empile pas les classes et n'ajoute pas <code>!important</code> : passe par un token (leçon 8). Les tokens ne se battent pas, ils changent la valeur que Material utilise.</span></li>
+    <li><span>3</span><span><code>!important</code> déclenche une escalade : la prochaine personne devra en mettre un aussi. Réserve-le aux utilitaires (<code>.hidden</code>).</span></li>
+    <li><span>4</span><span>Astuce avancée : <code>:where(.a .b)</code> a un poids de zéro. Pratique pour des styles de base faciles à surcharger.</span></li>
+  </ul>
+</section>
+
+<!-- A11 -->
+<section class="lesson" id="a11">
+  <div class="lesson-head"><span class="num">11</span><h2>Organiser le SCSS d'un projet qui grossit</h2></div>
+<pre class="ascii">src/
+ ├── styles.scss                 ← point d'entrée global : n'y mets que des @use
+ ├── styles/
+ │    ├── _theme.scss            ← @include mat.theme(…) sur html                  <span class="a-dim">(génère du CSS)</span>
+ │    ├── _tokens.scss           ← tes variables métier : --app-gap, --app-danger…   <span class="a-dim">(génère du CSS)</span>
+ │    ├── _material.scss         ← overrides Material globaux et par contexte        <span class="a-dim">(génère du CSS)</span>
+ │    ├── _overlays.scss         ← styles des panelClass : dialogs, menus, select    <span class="a-dim">(génère du CSS)</span>
+ │    └── _mixins.scss           ← @mixin, @function, $breakpoints                   <span class="a-ok">(ne génère RIEN)</span>
+ └── app/
+      └── dossier/
+           └── dossier.component.scss   ← @use 'mixins' as mx;  puis styles locaux</pre>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>src/styles.scss</span></div><pre class="code" data-hl>@use 'styles/theme';
+@use 'styles/tokens';
+@use 'styles/material';
+@use 'styles/overlays';</pre></div>
+    <div class="cblock"><div class="cap"><span>angular.json</span><span>build › options</span></div><pre class="code">"styles": ["src/styles.scss"],
+"stylePreprocessorOptions": {
+  "includePaths": ["src/styles"]
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>un composant</span></div><pre class="code" data-hl>@use 'mixins' as mx;
+
+:host {
+  display: block;
+}
+.panel {
+  @include mx.stack(var(--app-gap));
+}</pre></div>
+  </div>
+  <div class="callout warn"><b>Le piège qui fait grossir le bundle</b>Chaque fichier <code>.component.scss</code> est compilé séparément. Si un partial importé par tes composants génère du CSS (une classe, un <code>@include mat.theme</code>…), ce CSS est <b>recopié dans chaque composant</b>. Les partials utilisés par les composants ne doivent contenir que des <code>$variables</code>, <code>@mixin</code> et <code>@function</code>.</div>
+  <h3>Les 7 règles d'équipe</h3>
+  <ul class="check">
+    <li><span>1</span><span>Le thème Material est défini <b>une seule fois</b>, dans <code>_theme.scss</code>.</span></li>
+    <li><span>2</span><span>Aucune couleur en dur dans un composant : <code>var(--mat-sys-*)</code> ou <code>var(--app-*)</code>.</span></li>
+    <li><span>3</span><span>Pour personnaliser Material : un override de token, scopé par une classe de contexte (<code>.dense-table</code>), plutôt que global.</span></li>
+    <li><span>4</span><span>Overlays : toujours <code>panelClass</code> ou <code>class</code>, styles dans <code>_overlays.scss</code>.</span></li>
+    <li><span>5</span><span><code>::ng-deep</code> : toujours précédé de <code>:host</code>, avec un commentaire qui justifie, et suivi en revue de code.</span></li>
+    <li><span>6</span><span>Trois niveaux d'imbrication Sass maximum (partie 1, erreur 6).</span></li>
+    <li><span>7</span><span><code>@use</code> partout, plus jamais <code>@import</code>.</span></li>
+  </ul>
+</section>
+
+<!-- A12 -->
+<section class="lesson" id="a12">
+  <div class="lesson-head"><span class="num">12</span><h2>L'arbre de décision</h2><span class="syntax">« je veux changer le style de… »</span></div>
+<pre class="ascii"><b>Je veux changer le style de…</b>
+ │
+ ├── une balise de MON template
+ │     └── SCSS de mon composant, avec mes classes.                           <span class="a-ok">simple</span>
+ │
+ ├── la boîte d'un composant ENFANT (marge, largeur, position)
+ │     └── SCSS du parent :  app-enfant { margin-top: 16px; }                  <span class="a-ok">simple</span>
+ │
+ ├── l'INTÉRIEUR d'un composant enfant à moi
+ │     ├── l'enfant expose une variable CSS / une classe / un input  →  utilise-la    <span class="a-ok">propre</span>
+ │     └── sinon  →  ajoute-la dans l'enfant (pas de ::ng-deep depuis le parent)
+ │
+ ├── un composant MATERIAL (couleur, forme, taille, typo)
+ │     └── mat.&lt;composant&gt;-overrides((token: valeur)) sur un sélecteur        <span class="a-ok">supporté</span>
+ │
+ ├── TOUTE l'app (couleurs, police, densité)
+ │     └── mat.theme(…) dans styles.scss  +  var(--mat-sys-*) partout          <span class="a-ok">supporté</span>
+ │
+ ├── un DIALOG, un SELECT ouvert, un MENU, un AUTOCOMPLETE (overlay)
+ │     └── panelClass / class  +  style dans un fichier GLOBAL                 <span class="a-ok">supporté</span>
+ │
+ └── un détail interne sans token (.mat-mdc-*, .mdc-*)
+       └── :host ::ng-deep .classe { … }  +  commentaire  +  liste pour l'upgrade   <span class="a-no">dernier recours</span></pre>
+</section>
+
+<!-- A13 -->
+<section class="lesson" id="a13">
+  <div class="lesson-head"><span class="num">13</span><h2>Exercices</h2></div>
+  <div class="prose"><p>Première série : le SCSS est écrit dans le fichier indiqué. Clique sur les éléments qui recevront le style, puis vérifie. Les réponses passent par le même calcul Sass puis Angular que le transformateur. Deuxième série : des choix d'approche, comme en revue de code.</p></div>
+  <div class="scorebar"><span>Réussis : <b class="score-n">0</b> / <span class="score-t">0</span></span><div class="meter" aria-hidden="true"><i id="meter"></i></div></div>
+  <div id="aex"></div>
+  <h3>Quelle approche choisirais-tu ?</h3>
+  <div id="aquiz"></div>
+</section>
+
+<footer>Les attributs <code>_ngcontent</code> / <code>_nghost</code> sont raccourcis pour la lisibilité. Le DOM interne de Material est simplifié et peut différer selon ta version ; seules les API (theme, tokens, overrides, panelClass) sont stables. Le transformateur reproduit les règles d'imbrication de Sass et de réécriture d'Angular (mode Emulated) pour les cas courants.</footer>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var clean=function(t){return t.replace(/\s+/g,' ');};
+var VOID=new Set(['input','img','br','hr','meta','link']);
+var INLINE=new Set(['span','a','em','strong','b','i','code','small','label','img','input','button','mark']);
+
+/* ---------- Parsing ---------- */
+function parse(html){
+  var doc=new DOMParser().parseFromString('<!doctype html><html><body>'+html+'</body></html>','text/html');
+  var body=doc.body, n=0;
+  body._all=Array.prototype.slice.call(body.querySelectorAll('*'));
+  body._all.forEach(function(el){el._i=n++;});
+  return body;
+}
+
+/* ---------- Rendu code ---------- */
+function attrsHTML(el){
+  return Array.prototype.map.call(el.attributes,function(a){
+    return ' <span class="s-attr">'+esc(a.name)+'</span>'+(a.value!==''?'<span class="s-p">=</span><span class="s-val">"'+esc(a.value)+'"</span>':'');
+  }).join('');
+}
+function openTag(el){return '<span class="s-p">&lt;</span><span class="s-tag">'+el.localName+'</span>'+attrsHTML(el)+'<span class="s-p">&gt;</span>';}
+function closeTag(el){return '<span class="s-p">&lt;/</span><span class="s-tag">'+el.localName+'</span><span class="s-p">&gt;</span>';}
+function inlineable(el){
+  if(VOID.has(el.localName)) return true;
+  for(var k=0;k<el.children.length;k++){var c=el.children[k]; if(!INLINE.has(c.localName)||c.children.length) return false;}
+  return clean(el.outerHTML).length<=74;
+}
+function inlineHTML(el){
+  var s='<span class="el" data-i="'+el._i+'">'+openTag(el);
+  if(VOID.has(el.localName)) return s+'</span>';
+  var nodes=el.childNodes;
+  for(var k=0;k<nodes.length;k++){
+    var n=nodes[k];
+    if(n.nodeType===3){var t=clean(n.textContent); if(k===0) t=t.replace(/^ /,''); if(k===nodes.length-1) t=t.replace(/ $/,''); if(t) s+='<span class="s-text">'+esc(t)+'</span>';}
+    else if(n.nodeType===1) s+=inlineHTML(n);
+  }
+  return s+closeTag(el)+'</span>';
+}
+function renderCode(body){
+  var out=[];
+  function walk(el,d){
+    if(inlineable(el)){out.push({i:el._i,d:d,h:inlineHTML(el)});return;}
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+openTag(el)+'</span>'});
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) out.push({i:null,d:d+1,h:'<span class="s-text">'+esc(t)+'</span>'});}
+      else if(n.nodeType===1) walk(n,d+1);
+    });
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+closeTag(el)+'</span>'});
+  }
+  Array.prototype.forEach.call(body.children,function(el){walk(el,0);});
+  return out.map(function(l){return '<div class="ln"'+(l.i!==null?' data-li="'+l.i+'"':'')+'><span class="gut"></span><span class="lc">'+'  '.repeat(l.d)+l.h+'</span></div>';}).join('');
+}
+
+/* ---------- Rendu boîtes ---------- */
+function boxHTML(el){
+  var elKids=Array.prototype.slice.call(el.children);
+  var inline=elKids.length>0&&elKids.every(function(c){return INLINE.has(c.localName);});
+  var label='<span class="s-tag">'+el.localName+'</span>'+(el.id?'<span class="s-id">#'+esc(el.id)+'</span>':'')+
+    Array.prototype.map.call(el.classList,function(c){return '<span class="s-cls">.'+esc(c)+'</span>';}).join('')+
+    Array.prototype.filter.call(el.attributes,function(a){return a.name!=='class'&&a.name!=='id';}).map(function(a){return '<span class="s-attrb">&nbsp;['+esc(a.name)+(a.value!==''?'="'+esc(a.value)+'"':'')+']</span>';}).join('');
+  var head, kids='';
+  if(!elKids.length){
+    var t=clean(el.textContent).trim();
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span>'+(t?'<span class="bx-text">'+esc(t)+'</span>':'')+'<span class="bx-badges"></span></div>';
+  } else {
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span><span class="bx-badges"></span></div>';
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) kids+='<span class="bx-text">'+esc(t)+'</span>';}
+      else if(n.nodeType===1) kids+=boxHTML(n);
+    });
+    kids='<div class="bx-kids">'+kids+'</div>';
+  }
+  return '<div class="bx'+(inline?' bx-inl':'')+'" data-i="'+el._i+'">'+head+kids+'</div>';
+}
+function renderBoxes(body){return Array.prototype.map.call(body.children,boxHTML).join('');}
+
+/* ---------- Analyse de sélecteur ---------- */
+function splitTop(sel){
+  var out=[],cur='',d=0,q=null;
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(ch===','&&d===0){out.push(cur.trim());cur='';continue;}
+    cur+=ch;
+  }
+  if(cur.trim())out.push(cur.trim());
+  return out;
+}
+function tokenize(sel){
+  var parts=[],cur='',d=0,q=null,sp=false;
+  sel=sel.trim();
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(d===0&&/\s/.test(ch)){if(cur){parts.push(cur);cur='';}sp=true;continue;}
+    if(d===0&&'>+~'.indexOf(ch)>=0){if(cur){parts.push(cur);cur='';}parts.push({c:ch});sp=false;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(sp){if(parts.length&&typeof parts[parts.length-1]==='string'&&!cur)parts.push({c:' '});sp=false;}
+    cur+=ch;
+  }
+  if(cur)parts.push(cur);
+  return parts;
+}
+function joinTok(t){return t.map(function(x){return typeof x==='string'?x:(x.c===' '?' ':' '+x.c+' ');}).join('').trim();}
+var PE=/::?(before|after|first-letter|first-line|placeholder|marker|selection)(?![\w-])/g;
+var ST=/:(hover|focus-visible|focus-within|focus|active|visited)(?![\w-])/g;
+function prep(g){
+  var pseudo=null,states=[];
+  var s=g.replace(PE,function(m,n){pseudo=n;return '\u0000';}).replace(ST,function(m,n){states.push(':'+n);return '\u0000';});
+  s=s.replace(/(^|[\s>+~(,])\u0000+/g,'$1*').replace(/\u0000/g,'');
+  return {s:s.trim(),pseudo:pseudo,states:states};
+}
+function extractHas(comp){
+  var k=comp.indexOf(':has('); if(k<0) return null;
+  var d=0; for(var j=k+4;j<comp.length;j++){ if(comp[j]==='(')d++; else if(comp[j]===')'){d--; if(d===0) return comp.slice(k+5,j).trim();} }
+  return null;
+}
+function anchors(el,comb,left,body){
+  var out=[], m=function(x){try{return x.matches(left);}catch(e){return false;}}, p;
+  if(comb===' '){for(p=el.parentElement;p&&p!==body;p=p.parentElement) if(m(p)) out.push(p);}
+  else if(comb==='>'){p=el.parentElement; if(p&&p!==body&&m(p)) out.push(p);}
+  else if(comb==='+'){p=el.previousElementSibling; if(p&&m(p)) out.push(p);}
+  else if(comb==='~'){for(p=el.previousElementSibling;p;p=p.previousElementSibling) if(m(p)) out.push(p);}
+  return out;
+}
+var FRAG=document.createDocumentFragment();
+function evaluate(body,sel){
+  var r={sel:sel,error:null,matched:new Set(),refs:new Map(),pseudo:null,states:[]};
+  var raw=(sel||'').trim();
+  if(!raw){r.error='empty';return r;}
+  if(raw.indexOf('&')>=0){r.error='amp';return r;}
+  var groups=splitTop(raw);
+  for(var gi=0;gi<groups.length;gi++){
+    var g=groups[gi];
+    try{FRAG.querySelector(g);}catch(e){r.error='invalid';return r;}
+    var p=prep(g), els;
+    try{ if(!p.s) throw 0; els=Array.prototype.slice.call(body.querySelectorAll(p.s)); }catch(e){r.error='invalid';return r;}
+    els.forEach(function(el){r.matched.add(el);});
+    if(p.pseudo) r.pseudo=p.pseudo;
+    p.states.forEach(function(s){if(r.states.indexOf(s)<0) r.states.push(s);});
+    var toks=tokenize(p.s);
+    if(toks.length>=3&&typeof toks[toks.length-2]==='object'){
+      var comb=toks[toks.length-2].c, left=joinTok(toks.slice(0,-2));
+      els.forEach(function(el){anchors(el,comb,left,body).forEach(function(a){if(!r.refs.has(a)) r.refs.set(a,'repère');});});
+    }
+    var last=toks[toks.length-1], has=typeof last==='string'?extractHas(last):null;
+    if(has&&!/:not\(/.test(last)){
+      els.forEach(function(el){try{
+        var found=/^>/.test(has)?el.querySelectorAll(':scope '+has):(/^[+~]/.test(has)?[]:el.querySelectorAll(has));
+        Array.prototype.forEach.call(found,function(f){r.refs.set(f,'condition');});
+      }catch(e){}});
+    }
+  }
+  return r;
+}
+
+/* ---------- Lecture en français ---------- */
+var PC={hover:'survolé par la souris',focus:'qui a le focus (clic ou Tab)','focus-visible':'qui a le focus clavier','focus-within':"qui contient l'élément qui a le focus",active:"pendant qu'on clique dessus",visited:'déjà visité',
+'first-child':'qui est le premier enfant de son parent','last-child':'qui est le dernier enfant de son parent','only-child':'qui est le seul enfant de son parent',
+'first-of-type':'qui est le premier de sa balise parmi ses frères','last-of-type':'qui est le dernier de sa balise parmi ses frères',
+empty:'vide',checked:'coché',disabled:'désactivé',enabled:'activé',root:'racine du document','placeholder-shown':'dont le placeholder est visible'};
+var PEL={before:'le pseudo-élément ::before (contenu ajouté au début, à l\'intérieur)',after:'le pseudo-élément ::after (contenu ajouté à la fin, à l\'intérieur)','first-letter':'la première lettre','first-line':'la première ligne',placeholder:"le texte d'aide (placeholder)",marker:'la puce',selection:'le texte sélectionné'};
+function ord(n){return n===1?'1er':n+'e';}
+function nth(arg,ofType){
+  var a=arg.trim().toLowerCase().replace(/\s+/g,'');
+  var scope=ofType?'parmi les frères de même balise':'parmi les enfants de son parent';
+  if(/^\d+$/.test(a)) return 'qui est le '+ord(+a)+' '+scope;
+  if(a==='odd'||a==='2n+1') return 'de rang impair (1er, 3e, 5e…) '+scope;
+  if(a==='even'||a==='2n') return 'de rang pair (2e, 4e, 6e…) '+scope;
+  var m=a.match(/^([+-]?\d*)n([+-]\d+)?$/);
+  if(m){
+    var A=(m[1]===''||m[1]==='+')?1:(m[1]==='-'?-1:parseInt(m[1],10)), B=m[2]?parseInt(m[2],10):0, ranks=[];
+    for(var n=0;n<40&&ranks.length<5;n++){var v=A*n+B; if(v>=1) ranks.push(v); else if(A<=0) break;}
+    ranks.sort(function(x,y){return x-y;});
+    return 'dont le rang '+scope+' vaut '+ranks.join(', ')+(A>0?'…':'');
+  }
+  return 'qui correspond à la formule <code>'+esc(arg)+'</code> '+scope;
+}
+function attrPhrase(n,op,v){
+  var N='<code>'+esc(n)+'</code>', V='<code>"'+esc(v)+'"</code>';
+  if(!op) return "qui a l'attribut "+N;
+  return {'=':'dont '+N+' vaut exactement '+V,'^=':'dont '+N+' commence par '+V,'$=':'dont '+N+' finit par '+V,'*=':'dont '+N+' contient '+V,'~=':'dont '+N+' contient le mot '+V,'|=':'dont '+N+' vaut '+V+' ou commence par « '+esc(v)+'- »'}[op];
+}
+function describeCompound(c){
+  var rest=c, tag=null, cls=[], ids=[], bits=[], pel=null, m, guard=0;
+  m=rest.match(/^(\*|[a-zA-Z][\w-]*)/); if(m){tag=m[1];rest=rest.slice(m[0].length);}
+  while(rest&&guard++<30){
+    if((m=rest.match(/^#([\w-]+)/))) ids.push(m[1]);
+    else if((m=rest.match(/^\.([\w-]+)/))) cls.push(m[1]);
+    else if((m=rest.match(/^\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\]\s]+))\s*)?\]/))) bits.push(attrPhrase(m[1],m[2],m[3]!=null?m[3]:(m[4]!=null?m[4]:m[5])));
+    else if((m=rest.match(/^(::?)([\w-]+)(\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\))?/))){
+      var name=m[2].toLowerCase(), arg=m[3]?m[3].slice(1,-1):null;
+      if(m[1]==='::'||(['before','after','first-letter','first-line'].indexOf(name)>=0)) pel=PEL[name]||('::'+esc(name));
+      else if(name==='nth-child') bits.push(nth(arg,false));
+      else if(name==='nth-of-type') bits.push(nth(arg,true));
+      else if(name==='not') bits.push('qui ne correspond PAS à <code>'+esc(arg)+'</code>');
+      else if(name==='has') bits.push('qui contient <code>'+esc(arg)+'</code>');
+      else if(name==='is'||name==='where') bits.push("qui correspond à l'un de <code>"+esc(arg)+'</code>');
+      else if(PC[name]) bits.push(PC[name]);
+      else bits.push('<code>:'+esc(name)+(arg!==null?'('+esc(arg)+')':'')+'</code>');
+    }
+    else return null;
+    rest=rest.slice(m[0].length);
+  }
+  var head=tag==='*'?"n'importe quel élément":(tag?'un <code>&lt;'+esc(tag)+'&gt;</code>':'un élément');
+  var parts=[];
+  if(ids.length) parts.push("avec l'id <code>#"+esc(ids[0])+'</code>');
+  if(cls.length===1) parts.push('avec la classe <code>.'+esc(cls[0])+'</code>');
+  else if(cls.length>1) parts.push('avec les classes '+cls.map(function(x){return '<code>.'+esc(x)+'</code>';}).join(' ET '));
+  parts=parts.concat(bits);
+  return {s:head+(parts.length?' '+parts.join(', '):''),pel:pel};
+}
+function describeGroup(g){
+  var toks=tokenize(g); if(!toks.length) return null;
+  var last=toks[toks.length-1]; if(typeof last!=='string') return null;
+  var d=describeCompound(last); if(!d) return null;
+  var out=d.s;
+  for(var k=toks.length-2;k>=1;k-=2){
+    var c=toks[k].c, prev=toks[k-1]; if(typeof prev!=='string') return null;
+    var pd=describeCompound(prev); if(!pd) return null;
+    var rel={' ':"qui se trouve quelque part à l'intérieur de",'>':"qui est l'enfant direct de",'+':'placé juste après','~':'placé après (même parent)'}[c];
+    out+=', '+rel+' '+pd.s;
+  }
+  out=out.replace(/ de un /g," d'un ");
+  if(d.pel) out='cible '+d.pel+' de : '+out;
+  return out;
+}
+function describe(sel){
+  var gs=splitTop(sel), res=[];
+  for(var k=0;k<gs.length;k++){var d=describeGroup(gs[k]); if(!d) return null; res.push(d.charAt(0).toUpperCase()+d.slice(1));}
+  return res.join('<br><b>OU</b> ');
+}
+function short(el){
+  var s=el.localName+(el.id?'#'+el.id:'')+Array.prototype.map.call(el.classList,function(c){return '.'+c;}).join('');
+  var t=clean(el.textContent).trim();
+  if(!t&&el.getAttribute('placeholder')) t=el.getAttribute('placeholder');
+  if(t) s+=' « '+(t.length>22?t.slice(0,21)+'…':t)+' »';
+  return s;
+}
+
+/* ---------- Surlignage ---------- */
+function addBadge(bx,text,cls){
+  var b=bx.querySelector(':scope > .bx-head > .bx-badges'); if(!b) return;
+  var s=document.createElement('span'); s.className='badge '+cls; s.textContent=text; b.appendChild(s);
+}
+function q(root,i){return root.querySelectorAll('[data-i="'+i+'"]');}
+function apply(root,r){
+  root.querySelectorAll('.sel,.ref,.cand').forEach(function(e){e.classList.remove('sel','ref','cand');});
+  root.querySelectorAll('.ln').forEach(function(l){l.classList.remove('on-sel','on-ref','on-cand');});
+  root.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+  root.querySelectorAll('.ghost').forEach(function(g){g.remove();});
+  if(r.error) return;
+  var special=r.states.length||r.pseudo, mk=special?'cand':'sel';
+  r.matched.forEach(function(el){
+    q(root,el._i).forEach(function(n){
+      n.classList.add(mk);
+      if(n.classList.contains('bx')) addBadge(n,special?(r.states.length?r.states.join(' '):'::'+r.pseudo):'✓ sélectionné',special?'b-cand':'b-sel');
+    });
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-'+mk);});
+    if(r.pseudo==='before'||r.pseudo==='after'){
+      root.querySelectorAll('.bx[data-i="'+el._i+'"]').forEach(function(bx){
+        var gh=document.createElement('div'); gh.className='ghost'; gh.textContent='::'+r.pseudo+' (contenu ajouté)';
+        var head=bx.querySelector(':scope > .bx-head');
+        if(r.pseudo==='before') bx.insertBefore(gh,head.nextSibling); else bx.appendChild(gh);
+      });
+    }
+  });
+  r.refs.forEach(function(label,el){
+    q(root,el._i).forEach(function(n){n.classList.add('ref'); if(n.classList.contains('bx')) addBadge(n,label,'b-ref');});
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-ref');});
+  });
+}
+function hoverSync(panes){
+  var cur=null;
+  function set(i){
+    if(cur!==null) q(panes,cur).forEach(function(n){n.classList.remove('hov');});
+    cur=i; if(i!==null) q(panes,i).forEach(function(n){n.classList.add('hov');});
+  }
+  panes.addEventListener('mouseover',function(e){var t=e.target.closest('[data-i]'); set(t?t.getAttribute('data-i'):null);});
+  panes.addEventListener('mouseleave',function(){set(null);});
+}
+
+/* ---------- Atelier ---------- */
+function Lab(host,cfg,key){
+  var id='in-'+key;
+  host.classList.add('lab');
+  host.innerHTML='<div class="lab-top"><div class="chips" role="group" aria-label="Sélecteurs à essayer"></div>'+
+    '<div class="try"><label for="'+id+'">'+esc(cfg.inputLabel||'Ton sélecteur')+'</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
+    '<div class="lab-panes'+(cfg.compact?' compact':'')+'"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code"></div></div>'+
+    '<div class="pane pane-box"><div class="pane-cap">Aperçu en boîtes · une boîte = une balise</div><div class="boxes"></div></div></div>'+
+    '<div class="lab-foot"><div class="read"></div><div class="verdict" role="status"></div><pre class="rule"></pre></div>';
+  var chipsEl=host.querySelector('.chips'), input=host.querySelector('input'), codeEl=host.querySelector('.code'), boxesEl=host.querySelector('.boxes'),
+      readEl=host.querySelector('.read'), verdictEl=host.querySelector('.verdict'), ruleEl=host.querySelector('.rule'), panes=host.querySelector('.lab-panes');
+  var body, chips=[];
+  hoverSync(panes);
+  function setHTML(html){body=parse(html);codeEl.innerHTML=renderCode(body);boxesEl.innerHTML=renderBoxes(body);}
+  function setChips(list){
+    chips=list;
+    chipsEl.innerHTML=list.map(function(c,k){return '<button type="button" class="chip" data-k="'+k+'" aria-pressed="false">'+esc(c.label||c.sel)+'</button>';}).join('');
+  }
+  function syncPressed(){
+    var v=input.value.trim();
+    chipsEl.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',chips[+b.getAttribute('data-k')].sel===v?'true':'false');});
+  }
+  function update(){
+    var sel=input.value, r=evaluate(body,sel);
+    apply(panes,r); syncPressed();
+    var k=-1; for(var j=0;j<chips.length;j++) if(chips[j].sel===sel.trim()) {k=j;break;}
+    var note=k>=0&&chips[k].note?'<div style="margin-top:4px">'+chips[k].note+'</div>':'';
+    if(r.error==='empty'){readEl.innerHTML='';verdictEl.innerHTML='Tape un sélecteur, ou clique sur un des exemples.';ruleEl.textContent='';return;}
+    if(r.error==='amp'){readEl.innerHTML='';verdictEl.innerHTML='<span class="err">Le &amp; n\'existe pas dans un sélecteur CSS classique.</span> C\'est une notation SCSS : voir la partie 2.';ruleEl.textContent='';return;}
+    if(r.error==='invalid'){readEl.innerHTML=note;verdictEl.innerHTML='<span class="err">Sélecteur invalide.</span> Le navigateur ignorerait toute la règle.';ruleEl.textContent='';return;}
+    var d=describe(sel.trim());
+    readEl.innerHTML=(d?'<b>Lecture :</b> '+d+'.':'')+note;
+    var list=body._all.filter(function(el){return r.matched.has(el);});
+    var special=r.states.length||r.pseudo, n=list.length, msg;
+    if(!n) msg='<b>Aucun élément</b> ne correspond.';
+    else if(r.states.length) msg='<b>'+n+' candidat'+(n>1?'s':'')+'</b> : stylé'+(n>1?'s':'')+' seulement pendant '+r.states.join(', ')+'.';
+    else if(r.pseudo) msg='<b>'+n+' élément'+(n>1?'s':'')+' hôte'+(n>1?'s':'')+'</b> : le style vise '+(PEL[r.pseudo]||'::'+r.pseudo)+' de '+(n>1?'chacun':'cet élément')+'.';
+    else msg='<b>'+n+' élément'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'')+'</b> :';
+    verdictEl.innerHTML=msg+' '+list.map(function(el){return '<span class="pill'+(special?' c':'')+'">'+esc(short(el))+'</span>';}).join('');
+    ruleEl.innerHTML='<span class="sx">'+esc(sel.trim())+'</span> {\n  background: jaune;   /* la règle CSS complète */\n}';
+  }
+  function select(k){input.value=chips[k].sel;update();}
+  chipsEl.addEventListener('click',function(e){var b=e.target.closest('.chip'); if(b) select(+b.getAttribute('data-k'));});
+  input.addEventListener('input',update);
+  setHTML(cfg.html); setChips(cfg.chips||[]);
+  if(chips.length) select(cfg.start||0); else update();
+  return {setHTML:setHTML,setChips:setChips,select:select,update:update};
+}
+
+/* ---------- Coloration du code statique ---------- */
+function hl(text){
+  var s=esc(text);
+  s=s.replace(/\/\*[\s\S]*?\*\//g,function(m){return '<span class="cm">'+m+'</span>';});
+  s=s.replace(/(^|[\s{;])([a-z-]+)(:\s)/g,'$1<span class="pr">$2</span>$3');
+  s=s.replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  s=s.replace(/([{}])/g,'<span class="br">$1</span>');
+  return s;
+}
+
+/* ---------- Mini compilateur Sass (imbrication + &) ---------- */
+function compile(src){
+  src=src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:"'])\/\/.*$/gm,'$1');
+  var i=0;
+  function block(){
+    var node={decls:[],kids:[]}, buf='';
+    while(i<src.length){
+      var ch=src[i++];
+      if(ch==='{'){var k=block(); k.raw=buf.trim().replace(/\s+/g,' '); buf=''; node.kids.push(k);}
+      else if(ch==='}'){if(buf.trim()) node.decls.push(buf.trim()); return node;}
+      else if(ch===';'){if(buf.trim()) node.decls.push(buf.trim()); buf='';}
+      else buf+=ch;
+    }
+    return node;
+  }
+  var root=block(), rules=[], errors=[];
+  function walk(node,parents,depth){
+    node.kids.forEach(function(k){
+      var parts=splitTop(k.raw||''), sel=[], trace=[];
+      parts.forEach(function(part){
+        if(!parents){
+          if(part.indexOf('&')>=0) errors.push('« '+part+' » : un & au premier niveau n\'a pas de parent à recopier (Sass refuse).');
+          sel.push(part); trace.push({kind:'root',part:part,res:part}); return;
+        }
+        parents.forEach(function(p){
+          var res;
+          if(part.indexOf('&')>=0){res=part.replace(/&/g,function(){return p;}); trace.push({kind:'amp',part:part,parent:p,res:res});}
+          else {res=p+' '+part; trace.push({kind:'space',part:part,parent:p,res:res});}
+          sel.push(res);
+        });
+      });
+      rules.push({sel:sel,decls:k.decls,depth:depth,trace:trace});
+      walk(k,sel,depth+1);
+    });
+  }
+  walk(root,null,0);
+  return {rules:rules,errors:errors};
+}
+function cssText(rules){
+  return rules.map(function(r){
+    return r.sel.join(',\n')+' {'+(r.decls.length?'\n'+r.decls.map(function(d){return '  '+d+';';}).join('\n')+'\n':' ')+'}';
+  }).join('\n\n');
+}
+function traceHTML(t){
+  var P='<mark class="par">'+esc(t.parent||'')+'</mark>';
+  if(t.kind==='root') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-root">premier niveau</span></div><div class="tr-how">Pas de parent : reste tel quel.</div><div class="tr-res">'+esc(t.res)+'</div></li>';
+  if(t.kind==='space') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-sp">pas de &amp; · règle 1</span></div><div class="tr-how">parent + espace + sélecteur</div><div class="tr-res">'+P+'<span class="spc">␣</span>'+esc(t.part)+'</div></li>';
+  var src=esc(t.part).replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  var res=esc(t.part).replace(/&amp;/g,P);
+  return '<li class="tr"><div class="tr-src"><code>'+src+'</code><span class="tg tg-amp">contient &amp; · règle 2</span></div><div class="tr-how"><span class="amp">&amp;</span> ← <code>'+esc(t.parent)+'</code>, rien d\'autre n\'est ajouté</div><div class="tr-res">'+res+'</div></li>';
+}
+
+
+
+/* ---------- Réécriture Angular (Emulated) ---------- */
+var FILES={g:{name:'styles.scss',short:'global',id:null},p:{name:'dossier.component.scss',short:'dossier',id:'p'},c:{name:'party-card.component.scss',short:'party-card',id:'c'},d:{name:'confirm-dialog.component.scss',short:'confirm-dialog',id:'d'}};
+function addAttr(comp,attr){
+  var d=0,qt=null;
+  for(var k=0;k<comp.length;k++){var ch=comp[k];
+    if(qt){if(ch===qt)qt=null;continue;}
+    if(ch==='"'||ch==="'"){qt=ch;continue;}
+    if(ch==='['||ch==='(')d++; else if(ch===']'||ch===')')d--;
+    else if(ch===':'&&d===0) return comp.slice(0,k)+attr+comp.slice(k);
+  }
+  return comp+attr;
+}
+function closeParen(s,start){var d=0;for(var k=start;k<s.length;k++){if(s[k]==='(')d++;else if(s[k]===')'){d--;if(d===0)return k;}}return s.length-1;}
+function emulateGroup(g,id){
+  var CA='[_ngcontent-'+id+']', HA='[_nghost-'+id+']';
+  var toks=tokenize(g), out=[], deep=false, ctx=null;
+  for(var k=0;k<toks.length;k++){
+    var t=toks[k];
+    if(typeof t!=='string'){out.push(t);continue;}
+    if(t==='::ng-deep'){deep=true; if(toks[k+1]&&typeof toks[k+1]==='object'&&toks[k+1].c===' ') k++; continue;}
+    if(deep){out.push(t);continue;}
+    if(t.indexOf(':host-context(')===0){var e=closeParen(t,13); ctx=t.slice(14,e); out.push(addAttr(t.slice(e+1),HA)); continue;}
+    if(/^:host(?![\w-])/.test(t)){
+      var rest=t.slice(5), inner='';
+      if(rest[0]==='('){var e2=closeParen(rest,0); inner=rest.slice(1,e2); rest=rest.slice(e2+1);}
+      out.push(addAttr(inner+rest,HA)); continue;
+    }
+    out.push(addAttr(t,CA));
+  }
+  while(out.length&&typeof out[0]==='object') out.shift();
+  var s=joinTok(out);
+  return ctx!==null?[ctx+s,ctx+' '+s]:[s];
+}
+function emulate(sel,f){
+  var id=FILES[f].id;
+  if(!id) return splitTop(sel);
+  var res=[]; splitTop(sel).forEach(function(g){res=res.concat(emulateGroup(g,id));});
+  return res;
+}
+function ngHL(s){return esc(s).replace(/\[_ng(content|host)-[a-z]\]/g,function(m){return '<span class="ng">'+m+'</span>';});}
+function pipeline(scss,f){
+  var c=compile(scss), rules=c.rules.filter(function(r){return r.decls.length;});
+  if(!rules.length) rules=c.rules;
+  var css=[]; rules.forEach(function(r){r.sel.forEach(function(s){if(css.indexOf(s)<0)css.push(s);});});
+  var fin=[]; css.forEach(function(s){emulate(s,f).forEach(function(x){if(fin.indexOf(x)<0)fin.push(x);});});
+  return {css:css,fin:fin,errors:c.errors};
+}
+function chipFrom(o){
+  var p=pipeline(o.scss,o.f);
+  return {label:'['+FILES[o.f].short+']  '+p.css.join(', '),sel:p.fin.join(', '),
+    note:'<b>Écrit dans</b> <code>'+FILES[o.f].name+'</code> · Sass → <code>'+esc(p.css.join(', '))+'</code> · Angular → <code>'+ngHL(p.fin.join(', '))+'</code>'+(o.note?'<br>'+o.note:'')};
+}
+
+/* ---------- DOM d'exemple ---------- */
+var DOM_COMP='<app-dossier _nghost-p="">\n<div class="dossier" _ngcontent-p="">\n<h2 class="title" _ngcontent-p="">Dossier 42</h2>\n<mat-form-field class="mat-mdc-form-field amount" _ngcontent-p="">\n<div class="mat-mdc-text-field-wrapper">\n<label class="mdc-floating-label"><mat-label _ngcontent-p="">Montant</mat-label></label>\n<input matinput="" class="mat-mdc-input-element" _ngcontent-p="">\n</div>\n</mat-form-field>\n<app-party-card class="card compact" _ngcontent-p="" _nghost-c="">\n<span class="name" _ngcontent-c="">Dupont</span>\n<button mat-flat-button="" class="mdc-button" _ngcontent-c=""><span class="mdc-button__label">Retirer</span></button>\n</app-party-card>\n</div>\n</app-dossier>';
+var DOM_FULL='<app-dossier _nghost-p="">\n<div class="dossier" _ngcontent-p="">\n<h2 class="title" _ngcontent-p="">Dossier 42</h2>\n<mat-form-field class="mat-mdc-form-field amount" _ngcontent-p="">\n<div class="mat-mdc-text-field-wrapper">\n<label class="mdc-floating-label"><mat-label _ngcontent-p="">Montant</mat-label></label>\n<input matinput="" class="mat-mdc-input-element" _ngcontent-p="">\n</div>\n</mat-form-field>\n<mat-select class="mat-mdc-select" panelclass="article-panel" _ngcontent-p="">Article</mat-select>\n<app-party-card class="card compact" _ngcontent-p="" _nghost-c="">\n<span class="name" _ngcontent-c="">Dupont</span>\n<button mat-flat-button="" class="mdc-button" _ngcontent-c=""><span class="mdc-button__label">Retirer</span></button>\n</app-party-card>\n</div>\n</app-dossier>\n<div class="cdk-overlay-container">\n<div class="cdk-overlay-pane">\n<div class="mat-mdc-select-panel article-panel">\n<mat-option class="mat-mdc-option">029</mat-option>\n<mat-option class="mat-mdc-option">193</mat-option>\n</div>\n</div>\n<div class="cdk-overlay-pane confirm-dialog">\n<mat-dialog-container class="mat-mdc-dialog-container">\n<app-confirm-dialog _nghost-d="">\n<p class="message" _ngcontent-d="">Confirmer la suppression ?</p>\n</app-confirm-dialog>\n</mat-dialog-container>\n</div>\n</div>';
+var DOMS={COMP:DOM_COMP,FULL:DOM_FULL};
+
+var ALABS={
+ ENC:{dom:'COMP',chips:[
+  {f:'p',scss:'.title { color: navy; }',note:'Le h2 est écrit dans le template du dossier : il porte <span class="ng">_ngcontent-p</span>.'},
+  {f:'p',scss:'span { color: red; }',note:'Aucun span n\'a <span class="ng">_ngcontent-p</span> : l\'un appartient à party-card, l\'autre à Material.'},
+  {f:'c',scss:'span { color: red; }',note:'Écrit dans party-card : seul le span de son template est touché, pas celui créé par Material dans le bouton.'},
+  {f:'c',scss:':host { display: block; }'},
+  {f:'c',scss:':host(.compact) .name { font-size: 12px; }'},
+  {f:'g',scss:'span { color: red; }',note:'Global : aucun attribut ajouté, donc tous les span de l\'app.'}]},
+ MAT:{dom:'COMP',chips:[
+  {f:'p',scss:'mat-form-field { margin-bottom: 8px; }',note:'La balise mat-form-field est écrite dans ton template : tu peux styler sa boîte.'},
+  {f:'p',scss:'mat-form-field {\n  .mat-mdc-text-field-wrapper { background: #eef; }\n}',note:'Rien : le wrapper est créé par Material, il n\'a pas ton attribut.'},
+  {f:'p',scss:'mat-form-field {\n  input { text-align: right; }\n}',note:'Ça marche : l\'input est écrit par toi (contenu projeté).'},
+  {f:'p',scss:'mat-label { font-weight: 600; }',note:'Contenu projeté aussi.'},
+  {f:'p',scss:'.mdc-floating-label { color: red; }'},
+  {f:'g',scss:'.amount .mat-mdc-text-field-wrapper { background: #eef; }',note:'En global ça correspond, mais tu dépends d\'une classe interne qui peut changer à la prochaine version.'}],start:1},
+ DEEP:{dom:'COMP',chips:[
+  {f:'p',scss:':host ::ng-deep .mat-mdc-text-field-wrapper { background: #eef; }',note:'Limité au dossier et à ses descendants.'},
+  {f:'p',scss:':host ::ng-deep .mdc-button__label { text-transform: uppercase; }',note:'Atteint aussi le bouton à l\'intérieur de party-card : souvent plus large que prévu.'},
+  {f:'p',scss:'::ng-deep .mdc-button__label { text-transform: uppercase; }',note:'Plus aucun attribut : règle globale, valable pour toute l\'app tant que ce composant est affiché.'},
+  {f:'p',scss:'.dossier ::ng-deep .name { font-weight: 700; }'}]},
+ CHILD:{dom:'COMP',chips:[
+  {f:'p',scss:'app-party-card {\n  .name { font-weight: 700; }\n}',note:'Rien : .name porte <span class="ng">_ngcontent-c</span>, pas <span class="ng">_ngcontent-p</span>.'},
+  {f:'p',scss:'app-party-card { margin-top: 16px; }',note:'La balise hôte est dans le template du parent : le parent peut gérer sa boîte.'},
+  {f:'c',scss:':host(.compact) .name { font-size: 12px; }',note:'L\'enfant réagit à une classe posée par le parent.'},
+  {f:'c',scss:':host-context(.dossier) .name { font-weight: 700; }',note:'Deux sélecteurs générés : l\'hôte lui-même ou un ancêtre a .dossier.'}]},
+ OVL:{dom:'FULL',chips:[
+  {f:'p',scss:'.mat-mdc-option { color: red; }',note:'Les options n\'ont pas ton attribut : elles ne sont même pas dans ton composant.'},
+  {f:'p',scss:':host ::ng-deep .mat-mdc-option { color: red; }',note:'Toujours rien : le panneau est hors de &lt;app-dossier&gt;, donc pas sous ton :host.'},
+  {f:'g',scss:'.article-panel {\n  .mat-mdc-option { color: red; }\n}',note:'La bonne méthode : ta panelClass + un style global.'},
+  {f:'g',scss:'.confirm-dialog {\n  .mat-mdc-dialog-container { border-radius: 4px; }\n}'},
+  {f:'d',scss:'.message { font-weight: 600; }',note:'Le composant du dialog style son propre template normalement.'}],start:2}
+};
+
+/* ---------- Construction des ateliers ---------- */
+document.querySelectorAll('[data-alab]').forEach(function(h){
+  var k=h.getAttribute('data-alab'), cfg=ALABS[k]; if(!cfg) return;
+  Lab(h,{html:DOMS[cfg.dom],chips:cfg.chips.map(chipFrom),start:cfg.start||0,inputLabel:'Sélecteur final'},'a'+k);
+});
+document.querySelectorAll('pre[data-hl]').forEach(function(p){p.innerHTML=hl(p.textContent);});
+
+/* ---------- Transformateur 3 étages ---------- */
+var PP=[
+ {label:'Classe simple',f:'p',scss:'.title {\n  color: navy;\n}'},
+ {label:'Intérieur Material',f:'p',scss:'mat-form-field {\n  .mat-mdc-text-field-wrapper {\n    background: #eef;\n  }\n}'},
+ {label:'::ng-deep encadré',f:'p',scss:':host ::ng-deep {\n  .mat-mdc-text-field-wrapper {\n    background: #eef;\n  }\n}'},
+ {label:':host et :host()',f:'c',scss:':host {\n  display: block;\n\n  &(.compact) { }\n  .name { font-weight: 600; }\n}'},
+ {label:'Overlay en global',f:'g',scss:'.article-panel {\n  .mat-mdc-option {\n    min-height: 32px;\n  }\n}'},
+ {label:'Fuite ::ng-deep',f:'p',scss:'::ng-deep .mdc-button__label {\n  text-transform: uppercase;\n}'}
+];
+PP[3].scss=':host {\n  display: block;\n\n  .name { font-weight: 600; }\n}\n\n:host(.compact) {\n  padding: 4px;\n}';
+var ppF='p', ppSrc=document.getElementById('pp-src'), ppFiles=document.getElementById('pp-files'), ppPre=document.getElementById('pp-presets');
+var ppLab=Lab(document.getElementById('pp-lab'),{html:DOM_FULL,chips:[{sel:'.title[_ngcontent-p]'}],inputLabel:'Sélecteur final'},'pp');
+ppFiles.innerHTML=Object.keys(FILES).map(function(k){return '<button type="button" data-f="'+k+'" aria-pressed="'+(k===ppF)+'">'+esc(FILES[k].name)+'</button>';}).join('');
+ppPre.innerHTML=PP.map(function(p,k){return '<button type="button" data-k="'+k+'" aria-pressed="'+(k===0)+'">'+esc(p.label)+'</button>';}).join('');
+var ppKey='';
+function runPP(){
+  document.getElementById('pp-fname').textContent='SCSS écrit dans '+FILES[ppF].name;
+  ppFiles.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-f')===ppF?'true':'false');});
+  var r=pipeline(ppSrc.value,ppF);
+  document.getElementById('pp-s1').innerHTML=r.css.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')||'<li>…</li>';
+  document.getElementById('pp-s2').innerHTML=r.fin.map(function(s){return '<li>'+ngHL(s)+'</li>';}).join('')||'<li>…</li>';
+  var key=ppF+'|'+r.fin.join('|');
+  if(key!==ppKey&&r.fin.length){
+    ppKey=key;
+    ppLab.setChips(r.css.map(function(s){var fin=emulate(s,ppF).join(', ');return {label:s,sel:fin,note:'Envoyé au navigateur : <code>'+ngHL(fin)+'</code>'};}));
+    ppLab.select(r.css.length-1);
+  }
+}
+ppFiles.addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; ppF=b.getAttribute('data-f'); ppKey=''; runPP();});
+ppPre.addEventListener('click',function(e){var b=e.target.closest('button'); if(!b) return; var p=PP[+b.getAttribute('data-k')];
+  ppPre.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+  ppF=p.f; ppSrc.value=p.scss; ppKey=''; runPP();});
+ppSrc.addEventListener('input',runPP);
+ppSrc.addEventListener('keydown',function(e){if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();var s=ppSrc.selectionStart;ppSrc.setRangeText('  ',s,ppSrc.selectionEnd,'end');runPP();}});
+ppSrc.value=PP[0].scss; runPP();
+
+/* ---------- Démo tokens ---------- */
+var BTN_CSS='.mdc-button{font:600 14px "IBM Plex Sans",system-ui,sans-serif;border:0;cursor:pointer;padding:9px 20px;border-radius:var(--mat-button-filled-container-shape,20px);background:var(--mat-button-filled-container-color,var(--mat-sys-primary));color:var(--mat-button-filled-label-text-color,var(--mat-sys-on-primary));transition:background-color .2s,border-radius .2s}';
+document.querySelectorAll('.fake-btn').forEach(function(h){
+  var sr; try{sr=h.attachShadow({mode:'open'});}catch(e){h.textContent=h.getAttribute('data-label');return;}
+  sr.innerHTML='<style>'+BTN_CSS+'</style><button type="button" class="mdc-button"><span class="mdc-button__label">'+esc(h.getAttribute('data-label'))+'</span></button>';
+});
+var td=document.getElementById('tokdemo'), tkMsg=document.getElementById('tk-msg');
+function runTok(){
+  var dr=document.getElementById('tk-direct').checked, zn=document.getElementById('tk-zone').checked, rt=document.getElementById('tk-root').checked;
+  td.classList.toggle('r-direct',dr); td.classList.toggle('r-zone',zn); td.classList.toggle('r-root',rt);
+  var m=[];
+  if(dr) m.push('La règle directe sur <code>.mdc-button__label</code> ne change rien : le sélecteur ne peut pas entrer dans le bouton.');
+  if(zn) m.push('<code>.zone-fiscal</code> pose les variables : seul le bouton de cette zone change, avec la couleur et l\'arrondi.');
+  if(rt) m.push('<code>:root</code> pose une couleur pour toute l\'app'+(zn?' ; la zone fiscale garde la sienne, car la variable la plus proche gagne.':'.'));
+  if(!m.length) m.push('Aucune personnalisation : les boutons utilisent le thème (<code>--mat-sys-primary</code>).');
+  tkMsg.innerHTML=m.join(' ');
+}
+['tk-direct','tk-zone','tk-root'].forEach(function(id){document.getElementById(id).addEventListener('change',runTok);});
+runTok();
+
+/* ---------- Exercices ---------- */
+var LV={1:'Facile',2:'Moyen',3:'Difficile',4:'Expert'};
+var AEX=[
+ {lvl:1,f:'p',dom:'COMP',scss:'.title {\n  color: navy;\n}',explain:'Le h2 est écrit dans le template du dossier. Sélecteur final : <code>.title[_ngcontent-p]</code>.'},
+ {lvl:1,f:'p',dom:'COMP',scss:'.name {\n  font-weight: 700;\n}',explain:'Piège : <code>.name</code> est dans le template de party-card, il porte <code>_ngcontent-c</code>. Depuis le dossier, rien ne correspond.'},
+ {lvl:2,f:'p',dom:'COMP',scss:'mat-form-field {\n  input {\n    text-align: right;\n  }\n}',explain:'L\'input est écrit par toi entre les balises de mat-form-field : contenu projeté, il garde <code>_ngcontent-p</code>.'},
+ {lvl:2,f:'p',dom:'COMP',scss:'mat-form-field {\n  .mat-mdc-text-field-wrapper {\n    background: #eef;\n  }\n}',explain:'Le wrapper est créé par Material : pas d\'attribut <code>_ngcontent-p</code>, aucune correspondance.'},
+ {lvl:2,f:'c',dom:'COMP',scss:':host(.compact) {\n  padding: 4px;\n}',explain:'<code>:host(.compact)</code> devient <code>.compact[_nghost-c]</code> : la balise app-party-card, qui a la classe compact.'},
+ {lvl:3,f:'c',dom:'COMP',scss:'button {\n  .mdc-button__label {\n    color: red;\n  }\n}',explain:'Le button a <code>_ngcontent-c</code>, mais le span intérieur est créé par Material. Le second morceau <code>.mdc-button__label[_ngcontent-c]</code> ne correspond à rien.'},
+ {lvl:3,f:'p',dom:'COMP',scss:':host ::ng-deep .mdc-button__label {\n  text-transform: uppercase;\n}',explain:'Après <code>::ng-deep</code>, plus d\'attribut : le label du bouton, pourtant dans un composant enfant, est atteint.'},
+ {lvl:3,f:'g',dom:'COMP',scss:'.dossier span {\n  color: gray;\n}',explain:'Fichier global : aucun attribut. Tous les span sous .dossier, y compris ceux de Material et de l\'enfant.'},
+ {lvl:3,f:'c',dom:'COMP',scss:':host-context(.dossier) .name {\n  font-weight: 700;\n}',explain:'Génère <code>.dossier[_nghost-c] .name[_ngcontent-c]</code> et <code>.dossier [_nghost-c] .name[_ngcontent-c]</code>. Le second correspond : un ancêtre de l\'hôte a .dossier.'},
+ {lvl:4,f:'p',dom:'FULL',scss:':host ::ng-deep .mat-mdc-option {\n  color: red;\n}',explain:'Les options sont dans le cdk-overlay-container, hors de app-dossier. Même ::ng-deep ne les atteint pas.'},
+ {lvl:4,f:'g',dom:'FULL',scss:'.article-panel {\n  .mat-mdc-option {\n    min-height: 32px;\n  }\n}',explain:'Global + panelClass : les deux options du panneau.'},
+ {lvl:4,f:'d',dom:'FULL',scss:':host {\n  .message {\n    font-weight: 600;\n  }\n}',explain:'Sass donne <code>:host .message</code>, Angular <code>[_nghost-d] .message[_ngcontent-d]</code> : le texte du dialog.'}
+];
+var QUIZ=[
+ {q:'Tous les boutons « flat » de l\'application doivent avoir des coins carrés.',opts:['::ng-deep .mdc-button { border-radius: 0 !important; } dans app.component.scss','@include mat.button-overrides((filled-container-shape: 0)) sur :root dans styles.scss','ViewEncapsulation.None sur chaque composant qui contient un bouton','.mat-mdc-button { border-radius: 0; } dans chaque composant'],ok:1,x:'Le token <code>filled-container-shape</code> est l\'API prévue pour ça. Les autres options ciblent du DOM interne, fuient en global ou se répètent partout.'},
+ {q:'Les options d\'un mat-select de l\'écran fiscal doivent être plus compactes, et seulement là.',opts:[':host ::ng-deep .mat-mdc-option { min-height: 32px; } dans le composant fiscal','panelClass="fiscal-select" sur le mat-select, et .fiscal-select .mat-mdc-option { … } dans _overlays.scss','.mat-mdc-option { min-height: 32px; } dans styles.scss','Mettre le style dans le SCSS du mat-select'],ok:1,x:'Le panneau vit dans l\'overlay, hors du composant : seul un style global peut l\'atteindre, et la panelClass le limite à cet écran.'},
+ {q:'Le nom dans app-party-card doit être en gras, uniquement quand la carte est affichée dans le dossier.',opts:['app-party-card .name { font-weight: 700; } dans dossier.component.scss','Une classe highlight posée par le dossier sur app-party-card, et :host(.highlight) .name { … } dans party-card.component.scss','.name { font-weight: 700 !important; } dans styles.scss','Copier le composant party-card'],ok:1,x:'Le parent décide (il pose la classe), l\'enfant applique (il style son intérieur). La première option ne correspond à rien à cause de l\'encapsulation.'},
+ {q:'Tu veux utiliser la couleur principale du thème pour un titre de ton composant.',opts:['color: #1976d2;','color: var(--mat-sys-primary);','@include mat.theme(...) dans le composant','color: mat.get-theme-color(primary) dans styles.scss'],ok:1,x:'Les variables système sont posées sur html et héritées partout. Si le thème change, ton titre suit sans modification.'},
+ {q:'Après avoir ajouté @use \'styles/material\' dans 40 composants, le bundle CSS a pris 300 Ko.',opts:['C\'est normal avec Material','_material.scss génère du CSS (overrides, classes) : il est recopié dans chaque composant. Les composants ne doivent importer que des partials sans sortie CSS','Il faut remplacer @use par @import','Il faut passer les composants en ViewEncapsulation.None'],ok:1,x:'Chaque component.scss est compilé séparément. Un partial qui produit du CSS est dupliqué autant de fois qu\'il est importé.'}
+];
+var solved=new Set(), total=AEX.length+QUIZ.length, exHost=document.getElementById('aex');
+document.querySelectorAll('.score-t').forEach(function(s){s.textContent=total;});
+function updScore(){document.querySelectorAll('.score-n').forEach(function(s){s.textContent=solved.size;}); var m=document.getElementById('meter'); if(m) m.style.width=(solved.size/total*100)+'%';}
+AEX.forEach(function(ex,k){
+  var n=k+1, body=parse(DOMS[ex.dom]), p=pipeline(ex.scss,ex.f), sel=p.fin.join(', '), answer=evaluate(body,sel).matched;
+  var card=document.createElement('div'); card.className='ex';
+  card.innerHTML='<div class="ex-head"><span class="ex-n">Exercice '+n+'</span><span class="lvl lvl-'+ex.lvl+'">'+LV[ex.lvl]+'</span><code>'+esc(FILES[ex.f].name)+'</code><span class="ex-status"></span></div>'+
+    '<div class="ex-q"><p>Ce SCSS est écrit dans <b>'+esc(FILES[ex.f].name)+'</b>. Quels éléments reçoivent le style ?</p><pre class="code solo">'+hl(ex.scss)+'</pre>'+
+    '<p class="ex-tip">Clique sur les boîtes ou les lignes de HTML (ou Tab puis Espace), puis vérifie. « Aucun élément » peut être la bonne réponse.</p></div>'+
+    '<div class="lab-panes"><div class="pane pane-code"><div class="pane-cap">DOM final</div><div class="code">'+renderCode(body)+'</div></div><div class="pane pane-box"><div class="pane-cap">Clique pour choisir</div><div class="boxes">'+renderBoxes(body)+'</div></div></div>'+
+    '<div class="ex-actions"><button type="button" class="btn" data-a="check">Vérifier</button><button type="button" class="btn alt" data-a="show">Voir la solution</button><button type="button" class="btn alt" data-a="reset">Recommencer</button><span class="ex-fb" role="status"></span></div>'+
+    '<div class="ex-explain" hidden><p>'+ex.explain+'</p><p>Sélecteur final : <code>'+ngHL(sel)+'</code></p></div>';
+  exHost.appendChild(card);
+  var panes=card.querySelector('.lab-panes'), fb=card.querySelector('.ex-fb'), expl=card.querySelector('.ex-explain'), status=card.querySelector('.ex-status');
+  var picked=new Set(), shown=false;
+  hoverSync(panes);
+  panes.querySelectorAll('.bx').forEach(function(b){b.tabIndex=0;b.setAttribute('role','checkbox');b.setAttribute('aria-checked','false');});
+  function clearRes(){
+    panes.querySelectorAll('.r-ok,.r-miss,.r-wrong,.sel').forEach(function(e){e.classList.remove('r-ok','r-miss','r-wrong','sel');});
+    panes.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+    fb.textContent=''; fb.className='ex-fb'; shown=false;
+  }
+  function paint(){panes.querySelectorAll('[data-i]').forEach(function(e){var on=picked.has(+e.getAttribute('data-i')); e.classList.toggle('picked',on); if(e.classList.contains('bx')) e.setAttribute('aria-checked',on?'true':'false');});}
+  function toggle(i){if(shown) clearRes(); if(picked.has(i)) picked.delete(i); else picked.add(i); paint();}
+  panes.addEventListener('click',function(e){var t=e.target.closest('[data-i]'); if(t) toggle(+t.getAttribute('data-i'));});
+  panes.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('bx')){e.preventDefault();toggle(+e.target.getAttribute('data-i'));}});
+  card.querySelector('.ex-actions').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
+    if(a==='reset'){picked.clear();clearRes();paint();expl.hidden=true;return;}
+    clearRes();
+    if(a==='show'){
+      picked.clear(); paint();
+      body._all.forEach(function(el){if(answer.has(el)) q(panes,el._i).forEach(function(nd){nd.classList.add('sel'); if(nd.classList.contains('bx')) addBadge(nd,'✓ réponse','b-sel');});});
+      fb.textContent=answer.size?answer.size+' élément'+(answer.size>1?'s':'')+' stylé'+(answer.size>1?'s':'')+'.':'Aucun élément : c\'était le piège.';
+      expl.hidden=false; shown=true; return;
+    }
+    var ok=0,miss=0,wrong=0;
+    body._all.forEach(function(el){
+      var pk=picked.has(el._i), r=answer.has(el), cls=null, lab=null;
+      if(pk&&r){cls='r-ok';lab='✓ juste';ok++;} else if(!pk&&r){cls='r-miss';lab='oublié';miss++;} else if(pk&&!r){cls='r-wrong';lab='en trop';wrong++;}
+      if(cls) q(panes,el._i).forEach(function(nd){nd.classList.add(cls); if(nd.classList.contains('bx')) addBadge(nd,lab,cls==='r-ok'?'b-ok':(cls==='r-miss'?'b-miss':'b-wrong'));});
+    });
+    panes.querySelectorAll('.picked').forEach(function(e){e.classList.remove('picked');});
+    shown=true;
+    if(!miss&&!wrong){fb.textContent=answer.size?'Parfait, '+ok+' sur '+answer.size+'.':'Parfait : aucun élément, c\'était le piège.'; fb.className='ex-fb good'; solved.add('e'+n); status.textContent='✓ Réussi'; updScore();}
+    else {var bits=[]; if(miss) bits.push(miss+' oublié'+(miss>1?'s':'')); if(wrong) bits.push(wrong+' en trop'); fb.textContent='Presque : '+bits.join(', ')+'.'; fb.className='ex-fb bad';}
+    expl.hidden=false;
+  });
+});
+var qHost=document.getElementById('aquiz');
+QUIZ.forEach(function(Q,k){
+  var box=document.createElement('div'); box.className='quiz';
+  box.innerHTML='<fieldset><legend>'+(k+1)+'. '+esc(Q.q)+'</legend>'+Q.opts.map(function(o,j){return '<label><input type="radio" name="q'+k+'" id="q'+k+'-'+j+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join('')+'</fieldset><div class="qa"><button type="button" class="btn">Vérifier</button><span class="ex-fb" role="status"></span></div><div class="qx" hidden>'+Q.x+'</div>';
+  qHost.appendChild(box);
+  box.querySelector('.btn').addEventListener('click',function(){
+    var sel=box.querySelector('input:checked'), fb=box.querySelector('.ex-fb');
+    box.querySelectorAll('label').forEach(function(l){l.classList.remove('good','bad');});
+    if(!sel){fb.textContent='Choisis une réponse.';fb.className='ex-fb';return;}
+    var v=+sel.value, labels=box.querySelectorAll('label');
+    labels[Q.ok].classList.add('good');
+    if(v===Q.ok){fb.textContent='Exact.';fb.className='ex-fb good';solved.add('q'+k);updScore();}
+    else {labels[v].classList.add('bad');fb.textContent='Pas celle-là.';fb.className='ex-fb bad';}
+    box.querySelector('.qx').hidden=false;
+  });
+});
+updScore();
+
+/* ---------- Sommaire ---------- */
+var toc=document.getElementById('toc');
+if(window.matchMedia&&window.matchMedia('(max-width:980px)').matches) toc.removeAttribute('open');
+var links={}; toc.querySelectorAll('a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(ents){ents.forEach(function(en){if(en.isIntersecting){Object.keys(links).forEach(function(k){links[k].removeAttribute('aria-current');}); var a=links[en.target.id]; if(a) a.setAttribute('aria-current','true');}});},{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('section.lesson').forEach(function(s){io.observe(s);});
+}
+})();
+</script>
+
+</body>
+</html>
