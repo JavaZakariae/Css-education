@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>DevTools pour CSS Angular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : sommaire collant à gauche, colonne de leçons à droite ; chaque atelier = HTML à gauche, boîtes à droite. Motif : le surligneur. */
+:root{
+  --paper:#F4F6F9; --surface:#FFFFFF; --surface-2:#ECF0F5; --ink:#172031; --muted:#5A6679; --line:#D6DCE5;
+  --mark:#FFE05A; --mark-ink:#3A2B00; --mark-edge:#D9AE00;
+  --ref:#2356D3; --ref-soft:rgba(35,86,211,.09);
+  --cand:#C2410C; --cand-soft:rgba(194,65,12,.09);
+  --ok:#157A3A; --ok-soft:rgba(21,122,58,.12); --bad:#BE2A31; --bad-soft:rgba(190,42,49,.10);
+  --syn-tag:#8B2C91; --syn-attr:#965700; --syn-val:#0A6C4E; --syn-text:#172031; --syn-punct:#7A8597;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+    --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+    --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+    --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+    --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+    --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+  --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+  --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+  --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+  --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+  --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--ref)}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);padding:.08em .35em;border-radius:4px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:44px;max-width:1260px;margin:0 auto;padding-inline:24px;padding-block:28px 96px}
+main{min-width:0}
+
+/* Sommaire */
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:14px;padding-right:4px}
+.toc summary{display:none}
+.toc .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 6px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);padding:3px 8px;border-radius:5px;line-height:1.35}
+.toc a span{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:1.6em}
+.toc a:hover{background:var(--surface-2)}
+.toc a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.toc a[aria-current="true"] span{color:inherit;opacity:.7}
+.toc .score{margin-top:18px;font-size:13px;color:var(--muted)}
+@media (max-width:980px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:8px;padding-inline:16px}
+  .toc{position:static;max-height:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px}
+  .toc summary{display:block;cursor:pointer;font-weight:600}
+}
+
+/* En-tête */
+.hero{padding-block:4px 30px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2.3rem,6vw,3.7rem);line-height:1.02;letter-spacing:-.025em;margin:.25em 0 .35em;text-wrap:balance}
+h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%);padding-inline:.06em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;font-size:14px}
+.sw{display:inline-block;width:20px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:7px}
+.sw.sel{background:var(--mark);border:1px solid var(--mark-edge)}
+.sw.ref{border:2px dashed var(--ref)}
+.sw.cand{border:2px dotted var(--cand);background:var(--cand-soft)}
+
+/* Parties et leçons */
+.part{margin-block:52px 4px;padding:22px 24px;border-radius:12px;background:var(--ink);color:var(--paper)}
+.part .kicker{color:inherit;opacity:.65}
+.part h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;margin:.15em 0 .3em;letter-spacing:-.015em}
+.part p{margin:0;opacity:.85;max-width:66ch}
+.part code{background:transparent;color:inherit;border-color:currentColor}
+section.lesson{padding-block:38px;border-bottom:1px solid var(--line);scroll-margin-top:12px}
+.lesson-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.num{font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--muted);min-width:2em}
+.lesson h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.45rem,3.2vw,1.95rem);line-height:1.15;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.syntax{font-family:var(--font-mono);font-size:14px;color:var(--muted)}
+.lesson h3{font-size:1.08rem;font-weight:600;margin:30px 0 6px}
+.prose{max-width:70ch}
+.prose p{margin:.55em 0}
+.big{font-size:1.05em}
+.callout{border-left:3px solid var(--ref);background:var(--ref-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:74ch;margin:16px 0;font-size:15px}
+.callout.warn{border-color:var(--cand);background:var(--cand-soft)}
+.callout.good{border-color:var(--ok);background:var(--ok-soft)}
+.callout > b:first-child{display:block;margin-bottom:2px}
+pre.ascii{font-family:var(--font-mono);font-size:13px;line-height:1.6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;overflow-x:auto;margin:16px 0;white-space:pre;color:var(--ink)}
+.a-ok{color:var(--ok);font-weight:600}.a-no{color:var(--bad);font-weight:600}.a-ref{color:var(--ref);font-weight:600}
+.a-sel{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+.a-amp{color:var(--cand);font-weight:700}.a-dim{color:var(--muted)}.a-tag{color:var(--syn-tag)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.t{border-collapse:collapse;font-size:14px;width:100%}
+.t th,.t td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+.codes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0}
+.cblock{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.cblock .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px}
+pre.code{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.cblock pre.code{background:transparent}
+pre.code.solo{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:14px 0}
+.amp{color:var(--cand);font-weight:700}
+.cm{color:var(--muted);font-style:italic}
+.pr{color:var(--syn-attr)}
+.br{color:var(--syn-punct)}
+
+/* Atelier */
+.lab{margin:20px 0 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.lab-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{font-family:var(--font-mono);font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;white-space:pre-wrap}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.try{display:flex;align-items:center;gap:8px;flex:1 1 240px;max-width:380px;min-width:0}
+.try label{font-size:12px;color:var(--muted);white-space:nowrap}
+.try input{flex:1;min-width:0;font-family:var(--font-mono);font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,.bx:focus-visible,.toc a:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
+.lab-panes{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.lab-panes.compact{grid-template-columns:minmax(0,1fr)}
+.lab-panes.compact .pane-code{display:none}
+.pane{min-width:0;padding:12px 14px}
+.pane-code{border-right:1px solid var(--line)}
+.pane-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+@media (max-width:760px){.lab-panes{grid-template-columns:minmax(0,1fr)}.pane-code{border-right:0;border-bottom:1px solid var(--line)}}
+.code{font-family:var(--font-mono);font-size:12.5px;line-height:1.8;overflow-x:auto}
+.ln{display:flex;white-space:pre;min-width:max-content}
+.gut{width:1.5em;flex:none;text-align:center;font-size:10px}
+.ln.on-sel .gut::before{content:"▶";color:var(--ink)}
+.ln.on-cand .gut::before{content:"▷";color:var(--cand)}
+.ln.on-ref:not(.on-sel):not(.on-cand) .gut::before{content:"◇";color:var(--ref)}
+.el{border-radius:3px}
+.el.sel{background:var(--mark);box-shadow:0 0 0 1px var(--mark-edge)}
+.code .el.sel span{color:var(--mark-ink)}
+.el.ref{outline:1.5px dashed var(--ref);outline-offset:1px}
+.el.cand{outline:1.5px dotted var(--cand);outline-offset:1px;background:var(--cand-soft)}
+.el.hov{text-decoration:underline;text-decoration-color:var(--muted);text-underline-offset:3px}
+.s-tag{color:var(--syn-tag)}.s-attr{color:var(--syn-attr)}.s-val{color:var(--syn-val)}.s-p{color:var(--syn-punct)}.s-text{color:var(--syn-text)}
+.s-cls{color:var(--syn-val)}.s-id{color:var(--syn-attr)}.s-attrb{color:var(--syn-attr);font-size:11px}
+.boxes{display:flex;flex-direction:column;gap:8px}
+.bx{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:background-color .15s,box-shadow .15s}
+.bx-head{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;min-width:0}
+.bx-lbl{display:flex;flex-wrap:wrap;min-width:0;word-break:break-all}
+.bx-text{font-family:var(--font-body);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.bx-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.badge{font-family:var(--font-body);font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap;line-height:1.6}
+.bx-kids{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:1px dashed var(--line);margin-left:2px}
+.bx-inl > .bx-kids{flex-direction:row;flex-wrap:wrap;align-items:center;border-left:0;padding-left:0;margin-left:0}
+.bx.sel{background:var(--mark);border-color:var(--mark-edge)}
+.bx.sel > .bx-head .bx-lbl span,.bx.sel > .bx-head .bx-text,.bx.sel > .bx-kids > .bx-text{color:var(--mark-ink)}
+.badge.b-sel{background:var(--ink);color:var(--paper)}
+.bx.ref{outline:2px dashed var(--ref);outline-offset:2px}
+.badge.b-ref{background:var(--ref);color:var(--surface)}
+.bx.cand{outline:2px dotted var(--cand);outline-offset:2px;background:var(--cand-soft)}
+.badge.b-cand{background:var(--cand);color:var(--surface)}
+.ghost{border:1.5px dashed var(--cand);color:var(--cand);font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:5px;align-self:flex-start;background:var(--surface)}
+.bx.hov{box-shadow:0 0 0 2px var(--muted)}
+.lab-foot{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:8px;font-size:14px}
+.read b,.verdict b{font-weight:600}
+.read code,.verdict code{white-space:normal}
+.verdict{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:5px;background:var(--mark);color:var(--mark-ink)}
+.pill.c{background:var(--cand-soft);color:var(--cand);outline:1px dotted var(--cand)}
+.err{color:var(--bad);font-weight:600}
+.rule{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rule .sx{color:var(--ink);font-weight:600}
+
+/* Démo vivante */
+.live{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;background:var(--surface)}
+.live-stage{padding:18px;min-width:0}
+.live-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.live pre.code{background:var(--surface-2);border-left:1px solid var(--line)}
+@media (max-width:760px){.live{grid-template-columns:minmax(0,1fr)}.live pre.code{border-left:0;border-top:1px solid var(--line)}}
+
+/* Transformateur SCSS */
+.xf{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin:20px 0 0}
+.xf-col{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.xf-col + .xf-col{border-left:1px solid var(--line)}
+@media (max-width:760px){.xf{grid-template-columns:minmax(0,1fr)}.xf-col + .xf-col{border-left:0;border-top:1px solid var(--line)}}
+.xf textarea{width:100%;min-height:250px;font-family:var(--font-mono);font-size:13px;line-height:1.6;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:12px;resize:vertical;tab-size:2}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:500 12.5px var(--font-body);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.trace{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tr{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;display:grid;gap:3px;min-width:0}
+.tr-src{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tr code{white-space:normal;overflow-wrap:anywhere}
+.tg{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px}
+.tg-amp{background:var(--cand-soft);color:var(--cand)}
+.tg-sp{background:var(--ref-soft);color:var(--ref)}
+.tg-root{background:var(--surface-2);color:var(--muted)}
+.tr-how{color:var(--muted)}
+.tr-res{font-family:var(--font-mono);font-size:13px;overflow-wrap:anywhere}
+mark.par{background:var(--ref-soft);color:var(--ref);border-bottom:2px solid var(--ref);padding:0 2px;border-radius:2px}
+.spc{color:var(--cand);font-weight:700}
+.xf-err{color:var(--bad);font-size:13px}
+pre.css-out{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:10px 12px;background:var(--surface-2);border-radius:8px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.sub-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* Cartes d'erreurs */
+.errc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;margin:18px 0}
+.errc h3{margin:0 0 6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}
+.duo > div{min-width:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.duo .cap{font-size:12px;font-weight:600;padding:6px 12px;border-bottom:1px solid var(--line)}
+.duo .no .cap{background:var(--bad-soft);color:var(--bad)}
+.duo .yes .cap{background:var(--ok-soft);color:var(--ok)}
+.duo .out{font-family:var(--font-mono);font-size:13px;padding:8px 12px;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.errc .lab{margin-bottom:0}
+
+/* Exercices */
+.scorebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.meter{flex:1 1 200px;max-width:320px;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.ex{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden}
+.ex-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ex-n{font-weight:600}
+.lvl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 9px;border-radius:999px;border:1px solid currentColor}
+.lvl-1{color:var(--ok)}.lvl-2{color:var(--ref)}.lvl-3{color:var(--cand)}.lvl-4{color:var(--bad)}
+.ex-status{margin-left:auto;font-size:13px;font-weight:600;color:var(--ok)}
+.ex-q{padding:12px 14px 4px}
+.ex-q p{margin:.3em 0}
+.ex-tip{font-size:13px;color:var(--muted)}
+.ex .bx,.ex .el{cursor:pointer}
+.bx.picked{background:var(--ref-soft);border-color:var(--ref);box-shadow:inset 0 0 0 1px var(--ref)}
+.el.picked{background:var(--ref-soft);box-shadow:0 0 0 1px var(--ref)}
+.badge.b-pick{background:var(--ref);color:var(--surface)}
+.bx.r-ok{background:var(--ok-soft);border-color:var(--ok)}
+.bx.r-miss{outline:2px dashed var(--ok);outline-offset:2px}
+.bx.r-wrong{background:var(--bad-soft);border-color:var(--bad)}
+.el.r-ok{background:var(--ok-soft);box-shadow:0 0 0 1px var(--ok)}
+.el.r-miss{outline:1.5px dashed var(--ok);outline-offset:1px}
+.el.r-wrong{background:var(--bad-soft);box-shadow:0 0 0 1px var(--bad)}
+.badge.b-ok{background:var(--ok);color:var(--surface)}
+.badge.b-wrong{background:var(--bad);color:var(--surface)}
+.badge.b-miss{background:transparent;color:var(--ok);outline:1.5px dashed var(--ok)}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.btn{font:600 14px var(--font-body);padding:7px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+.ex-fb{font-size:14px;font-weight:600}
+.ex-fb.good{color:var(--ok)}.ex-fb.bad{color:var(--bad)}
+.ex-explain{padding:0 14px 14px;font-size:14.5px;max-width:78ch}
+.ex-explain p{margin:.4em 0}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+.topnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.topnav a{font:600 13px var(--font-body);padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--surface)}
+.topnav a:hover{border-color:var(--muted)}
+.topnav a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+<style>
+kbd{font:600 12px var(--font-mono);padding:1px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--surface);color:var(--ink);white-space:nowrap}
+/* Simulateur */
+.sim{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);margin:18px 0}
+.sim-cap{display:flex;gap:8px;align-items:center;padding:6px 12px;background:var(--surface-2);border-bottom:1px solid var(--line);font:12px var(--font-mono);color:var(--muted)}
+.sim-cap .url{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-page{position:relative;padding:14px;border-bottom:4px solid var(--line);overflow-x:auto}
+.sim-paused{position:absolute;inset:0;background:rgba(120,120,120,.18);display:flex;align-items:flex-start;justify-content:center;padding-top:8px;z-index:3;pointer-events:none}
+.sim-paused span{pointer-events:auto;background:#f3d36a;color:#2a2200;font:600 12px var(--font-mono);padding:4px 10px;border-radius:6px;display:flex;gap:8px;align-items:center}
+.sim-paused button{font:inherit;border:1px solid rgba(0,0,0,.3);background:#fff7d6;border-radius:4px;cursor:pointer;color:#2a2200}
+.sim-toast{position:absolute;right:12px;bottom:10px;z-index:4;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12.5px;padding:6px 10px;border-radius:6px;max-width:80%}
+.dev{display:flex;flex-direction:column}
+.dev-bar{display:flex;align-items:stretch;gap:0;background:var(--surface-2);border-bottom:1px solid var(--line);font:12.5px var(--font-body);flex-wrap:wrap}
+.dev-bar button{font:inherit;color:var(--muted);background:transparent;border:0;border-bottom:2px solid transparent;padding:7px 12px;cursor:pointer}
+.dev-bar button[aria-pressed="true"],.dev-bar button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ref)}
+.dev-bar .ic{font-size:15px;line-height:1;padding:6px 10px}
+.dev-bar .ic[aria-pressed="true"]{color:var(--ref);background:var(--ref-soft)}
+.dev-bar .sep{width:1px;background:var(--line);margin:4px 2px}
+.dev-body{height:440px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.dev-body.one{grid-template-columns:minmax(0,1fr)}
+@media (max-width:860px){.dev-body{grid-template-columns:minmax(0,1fr);height:auto}.dev-body > *{max-height:340px}}
+.dom{position:relative;overflow:auto;border-right:1px solid var(--line);font:12px/1.75 var(--font-mono);padding:6px 0;min-width:0}
+.nd{padding:0 8px;white-space:nowrap;cursor:default;color:var(--ink)}
+.nd:hover{background:var(--ref-soft)}
+.nd.on{background:var(--ref-soft);box-shadow:inset 3px 0 0 var(--ref)}
+.t-tag{color:var(--syn-tag)}.t-an{color:var(--syn-attr)}.t-av{color:var(--syn-val)}.t-p{color:var(--syn-punct)}.t-ng{color:var(--cand)}
+.bdg{font:600 10px var(--font-body);padding:0 5px;margin-left:6px;border-radius:4px;border:1px solid var(--muted);color:var(--muted);cursor:pointer;vertical-align:1px}
+.bdg[aria-pressed="true"]{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.side{overflow:auto;display:flex;flex-direction:column;min-width:0}
+.subbar{display:flex;gap:0;border-bottom:1px solid var(--line);background:var(--surface-2);position:sticky;top:0;z-index:1;flex-wrap:wrap}
+.subbar button{font:12px var(--font-body);color:var(--muted);background:transparent;border:0;border-bottom:2px solid transparent;padding:6px 10px;cursor:pointer}
+.subbar button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ref)}
+.subbar .sp{flex:1}
+.hov{padding:6px 10px;border-bottom:1px solid var(--line);font:12px var(--font-mono);display:flex;gap:12px;flex-wrap:wrap;background:var(--surface-2)}
+.hov label{display:flex;gap:4px;align-items:center;cursor:pointer}
+.rul{border-bottom:1px solid var(--line);padding:6px 10px;font:12px/1.75 var(--font-mono)}
+.rul .hd{display:flex;gap:8px;justify-content:space-between;align-items:baseline}
+.rul .sl{color:var(--ink);overflow-wrap:anywhere}
+.rul .src{color:var(--muted);text-decoration:underline;white-space:nowrap;font-size:11px}
+.inh{padding:4px 10px;font:11px var(--font-body);color:var(--muted);background:var(--surface-2);border-bottom:1px solid var(--line)}
+.dcl{display:flex;align-items:center;gap:4px;padding-left:10px;min-width:0}
+.dcl input[type=checkbox]{margin:0 2px 0 0;width:12px;height:12px}
+.dcl .pp{color:var(--syn-attr);white-space:nowrap}
+.dcl input[type=text]{font:inherit;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--ink);padding:0 3px;min-width:0;flex:1}
+.dcl input[type=text]:hover,.dcl input[type=text]:focus{border-color:var(--line);background:var(--surface)}
+.dcl .rv{color:var(--muted);font-size:11px;white-space:nowrap}
+.dcl.over .pp,.dcl.over input[type=text],.dcl.off .pp,.dcl.off input[type=text]{text-decoration:line-through;opacity:.5}
+.cmp-row{border-bottom:1px solid var(--line);font:12px var(--font-mono)}
+.cmp-row > button{all:unset;display:flex;gap:8px;width:100%;padding:4px 10px;cursor:pointer;box-sizing:border-box}
+.cmp-row > button:focus-visible{outline:2px solid var(--ref);outline-offset:-2px}
+.cmp-row .pp{color:var(--syn-attr);min-width:120px}
+.cmp-row .vv{color:var(--ink);overflow-wrap:anywhere}
+.trace{padding:2px 10px 8px 28px;display:grid;gap:2px}
+.trace div{overflow-wrap:anywhere}
+.trace .w{color:var(--ink)}
+.trace .l{color:var(--muted);text-decoration:line-through}
+.trace .f{color:var(--muted);font-size:11px}
+.bm{margin:10px auto;font:11px var(--font-mono);text-align:center;width:max-content;max-width:100%}
+.bm div{border:1px dashed var(--muted);padding:4px 10px;position:relative}
+.bm .m{background:rgba(246,178,107,.35)}.bm .b{background:rgba(255,229,153,.55);border-style:solid}.bm .p{background:rgba(147,196,125,.45)}.bm .c{background:rgba(111,168,220,.45);padding:6px 14px;color:#10263a}
+.bm .lb{position:absolute;top:1px;left:4px;font-size:9px;color:#333;text-transform:lowercase}
+.lay{padding:8px 10px;display:grid;gap:6px;font-size:13px}
+.lay label{display:flex;gap:8px;align-items:center;font-family:var(--font-mono);font-size:12px}
+.chg{padding:8px 10px;font:12px/1.7 var(--font-mono)}
+.chg .fl{color:var(--muted);margin-top:6px}
+.chg .mi{color:var(--bad)}.chg .pl{color:var(--ok)}
+.cons{display:flex;flex-direction:column;height:100%;min-height:0}
+.cons-out{flex:1;overflow:auto;font:12px/1.6 var(--font-mono);padding:6px 0;min-height:120px}
+.cons-out > div{padding:3px 10px;border-bottom:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}
+.cons-out .in{color:var(--ref)}
+.cons-out .er{color:var(--bad);background:var(--bad-soft)}
+.cons-out .el-link{color:var(--syn-tag);text-decoration:underline;cursor:pointer}
+.cons-in{display:flex;gap:6px;align-items:center;border-top:1px solid var(--line);padding:4px 8px;background:var(--surface)}
+.cons-in span{color:var(--ref);font:600 13px var(--font-mono)}
+.cons-in input{flex:1;min-width:0;font:12.5px var(--font-mono);border:0;background:transparent;color:var(--ink);padding:6px 4px}
+.cons-in input:focus-visible{outline:2px solid var(--ref)}
+.cons-help{padding:6px 10px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.cons-help button{font:11.5px var(--font-mono);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:5px;padding:1px 6px;cursor:pointer}
+.ngt{padding:6px 0;font:12px/1.8 var(--font-mono);overflow:auto}
+.ngt .nd{cursor:pointer}
+.ngp{padding:8px 10px;font:12px/1.6 var(--font-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.rend{padding:12px 14px;display:grid;gap:10px;font-size:14px;max-width:70ch}
+.rend label{display:flex;gap:8px;align-items:flex-start;font-weight:600;cursor:pointer}
+.rend input{margin-top:4px}
+.mis{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:12px 0 18px;overflow:hidden}
+.mis-h{padding:8px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);font-weight:600;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mis ol{list-style:none;margin:0;padding:6px 0}
+.mis li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;padding:7px 14px;border-bottom:1px solid var(--line);font-size:14px;align-items:start}
+.mis li:last-child{border-bottom:0}
+.mis li .st{font-weight:700;color:var(--muted);text-align:center}
+.mis li.ok .st{color:var(--ok)}
+.mis li.ok{background:var(--ok-soft)}
+.mis input.ans{font:13px var(--font-mono);padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);margin-top:4px;width:min(260px,100%)}
+/* Missions dans le vrai navigateur */
+.real{display:grid;gap:14px;margin:16px 0}
+.rm{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 14px;display:grid;gap:10px}
+.rm h3{margin:0;font-size:1rem}
+.rm .row2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rm input{font:13px var(--font-mono);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:min(240px,100%)}
+.rm .fb{font-weight:600;font-size:14px}
+.rm .fb.ok{color:var(--ok)}.rm .fb.ko{color:var(--bad)}
+.mission-box{border:1.5px dashed var(--ref);border-radius:8px;padding:10px 12px;background:var(--ref-soft);font:600 13px var(--font-mono);color:var(--ink)}
+#m-r1{--mission-code:"VERT-42"}
+.m-frame{box-sizing:content-box;width:400px;border:1px solid var(--line);border-radius:8px;padding:0;background:var(--surface-2)}
+#m-r2{width:calc(50% - 37px);box-sizing:border-box}
+.m-scroll{overflow-x:auto;max-width:100%}
+.m-grid{width:520px;display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px}
+.m-grid div{border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--surface);font:12px var(--font-mono);text-align:center}
+#m-r5{transition:background-color .2s}
+#m-r5:hover{--mission-hover:"LUNE";background:var(--mark);color:var(--mark-ink)}
+.m-menu{position:absolute;z-index:50;min-width:200px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px 0}
+.m-menu div{padding:8px 14px;font-size:14px}
+.m-menu div + div{border-top:1px solid var(--line)}
+.cheat td:first-child{white-space:nowrap}
+</style>
+
+</head>
+<body>
+<div class="shell">
+<details class="toc" open id="toc">
+  <summary>Sommaire</summary>
+  <div class="grp">Prise en main</div>
+  <ol>
+    <li><a href="#d0"><span>0</span>Ouvrir et s'orienter</a></li>
+    <li><a href="#d1"><span>1</span>Le simulateur</a></li>
+  </ol>
+  <div class="grp">Les panneaux</div>
+  <ol>
+    <li><a href="#d2"><span>2</span>Styles</a></li>
+    <li><a href="#d3"><span>3</span>Calculé</a></li>
+    <li><a href="#d4"><span>4</span>Overlays flex / grid</a></li>
+    <li><a href="#d5"><span>5</span>Variables CSS</a></li>
+    <li><a href="#d6"><span>6</span>Angular et la console</a></li>
+    <li><a href="#d7"><span>7</span>Menus qui disparaissent</a></li>
+    <li><a href="#d8"><span>8</span>Corriger puis reporter</a></li>
+  </ol>
+  <div class="grp">Pratique</div>
+  <ol>
+    <li><a href="#d9"><span>9</span>Missions réelles</a></li>
+    <li><a href="#d10"><span>10</span>Antisèche</a></li>
+  </ol>
+  <div class="score">Missions : <b class="score-n">0</b> / <span class="score-t">0</span></div>
+</details>
+
+<main>
+<header class="hero">
+  <nav class="topnav" aria-label="Parties du cours"><a href="index.html">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html">2 · Angular &amp; Material</a><a href="layout.html">3 · Mise en page</a><a href="defis.html">4 · Défis</a><a href="niveaux.html">5 · Les niveaux</a><a href="devtools.html" aria-current="page">6 · DevTools</a></nav>
+  <div class="kicker">Partie 6 · Chrome DevTools et Angular DevTools</div>
+  <h1>Arrête de deviner : <span class="hl">inspecte</span></h1>
+  <p class="lead">Tout ce que tu as appris dans ce cours, DevTools te le montre directement : quelle règle gagne, quelle variable décide, quel composant possède l'élément, où sont les colonnes d'une grille. Cette partie t'apprend à lire ses panneaux, d'abord dans un simulateur avec des missions guidées, puis dans ton vrai navigateur.</p>
+  <div class="prog" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px"><span>Missions réussies : <b class="score-n">0</b> / <span class="score-t">0</span></span><div class="meter" aria-hidden="true"><i id="meter"></i></div></div>
+</header>
+
+<!-- 0 -->
+<section class="lesson" id="d0">
+  <div class="lesson-head"><span class="num">0</span><h2>Ouvrir DevTools et s'orienter</h2></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Raccourci (Windows / Linux)</th><th>Mac</th><th>Effet</th></tr>
+    <tr><td><kbd>F12</kbd> ou <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td><kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>I</kbd></td><td>ouvrir / fermer DevTools</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd></td><td><kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>C</kbd></td><td>sélecteur d'élément : clique sur la page pour inspecter</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td><kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd></td><td>palette de commandes : tape « rendering », « changes », « screenshot »…</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> dans Éléments</td><td><kbd>⌘</kbd>+<kbd>F</kbd></td><td>chercher dans le DOM : accepte du texte <b>et des sélecteurs CSS</b></td></tr>
+    <tr><td><kbd>F8</kbd> ou <kbd>Ctrl</kbd>+<kbd>\</kbd></td><td><kbd>⌘</kbd>+<kbd>\</kbd></td><td>mettre la page en pause (depuis Sources)</td></tr>
+  </table></div>
+  <div class="callout good"><b>Une astuce qui relie tout le cours</b>Dans l'onglet Éléments, <kbd>Ctrl</kbd>+<kbd>F</kbd> puis tape un sélecteur, par exemple <code>.parent &gt; .child</code> ou <code>[_ngcontent-ng-c3428157] .title</code>. DevTools surligne chaque élément qui correspond, un par un. C'est l'atelier de la partie 1, sur ta vraie app.</div>
+</section>
+
+<!-- 1 -->
+<section class="lesson" id="d1">
+  <div class="lesson-head"><span class="num">1</span><h2>Le simulateur</h2></div>
+  <div class="prose"><p>En haut, une page Angular : l'en-tête d'un dossier, un champ Material, un select et un bouton d'une lib d'équipe, une grille d'adresse et une carte de partie avec un menu. En bas, un DevTools simplifié qui fonctionne comme le vrai. Les missions se valident toutes seules quand tu les réussis.</p></div>
+  <div class="sim" id="sim">
+    <div class="sim-cap"><span>●●●</span><span class="url">localhost:4200/dossiers/2026-0042</span></div>
+    <div class="sim-page" id="sim-page"><div id="sim-host"></div><div class="sim-paused" id="sim-paused" hidden><span>En pause dans le débogueur <button type="button" id="sim-resume">▶ Reprendre</button></span></div><div class="sim-toast" id="sim-toast" hidden></div></div>
+    <div class="dev" id="dev">
+      <div class="dev-bar" role="tablist" aria-label="Panneaux DevTools">
+        <button type="button" class="ic" id="b-pick" aria-pressed="false" title="Sélecteur d'élément (Ctrl+Shift+C)">⌖</button>
+        <span class="sep"></span>
+        <button type="button" role="tab" data-p="el" aria-selected="true">Éléments</button>
+        <button type="button" role="tab" data-p="con" aria-selected="false">Console</button>
+        <button type="button" role="tab" data-p="ng" aria-selected="false">Angular</button>
+        <button type="button" role="tab" data-p="ren" aria-selected="false">Rendu</button>
+        <span class="sep"></span>
+        <button type="button" class="ic" id="b-pause" aria-pressed="false" title="Mettre en pause (F8)">⏸</button>
+      </div>
+      <div class="dev-body" id="dev-body"></div>
+    </div>
+  </div>
+  <div class="mis" id="mis"></div>
+</section>
+
+<!-- 2 -->
+<section class="lesson" id="d2">
+  <div class="lesson-head"><span class="num">2</span><h2>Lire l'onglet Styles</h2></div>
+  <div class="prose"><p>Styles liste toutes les règles qui touchent l'élément sélectionné, <b>de la plus forte à la plus faible</b>. Une déclaration <b>barrée</b> est battue par une règle plus haut dans la liste. En dessous, les sections « Hérité de… » montrent ce qui vient des ancêtres : la couleur, la police, et surtout les <b>variables CSS</b>.</p></div>
+  <ul class="check">
+    <li><span>1</span><span><b>Le lien à droite</b> (<code>dossier.component.scss:12</code>) dit d'où vient la règle. En mode développement, Angular fournit les fichiers source : tu sais immédiatement quel fichier modifier.</span></li>
+    <li><span>2</span><span><b>Les attributs <code>[_ngcontent-…]</code></b> dans un sélecteur signalent une règle de composant. Un sélecteur sans attribut vient d'un fichier global ou d'une lib.</span></li>
+    <li><span>3</span><span><b>La case à cocher</b> devant chaque déclaration la désactive temporairement : le meilleur moyen de savoir « à quoi sert cette ligne ? ».</span></li>
+    <li><span>4</span><span><b>Le bouton <code>:hov</code></b> force <code>:hover</code>, <code>:focus</code>, <code>:active</code>… sans garder la souris dessus. <b><code>.cls</code></b> ajoute ou retire des classes pour tester (<code>compact</code>, <code>active</code>…).</span></li>
+  </ul>
+</section>
+
+<!-- 3 -->
+<section class="lesson" id="d3">
+  <div class="lesson-head"><span class="num">3</span><h2>L'onglet Calculé : la vraie réponse</h2></div>
+  <div class="prose"><p>Styles montre ce qui est écrit, Calculé montre ce qui est <b>appliqué</b> : une valeur finale par propriété. Clique sur une propriété, ou sur la flèche à côté dans Chrome : DevTools déroule la <b>trace</b>, avec la règle gagnante en premier et les perdantes barrées. C'est le réflexe de la partie 5 : « qui décide de cette taille ? ».</p></div>
+  <div class="callout"><b>Le schéma du box model</b>En haut de Calculé : marge, bordure, padding, contenu, avec les vraies valeurs en pixels. Survole chaque couche : la page la surligne. Pour un « espace mystérieux », c'est le premier endroit où regarder.</div>
+</section>
+
+<!-- 4 -->
+<section class="lesson" id="d4">
+  <div class="lesson-head"><span class="num">4</span><h2>Les overlays flex et grid</h2></div>
+  <div class="prose"><p>Dans l'arbre des éléments, un conteneur flex ou grid porte un petit badge <b>flex</b> ou <b>grid</b>. Clique dessus : DevTools dessine sur la page les éléments, les espaces (<code>gap</code>) hachurés et, pour une grille, les numéros de lignes et de colonnes. L'onglet <b>Mise en page</b> (Layout) liste tous les conteneurs de la page avec une case à cocher chacun.</p></div>
+  <div class="callout good"><b>Quand t'en servir</b>Tu ne sais pas si l'écart vient d'une marge, d'un padding ou d'un <code>gap</code> ? Allume l'overlay : le gap est hachuré, le reste non. Une colonne de grille plus étroite que prévu ? L'overlay affiche sa vraie largeur.</div>
+</section>
+
+<!-- 5 -->
+<section class="lesson" id="d5">
+  <div class="lesson-head"><span class="num">5</span><h2>Les variables CSS</h2></div>
+  <div class="prose"><p>Une valeur comme <code>var(--lib-control-height, 40px)</code> ne dit pas d'où viennent les 40px. Dans Chrome, survole la variable dans Styles : une bulle affiche sa valeur actuelle. Clique dessus : DevTools saute à la règle qui la définit, souvent dans une section « Hérité de… » plus bas, posée sur <code>html</code> par le thème ou sur la balise hôte par toi.</p></div>
+  <ul class="check">
+    <li><span>1</span><span>Chaque <code>var(--…)</code> lu par Material ou ta lib est un <b>point de réglage</b> (partie 5, niveau 4). Fais la liste avant d'écrire un override.</span></li>
+    <li><span>2</span><span>Tu peux <b>ajouter</b> une variable pour tester : clique dans une règle (ou dans <code>element.style</code>) et tape <code>--lib-select-width: 100%</code>.</span></li>
+    <li><span>3</span><span>Une variable non définie et sans valeur de secours rend la déclaration invalide : DevTools la souligne d'un trait ondulé.</span></li>
+  </ul>
+</section>
+
+<!-- 6 -->
+<section class="lesson" id="d6">
+  <div class="lesson-head"><span class="num">6</span><h2>Angular DevTools et la console</h2></div>
+  <div class="prose"><p>Dans Éléments, l'élément sélectionné est disponible dans la console sous le nom <code>$0</code>. En mode développement, Angular ajoute un objet global <code>ng</code> pour relier le DOM à tes composants.</p></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Commande</th><th>Renvoie</th></tr>
+    <tr><td><code>ng.getComponent($0)</code></td><td>l'instance du composant dont <code>$0</code> est la balise hôte (<code>app-party-card</code>)</td></tr>
+    <tr><td><code>ng.getOwningComponent($0)</code></td><td>le composant dont le template contient <code>$0</code> : « qui a écrit ce bouton ? »</td></tr>
+    <tr><td><code>ng.getDirectives($0)</code></td><td>les directives posées sur l'élément (<code>matInput</code>…)</td></tr>
+    <tr><td><code>ng.applyChanges($0)</code></td><td>relance la détection de changements après une modification depuis la console</td></tr>
+    <tr><td><code>getComputedStyle($0).height</code></td><td>la valeur calculée, sans passer par l'onglet</td></tr>
+  </table></div>
+  <div class="prose"><p>L'extension <b>Angular DevTools</b> ajoute un onglet « Angular » : l'arbre de tes composants, leurs inputs et leurs propriétés, modifiables en direct. Sélectionne un composant et choisis « afficher dans Éléments » pour retrouver sa balise.</p></div>
+  <div class="callout"><b>Le lien avec le CSS</b>Un style ne s'applique pas sur un élément ? <code>ng.getOwningComponent($0)</code> te dit à quel composant il appartient, donc dans quel fichier SCSS une règle peut l'atteindre (partie 2). Si la réponse est un composant Material ou de ta lib, tu sais que tu es au niveau 5 de la partie 5.</div>
+</section>
+
+<!-- 7 -->
+<section class="lesson" id="d7">
+  <div class="lesson-head"><span class="num">7</span><h2>Inspecter un menu qui disparaît</h2></div>
+  <div class="prose"><p>Ouvre un <code>mat-select</code>, un <code>mat-menu</code> ou un autocomplete, puis clique dans DevTools : le panneau se ferme. La page a perdu le focus, ou a reçu un clic « dehors ». Trois parades :</p></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Méthode</th><th>Comment</th></tr>
+    <tr><td><b>Émuler une page active</b></td><td>Palette de commandes (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) → « Show Rendering » → coche <b>Emulate a focused page</b>. La page croit garder le focus : le menu reste ouvert pendant que tu inspectes.</td></tr>
+    <tr><td><b>Pause différée</b></td><td>Dans la console : <code>setTimeout(() =&gt; { debugger; }, 3000)</code>, puis ouvre le menu dans les 3 secondes. La page se fige avec le menu ouvert.</td></tr>
+    <tr><td><b>Pause sur modification</b></td><td>Clic droit sur <code>div.cdk-overlay-container</code> → <b>Break on → subtree modifications</b>. La page se met en pause dès que le menu s'ajoute ou se retire.</td></tr>
+  </table></div>
+  <div class="callout warn"><b>N'oublie pas de décocher</b>« Emulate a focused page » reste actif tant que DevTools est ouvert. Si plus tard un menu ne se ferme plus en cliquant ailleurs, vérifie d'abord cette case.</div>
+</section>
+
+<!-- 8 -->
+<section class="lesson" id="d8">
+  <div class="lesson-head"><span class="num">8</span><h2>Corriger en direct, puis reporter au bon endroit</h2></div>
+  <ul class="check">
+    <li><span>1</span><span><b>Essaie dans Styles</b> : change une valeur, coche ou décoche, ajoute une déclaration. Rien n'est enregistré, rien ne casse.</span></li>
+    <li><span>2</span><span><b>Ouvre l'onglet Changes</b> (palette de commandes → « Show Changes ») : il liste toutes tes modifications, fichier par fichier, sous forme de diff.</span></li>
+    <li><span>3</span><span><b>Choisis le niveau</b> (partie 5) avant de reporter. Une modification faite sur une règle de Material ne se reporte pas dans Material : elle devient un token, une variable ou une règle sur la balise hôte dans <b>ton</b> fichier.</span></li>
+    <li><span>4</span><span><b>Retire les attributs Angular</b> : <code>.row[_ngcontent-ng-c3428157]</code> s'écrit <code>.row</code> dans <code>dossier.component.scss</code>.</span></li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section class="lesson" id="d9">
+  <div class="lesson-head"><span class="num">9</span><h2>Missions dans ton vrai DevTools</h2></div>
+  <div class="prose"><p>Ces missions se font avec le vrai Chrome (ou Edge) DevTools, sur cette page. Chaque réponse est cachée dans le CSS ou le DOM : il faut l'inspecter pour la trouver.</p></div>
+  <div class="real" id="real">
+    <div class="rm" data-ans="VERT-42"><h3>R1 · Lire une variable</h3><p>Inspecte la boîte ci-dessous. Dans Styles, trouve la valeur de la variable <code>--mission-code</code>.</p><div class="mission-box" id="m-r1">Inspecte-moi</div><div class="row2"><label for="r1">Réponse</label><input id="r1" autocomplete="off"><span class="fb" role="status"></span></div></div>
+    <div class="rm" data-ans="163" data-num="1"><h3>R2 · Une largeur calculée</h3><p>Quelle est la <b>largeur calculée</b> de la boîte en pointillés, en pixels (onglet Calculé, ou le schéma du box model) ? Regarde aussi la règle qui la fixe.</p><div class="m-scroll"><div class="m-frame"><div class="mission-box" id="m-r2">Quelle est ma largeur ?</div></div></div><div class="row2"><label for="r2">Réponse (px)</label><input id="r2" autocomplete="off" inputmode="numeric"><span class="fb" role="status"></span></div></div>
+    <div class="rm" data-ans="ZEPHYR"><h3>R3 · Le menu qui disparaît</h3><p>Ouvre ce menu : une de ses options contient un code. Le menu se ferme dès que la page perd le focus ; inspecte-le sans qu'il disparaisse (leçon 7). L'option du code n'existe dans le DOM que quand le menu est ouvert.</p><div><button type="button" class="btn alt" id="m-r3">Ouvrir le menu</button></div><div class="row2"><label for="r3">Code</label><input id="r3" autocomplete="off"><span class="fb" role="status"></span></div></div>
+    <div class="rm" data-ans="5" data-num="1"><h3>R4 · L'overlay grid</h3><p>Allume l'overlay grid de ce conteneur (badge « grid » dans Éléments). Combien de <b>colonnes</b> la grille crée-t-elle ?</p><div class="m-scroll"><div class="m-grid" id="m-r4"><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div></div></div><div class="row2"><label for="r4">Colonnes</label><input id="r4" autocomplete="off" inputmode="numeric"><span class="fb" role="status"></span></div></div>
+    <div class="rm" data-ans="LUNE"><h3>R5 · Forcer un état</h3><p>Au survol, cette boîte définit une variable <code>--mission-hover</code>. Impossible de la lire en gardant la souris dessus : force <code>:hover</code> avec le bouton <code>:hov</code> de Styles.</p><div class="mission-box" id="m-r5">Survole-moi… ou force :hover</div><div class="row2"><label for="r5">Valeur</label><input id="r5" autocomplete="off"><span class="fb" role="status"></span></div></div>
+  </div>
+  <h3>Et sur HYPRES, en local</h3>
+  <ul class="check">
+    <li><span>1</span><span>Sélectionne un champ d'un stepper, puis tape <code>ng.getOwningComponent($0)</code> : quel composant l'a écrit ?</span></li>
+    <li><span>2</span><span>Trouve un <code>mat-form-field</code> et remonte sa hauteur dans Calculé jusqu'à la variable du thème.</span></li>
+    <li><span>3</span><span>Ouvre un <code>mat-select</code> avec « Emulate a focused page » et cherche sa <code>panelClass</code> dans le <code>cdk-overlay-container</code>.</span></li>
+    <li><span>4</span><span>Avec <kbd>Ctrl</kbd>+<kbd>F</kbd> dans Éléments, compte les <code>::ng-deep</code> devenus globaux : cherche un sélecteur de ta lib sans attribut <code>_ngcontent</code>.</span></li>
+  </ul>
+</section>
+
+<!-- 10 -->
+<section class="lesson" id="d10">
+  <div class="lesson-head"><span class="num">10</span><h2>L'antisèche</h2></div>
+  <div class="tbl"><table class="t cheat">
+    <tr><th>Je veux…</th><th>Dans DevTools</th></tr>
+    <tr><td>savoir quelle règle gagne</td><td>Styles : la plus haute non barrée · Calculé : clic sur la propriété</td></tr>
+    <tr><td>savoir quel fichier modifier</td><td>le lien <code>fichier.scss:ligne</code> à droite de la règle</td></tr>
+    <tr><td>tester un sélecteur</td><td>Éléments → <kbd>Ctrl</kbd>+<kbd>F</kbd> → taper le sélecteur</td></tr>
+    <tr><td>comprendre un espace</td><td>schéma du box model + overlay flex/grid</td></tr>
+    <tr><td>voir d'où vient une hauteur en <code>var()</code></td><td>survol de la variable, ou Calculé → trace</td></tr>
+    <tr><td>tester un état</td><td><code>:hov</code> → <code>:hover</code> / <code>:focus</code></td></tr>
+    <tr><td>tester une classe</td><td><code>.cls</code> → ajouter / décocher</td></tr>
+    <tr><td>inspecter un menu ou un select ouvert</td><td>Rendering → Emulate a focused page</td></tr>
+    <tr><td>trouver le composant d'un élément</td><td><code>ng.getOwningComponent($0)</code> ou Angular DevTools</td></tr>
+    <tr><td>récupérer mes essais</td><td>palette de commandes → Show Changes</td></tr>
+  </table></div>
+</section>
+<footer>Le simulateur reproduit le fonctionnement de Chrome DevTools sur une page simplifiée : les panneaux réels ont plus d'options, mais la lecture est la même.</footer>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var clean=function(t){return t.replace(/\s+/g,' ');};
+var VOID=new Set(['input','img','br','hr','meta','link']);
+var INLINE=new Set(['span','a','em','strong','b','i','code','small','label','img','input','button','mark']);
+
+/* ---------- Parsing ---------- */
+function parse(html){
+  var doc=new DOMParser().parseFromString('<!doctype html><html><body>'+html+'</body></html>','text/html');
+  var body=doc.body, n=0;
+  body._all=Array.prototype.slice.call(body.querySelectorAll('*'));
+  body._all.forEach(function(el){el._i=n++;});
+  return body;
+}
+
+/* ---------- Rendu code ---------- */
+function attrsHTML(el){
+  return Array.prototype.map.call(el.attributes,function(a){
+    return ' <span class="s-attr">'+esc(a.name)+'</span>'+(a.value!==''?'<span class="s-p">=</span><span class="s-val">"'+esc(a.value)+'"</span>':'');
+  }).join('');
+}
+function openTag(el){return '<span class="s-p">&lt;</span><span class="s-tag">'+el.localName+'</span>'+attrsHTML(el)+'<span class="s-p">&gt;</span>';}
+function closeTag(el){return '<span class="s-p">&lt;/</span><span class="s-tag">'+el.localName+'</span><span class="s-p">&gt;</span>';}
+function inlineable(el){
+  if(VOID.has(el.localName)) return true;
+  for(var k=0;k<el.children.length;k++){var c=el.children[k]; if(!INLINE.has(c.localName)||c.children.length) return false;}
+  return clean(el.outerHTML).length<=74;
+}
+function inlineHTML(el){
+  var s='<span class="el" data-i="'+el._i+'">'+openTag(el);
+  if(VOID.has(el.localName)) return s+'</span>';
+  var nodes=el.childNodes;
+  for(var k=0;k<nodes.length;k++){
+    var n=nodes[k];
+    if(n.nodeType===3){var t=clean(n.textContent); if(k===0) t=t.replace(/^ /,''); if(k===nodes.length-1) t=t.replace(/ $/,''); if(t) s+='<span class="s-text">'+esc(t)+'</span>';}
+    else if(n.nodeType===1) s+=inlineHTML(n);
+  }
+  return s+closeTag(el)+'</span>';
+}
+function renderCode(body){
+  var out=[];
+  function walk(el,d){
+    if(inlineable(el)){out.push({i:el._i,d:d,h:inlineHTML(el)});return;}
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+openTag(el)+'</span>'});
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) out.push({i:null,d:d+1,h:'<span class="s-text">'+esc(t)+'</span>'});}
+      else if(n.nodeType===1) walk(n,d+1);
+    });
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+closeTag(el)+'</span>'});
+  }
+  Array.prototype.forEach.call(body.children,function(el){walk(el,0);});
+  return out.map(function(l){return '<div class="ln"'+(l.i!==null?' data-li="'+l.i+'"':'')+'><span class="gut"></span><span class="lc">'+'  '.repeat(l.d)+l.h+'</span></div>';}).join('');
+}
+
+/* ---------- Rendu boîtes ---------- */
+function boxHTML(el){
+  var elKids=Array.prototype.slice.call(el.children);
+  var inline=elKids.length>0&&elKids.every(function(c){return INLINE.has(c.localName);});
+  var label='<span class="s-tag">'+el.localName+'</span>'+(el.id?'<span class="s-id">#'+esc(el.id)+'</span>':'')+
+    Array.prototype.map.call(el.classList,function(c){return '<span class="s-cls">.'+esc(c)+'</span>';}).join('')+
+    Array.prototype.filter.call(el.attributes,function(a){return a.name!=='class'&&a.name!=='id';}).map(function(a){return '<span class="s-attrb">&nbsp;['+esc(a.name)+(a.value!==''?'="'+esc(a.value)+'"':'')+']</span>';}).join('');
+  var head, kids='';
+  if(!elKids.length){
+    var t=clean(el.textContent).trim();
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span>'+(t?'<span class="bx-text">'+esc(t)+'</span>':'')+'<span class="bx-badges"></span></div>';
+  } else {
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span><span class="bx-badges"></span></div>';
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) kids+='<span class="bx-text">'+esc(t)+'</span>';}
+      else if(n.nodeType===1) kids+=boxHTML(n);
+    });
+    kids='<div class="bx-kids">'+kids+'</div>';
+  }
+  return '<div class="bx'+(inline?' bx-inl':'')+'" data-i="'+el._i+'">'+head+kids+'</div>';
+}
+function renderBoxes(body){return Array.prototype.map.call(body.children,boxHTML).join('');}
+
+/* ---------- Analyse de sélecteur ---------- */
+function splitTop(sel){
+  var out=[],cur='',d=0,q=null;
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(ch===','&&d===0){out.push(cur.trim());cur='';continue;}
+    cur+=ch;
+  }
+  if(cur.trim())out.push(cur.trim());
+  return out;
+}
+function tokenize(sel){
+  var parts=[],cur='',d=0,q=null,sp=false;
+  sel=sel.trim();
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(d===0&&/\s/.test(ch)){if(cur){parts.push(cur);cur='';}sp=true;continue;}
+    if(d===0&&'>+~'.indexOf(ch)>=0){if(cur){parts.push(cur);cur='';}parts.push({c:ch});sp=false;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(sp){if(parts.length&&typeof parts[parts.length-1]==='string'&&!cur)parts.push({c:' '});sp=false;}
+    cur+=ch;
+  }
+  if(cur)parts.push(cur);
+  return parts;
+}
+function joinTok(t){return t.map(function(x){return typeof x==='string'?x:(x.c===' '?' ':' '+x.c+' ');}).join('').trim();}
+var PE=/::?(before|after|first-letter|first-line|placeholder|marker|selection)(?![\w-])/g;
+var ST=/:(hover|focus-visible|focus-within|focus|active|visited)(?![\w-])/g;
+function prep(g){
+  var pseudo=null,states=[];
+  var s=g.replace(PE,function(m,n){pseudo=n;return '\u0000';}).replace(ST,function(m,n){states.push(':'+n);return '\u0000';});
+  s=s.replace(/(^|[\s>+~(,])\u0000+/g,'$1*').replace(/\u0000/g,'');
+  return {s:s.trim(),pseudo:pseudo,states:states};
+}
+function extractHas(comp){
+  var k=comp.indexOf(':has('); if(k<0) return null;
+  var d=0; for(var j=k+4;j<comp.length;j++){ if(comp[j]==='(')d++; else if(comp[j]===')'){d--; if(d===0) return comp.slice(k+5,j).trim();} }
+  return null;
+}
+function anchors(el,comb,left,body){
+  var out=[], m=function(x){try{return x.matches(left);}catch(e){return false;}}, p;
+  if(comb===' '){for(p=el.parentElement;p&&p!==body;p=p.parentElement) if(m(p)) out.push(p);}
+  else if(comb==='>'){p=el.parentElement; if(p&&p!==body&&m(p)) out.push(p);}
+  else if(comb==='+'){p=el.previousElementSibling; if(p&&m(p)) out.push(p);}
+  else if(comb==='~'){for(p=el.previousElementSibling;p;p=p.previousElementSibling) if(m(p)) out.push(p);}
+  return out;
+}
+var FRAG=document.createDocumentFragment();
+function evaluate(body,sel){
+  var r={sel:sel,error:null,matched:new Set(),refs:new Map(),pseudo:null,states:[]};
+  var raw=(sel||'').trim();
+  if(!raw){r.error='empty';return r;}
+  if(raw.indexOf('&')>=0){r.error='amp';return r;}
+  var groups=splitTop(raw);
+  for(var gi=0;gi<groups.length;gi++){
+    var g=groups[gi];
+    try{FRAG.querySelector(g);}catch(e){r.error='invalid';return r;}
+    var p=prep(g), els;
+    try{ if(!p.s) throw 0; els=Array.prototype.slice.call(body.querySelectorAll(p.s)); }catch(e){r.error='invalid';return r;}
+    els.forEach(function(el){r.matched.add(el);});
+    if(p.pseudo) r.pseudo=p.pseudo;
+    p.states.forEach(function(s){if(r.states.indexOf(s)<0) r.states.push(s);});
+    var toks=tokenize(p.s);
+    if(toks.length>=3&&typeof toks[toks.length-2]==='object'){
+      var comb=toks[toks.length-2].c, left=joinTok(toks.slice(0,-2));
+      els.forEach(function(el){anchors(el,comb,left,body).forEach(function(a){if(!r.refs.has(a)) r.refs.set(a,'repère');});});
+    }
+    var last=toks[toks.length-1], has=typeof last==='string'?extractHas(last):null;
+    if(has&&!/:not\(/.test(last)){
+      els.forEach(function(el){try{
+        var found=/^>/.test(has)?el.querySelectorAll(':scope '+has):(/^[+~]/.test(has)?[]:el.querySelectorAll(has));
+        Array.prototype.forEach.call(found,function(f){r.refs.set(f,'condition');});
+      }catch(e){}});
+    }
+  }
+  return r;
+}
+
+/* ---------- Lecture en français ---------- */
+var PC={hover:'survolé par la souris',focus:'qui a le focus (clic ou Tab)','focus-visible':'qui a le focus clavier','focus-within':"qui contient l'élément qui a le focus",active:"pendant qu'on clique dessus",visited:'déjà visité',
+'first-child':'qui est le premier enfant de son parent','last-child':'qui est le dernier enfant de son parent','only-child':'qui est le seul enfant de son parent',
+'first-of-type':'qui est le premier de sa balise parmi ses frères','last-of-type':'qui est le dernier de sa balise parmi ses frères',
+empty:'vide',checked:'coché',disabled:'désactivé',enabled:'activé',root:'racine du document','placeholder-shown':'dont le placeholder est visible'};
+var PEL={before:'le pseudo-élément ::before (contenu ajouté au début, à l\'intérieur)',after:'le pseudo-élément ::after (contenu ajouté à la fin, à l\'intérieur)','first-letter':'la première lettre','first-line':'la première ligne',placeholder:"le texte d'aide (placeholder)",marker:'la puce',selection:'le texte sélectionné'};
+function ord(n){return n===1?'1er':n+'e';}
+function nth(arg,ofType){
+  var a=arg.trim().toLowerCase().replace(/\s+/g,'');
+  var scope=ofType?'parmi les frères de même balise':'parmi les enfants de son parent';
+  if(/^\d+$/.test(a)) return 'qui est le '+ord(+a)+' '+scope;
+  if(a==='odd'||a==='2n+1') return 'de rang impair (1er, 3e, 5e…) '+scope;
+  if(a==='even'||a==='2n') return 'de rang pair (2e, 4e, 6e…) '+scope;
+  var m=a.match(/^([+-]?\d*)n([+-]\d+)?$/);
+  if(m){
+    var A=(m[1]===''||m[1]==='+')?1:(m[1]==='-'?-1:parseInt(m[1],10)), B=m[2]?parseInt(m[2],10):0, ranks=[];
+    for(var n=0;n<40&&ranks.length<5;n++){var v=A*n+B; if(v>=1) ranks.push(v); else if(A<=0) break;}
+    ranks.sort(function(x,y){return x-y;});
+    return 'dont le rang '+scope+' vaut '+ranks.join(', ')+(A>0?'…':'');
+  }
+  return 'qui correspond à la formule <code>'+esc(arg)+'</code> '+scope;
+}
+function attrPhrase(n,op,v){
+  var N='<code>'+esc(n)+'</code>', V='<code>"'+esc(v)+'"</code>';
+  if(!op) return "qui a l'attribut "+N;
+  return {'=':'dont '+N+' vaut exactement '+V,'^=':'dont '+N+' commence par '+V,'$=':'dont '+N+' finit par '+V,'*=':'dont '+N+' contient '+V,'~=':'dont '+N+' contient le mot '+V,'|=':'dont '+N+' vaut '+V+' ou commence par « '+esc(v)+'- »'}[op];
+}
+function describeCompound(c){
+  var rest=c, tag=null, cls=[], ids=[], bits=[], pel=null, m, guard=0;
+  m=rest.match(/^(\*|[a-zA-Z][\w-]*)/); if(m){tag=m[1];rest=rest.slice(m[0].length);}
+  while(rest&&guard++<30){
+    if((m=rest.match(/^#([\w-]+)/))) ids.push(m[1]);
+    else if((m=rest.match(/^\.([\w-]+)/))) cls.push(m[1]);
+    else if((m=rest.match(/^\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\]\s]+))\s*)?\]/))) bits.push(attrPhrase(m[1],m[2],m[3]!=null?m[3]:(m[4]!=null?m[4]:m[5])));
+    else if((m=rest.match(/^(::?)([\w-]+)(\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\))?/))){
+      var name=m[2].toLowerCase(), arg=m[3]?m[3].slice(1,-1):null;
+      if(m[1]==='::'||(['before','after','first-letter','first-line'].indexOf(name)>=0)) pel=PEL[name]||('::'+esc(name));
+      else if(name==='nth-child') bits.push(nth(arg,false));
+      else if(name==='nth-of-type') bits.push(nth(arg,true));
+      else if(name==='not') bits.push('qui ne correspond PAS à <code>'+esc(arg)+'</code>');
+      else if(name==='has') bits.push('qui contient <code>'+esc(arg)+'</code>');
+      else if(name==='is'||name==='where') bits.push("qui correspond à l'un de <code>"+esc(arg)+'</code>');
+      else if(PC[name]) bits.push(PC[name]);
+      else bits.push('<code>:'+esc(name)+(arg!==null?'('+esc(arg)+')':'')+'</code>');
+    }
+    else return null;
+    rest=rest.slice(m[0].length);
+  }
+  var head=tag==='*'?"n'importe quel élément":(tag?'un <code>&lt;'+esc(tag)+'&gt;</code>':'un élément');
+  var parts=[];
+  if(ids.length) parts.push("avec l'id <code>#"+esc(ids[0])+'</code>');
+  if(cls.length===1) parts.push('avec la classe <code>.'+esc(cls[0])+'</code>');
+  else if(cls.length>1) parts.push('avec les classes '+cls.map(function(x){return '<code>.'+esc(x)+'</code>';}).join(' ET '));
+  parts=parts.concat(bits);
+  return {s:head+(parts.length?' '+parts.join(', '):''),pel:pel};
+}
+function describeGroup(g){
+  var toks=tokenize(g); if(!toks.length) return null;
+  var last=toks[toks.length-1]; if(typeof last!=='string') return null;
+  var d=describeCompound(last); if(!d) return null;
+  var out=d.s;
+  for(var k=toks.length-2;k>=1;k-=2){
+    var c=toks[k].c, prev=toks[k-1]; if(typeof prev!=='string') return null;
+    var pd=describeCompound(prev); if(!pd) return null;
+    var rel={' ':"qui se trouve quelque part à l'intérieur de",'>':"qui est l'enfant direct de",'+':'placé juste après','~':'placé après (même parent)'}[c];
+    out+=', '+rel+' '+pd.s;
+  }
+  out=out.replace(/ de un /g," d'un ");
+  if(d.pel) out='cible '+d.pel+' de : '+out;
+  return out;
+}
+function describe(sel){
+  var gs=splitTop(sel), res=[];
+  for(var k=0;k<gs.length;k++){var d=describeGroup(gs[k]); if(!d) return null; res.push(d.charAt(0).toUpperCase()+d.slice(1));}
+  return res.join('<br><b>OU</b> ');
+}
+function short(el){
+  var s=el.localName+(el.id?'#'+el.id:'')+Array.prototype.map.call(el.classList,function(c){return '.'+c;}).join('');
+  var t=clean(el.textContent).trim();
+  if(!t&&el.getAttribute('placeholder')) t=el.getAttribute('placeholder');
+  if(t) s+=' « '+(t.length>22?t.slice(0,21)+'…':t)+' »';
+  return s;
+}
+
+/* ---------- Surlignage ---------- */
+function addBadge(bx,text,cls){
+  var b=bx.querySelector(':scope > .bx-head > .bx-badges'); if(!b) return;
+  var s=document.createElement('span'); s.className='badge '+cls; s.textContent=text; b.appendChild(s);
+}
+function q(root,i){return root.querySelectorAll('[data-i="'+i+'"]');}
+function apply(root,r){
+  root.querySelectorAll('.sel,.ref,.cand').forEach(function(e){e.classList.remove('sel','ref','cand');});
+  root.querySelectorAll('.ln').forEach(function(l){l.classList.remove('on-sel','on-ref','on-cand');});
+  root.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+  root.querySelectorAll('.ghost').forEach(function(g){g.remove();});
+  if(r.error) return;
+  var special=r.states.length||r.pseudo, mk=special?'cand':'sel';
+  r.matched.forEach(function(el){
+    q(root,el._i).forEach(function(n){
+      n.classList.add(mk);
+      if(n.classList.contains('bx')) addBadge(n,special?(r.states.length?r.states.join(' '):'::'+r.pseudo):'✓ sélectionné',special?'b-cand':'b-sel');
+    });
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-'+mk);});
+    if(r.pseudo==='before'||r.pseudo==='after'){
+      root.querySelectorAll('.bx[data-i="'+el._i+'"]').forEach(function(bx){
+        var gh=document.createElement('div'); gh.className='ghost'; gh.textContent='::'+r.pseudo+' (contenu ajouté)';
+        var head=bx.querySelector(':scope > .bx-head');
+        if(r.pseudo==='before') bx.insertBefore(gh,head.nextSibling); else bx.appendChild(gh);
+      });
+    }
+  });
+  r.refs.forEach(function(label,el){
+    q(root,el._i).forEach(function(n){n.classList.add('ref'); if(n.classList.contains('bx')) addBadge(n,label,'b-ref');});
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-ref');});
+  });
+}
+function hoverSync(panes){
+  var cur=null;
+  function set(i){
+    if(cur!==null) q(panes,cur).forEach(function(n){n.classList.remove('hov');});
+    cur=i; if(i!==null) q(panes,i).forEach(function(n){n.classList.add('hov');});
+  }
+  panes.addEventListener('mouseover',function(e){var t=e.target.closest('[data-i]'); set(t?t.getAttribute('data-i'):null);});
+  panes.addEventListener('mouseleave',function(){set(null);});
+}
+
+/* ---------- Atelier ---------- */
+function Lab(host,cfg,key){
+  var id='in-'+key;
+  host.classList.add('lab');
+  host.innerHTML='<div class="lab-top"><div class="chips" role="group" aria-label="Sélecteurs à essayer"></div>'+
+    '<div class="try"><label for="'+id+'">'+esc(cfg.inputLabel||'Ton sélecteur')+'</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
+    '<div class="lab-panes'+(cfg.compact?' compact':'')+'"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code"></div></div>'+
+    '<div class="pane pane-box"><div class="pane-cap">Aperçu en boîtes · une boîte = une balise</div><div class="boxes"></div></div></div>'+
+    '<div class="lab-foot"><div class="read"></div><div class="verdict" role="status"></div><pre class="rule"></pre></div>';
+  var chipsEl=host.querySelector('.chips'), input=host.querySelector('input'), codeEl=host.querySelector('.code'), boxesEl=host.querySelector('.boxes'),
+      readEl=host.querySelector('.read'), verdictEl=host.querySelector('.verdict'), ruleEl=host.querySelector('.rule'), panes=host.querySelector('.lab-panes');
+  var body, chips=[];
+  hoverSync(panes);
+  function setHTML(html){body=parse(html);codeEl.innerHTML=renderCode(body);boxesEl.innerHTML=renderBoxes(body);}
+  function setChips(list){
+    chips=list;
+    chipsEl.innerHTML=list.map(function(c,k){return '<button type="button" class="chip" data-k="'+k+'" aria-pressed="false">'+esc(c.label||c.sel)+'</button>';}).join('');
+  }
+  function syncPressed(){
+    var v=input.value.trim();
+    chipsEl.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',chips[+b.getAttribute('data-k')].sel===v?'true':'false');});
+  }
+  function update(){
+    var sel=input.value, r=evaluate(body,sel);
+    apply(panes,r); syncPressed();
+    var k=-1; for(var j=0;j<chips.length;j++) if(chips[j].sel===sel.trim()) {k=j;break;}
+    var note=k>=0&&chips[k].note?'<div style="margin-top:4px">'+chips[k].note+'</div>':'';
+    if(r.error==='empty'){readEl.innerHTML='';verdictEl.innerHTML='Tape un sélecteur, ou clique sur un des exemples.';ruleEl.textContent='';return;}
+    if(r.error==='amp'){readEl.innerHTML='';verdictEl.innerHTML='<span class="err">Le &amp; n\'existe pas dans un sélecteur CSS classique.</span> C\'est une notation SCSS : voir la partie 2.';ruleEl.textContent='';return;}
+    if(r.error==='invalid'){readEl.innerHTML=note;verdictEl.innerHTML='<span class="err">Sélecteur invalide.</span> Le navigateur ignorerait toute la règle.';ruleEl.textContent='';return;}
+    var d=describe(sel.trim());
+    readEl.innerHTML=(d?'<b>Lecture :</b> '+d+'.':'')+note;
+    var list=body._all.filter(function(el){return r.matched.has(el);});
+    var special=r.states.length||r.pseudo, n=list.length, msg;
+    if(!n) msg='<b>Aucun élément</b> ne correspond.';
+    else if(r.states.length) msg='<b>'+n+' candidat'+(n>1?'s':'')+'</b> : stylé'+(n>1?'s':'')+' seulement pendant '+r.states.join(', ')+'.';
+    else if(r.pseudo) msg='<b>'+n+' élément'+(n>1?'s':'')+' hôte'+(n>1?'s':'')+'</b> : le style vise '+(PEL[r.pseudo]||'::'+r.pseudo)+' de '+(n>1?'chacun':'cet élément')+'.';
+    else msg='<b>'+n+' élément'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'')+'</b> :';
+    verdictEl.innerHTML=msg+' '+list.map(function(el){return '<span class="pill'+(special?' c':'')+'">'+esc(short(el))+'</span>';}).join('');
+    ruleEl.innerHTML='<span class="sx">'+esc(sel.trim())+'</span> {\n  background: jaune;   /* la règle CSS complète */\n}';
+  }
+  function select(k){input.value=chips[k].sel;update();}
+  chipsEl.addEventListener('click',function(e){var b=e.target.closest('.chip'); if(b) select(+b.getAttribute('data-k'));});
+  input.addEventListener('input',update);
+  setHTML(cfg.html); setChips(cfg.chips||[]);
+  if(chips.length) select(cfg.start||0); else update();
+  return {setHTML:setHTML,setChips:setChips,select:select,update:update};
+}
+
+/* ---------- Coloration du code statique ---------- */
+function hl(text){
+  var s=esc(text);
+  s=s.replace(/\/\*[\s\S]*?\*\//g,function(m){return '<span class="cm">'+m+'</span>';});
+  s=s.replace(/(^|[\s{;])([a-z-]+)(:\s)/g,'$1<span class="pr">$2</span>$3');
+  s=s.replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  s=s.replace(/([{}])/g,'<span class="br">$1</span>');
+  return s;
+}
+
+/* ---------- Mini compilateur Sass (imbrication + &) ---------- */
+function compile(src){
+  src=src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:"'])\/\/.*$/gm,'$1');
+  var i=0;
+  function block(){
+    var node={decls:[],kids:[]}, buf='';
+    while(i<src.length){
+      var ch=src[i++];
+      if(ch==='{'){var k=block(); k.raw=buf.trim().replace(/\s+/g,' '); buf=''; node.kids.push(k);}
+      else if(ch==='}'){if(buf.trim()) node.decls.push(buf.trim()); return node;}
+      else if(ch===';'){if(buf.trim()) node.decls.push(buf.trim()); buf='';}
+      else buf+=ch;
+    }
+    return node;
+  }
+  var root=block(), rules=[], errors=[];
+  function walk(node,parents,depth){
+    node.kids.forEach(function(k){
+      var parts=splitTop(k.raw||''), sel=[], trace=[];
+      parts.forEach(function(part){
+        if(!parents){
+          if(part.indexOf('&')>=0) errors.push('« '+part+' » : un & au premier niveau n\'a pas de parent à recopier (Sass refuse).');
+          sel.push(part); trace.push({kind:'root',part:part,res:part}); return;
+        }
+        parents.forEach(function(p){
+          var res;
+          if(part.indexOf('&')>=0){res=part.replace(/&/g,function(){return p;}); trace.push({kind:'amp',part:part,parent:p,res:res});}
+          else {res=p+' '+part; trace.push({kind:'space',part:part,parent:p,res:res});}
+          sel.push(res);
+        });
+      });
+      rules.push({sel:sel,decls:k.decls,depth:depth,trace:trace});
+      walk(k,sel,depth+1);
+    });
+  }
+  walk(root,null,0);
+  return {rules:rules,errors:errors};
+}
+function cssText(rules){
+  return rules.map(function(r){
+    return r.sel.join(',\n')+' {'+(r.decls.length?'\n'+r.decls.map(function(d){return '  '+d+';';}).join('\n')+'\n':' ')+'}';
+  }).join('\n\n');
+}
+function traceHTML(t){
+  var P='<mark class="par">'+esc(t.parent||'')+'</mark>';
+  if(t.kind==='root') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-root">premier niveau</span></div><div class="tr-how">Pas de parent : reste tel quel.</div><div class="tr-res">'+esc(t.res)+'</div></li>';
+  if(t.kind==='space') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-sp">pas de &amp; · règle 1</span></div><div class="tr-how">parent + espace + sélecteur</div><div class="tr-res">'+P+'<span class="spc">␣</span>'+esc(t.part)+'</div></li>';
+  var src=esc(t.part).replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  var res=esc(t.part).replace(/&amp;/g,P);
+  return '<li class="tr"><div class="tr-src"><code>'+src+'</code><span class="tg tg-amp">contient &amp; · règle 2</span></div><div class="tr-how"><span class="amp">&amp;</span> ← <code>'+esc(t.parent)+'</code>, rien d\'autre n\'est ajouté</div><div class="tr-res">'+res+'</div></li>';
+}
+
+
+
+/* ================= La page simulée ================= */
+var SCENE_HTML=
+'<div class="app">'+
+'<app-dossier _nghost-p="">'+
+'<header class="head" _ngcontent-p=""><h2 class="title" _ngcontent-p="">Dossier 2026/0042</h2>'+
+'<lib-button _ngcontent-p="" _nghost-lib=""><button type="button" class="lib-btn lib-btn--primary" _ngcontent-lib=""><span class="lib-btn__label" _ngcontent-lib="">Enregistrer</span></button></lib-button></header>'+
+'<div class="row" _ngcontent-p="">'+
+'<mat-form-field class="mat-mdc-form-field" _ngcontent-p=""><div class="mat-mdc-text-field-wrapper"><div class="mat-mdc-form-field-infix"><label class="mdc-floating-label"><mat-label _ngcontent-p="">Montant</mat-label></label><input matinput="" class="mat-mdc-input-element" _ngcontent-p="" value="1.250,00"></div></div><div class="mat-mdc-form-field-subscript-wrapper"></div></mat-form-field>'+
+'<lib-select _ngcontent-p="" _nghost-lib=""><div class="lib-select__box" _ngcontent-lib=""><span class="lib-select__label" _ngcontent-lib="">Type</span><span class="lib-select__value" _ngcontent-lib="">Personne physique ▾</span></div></lib-select>'+
+'</div>'+
+'<div class="grid" _ngcontent-p=""><div class="cell" _ngcontent-p="">Rue</div><div class="cell" _ngcontent-p="">Numéro</div><div class="cell" _ngcontent-p="">Code postal</div><div class="cell" _ngcontent-p="">Commune</div></div>'+
+'<app-party-card class="card compact" _ngcontent-p="" _nghost-c=""><span class="name" _ngcontent-c="">Dupont Marie</span><button type="button" class="btn-remove" _ngcontent-c="">Retirer</button><button type="button" class="btn-menu" _ngcontent-c="" aria-label="Actions">⋮</button></app-party-card>'+
+'</app-dossier>'+
+'<div class="cdk-overlay-container"></div>'+
+'</div>';
+var FN={mat:'@angular/material',lib:'@equipe/ui-lib',g:'styles.scss',p:'dossier.component.scss',c:'party-card.component.scss'};
+function R_(f,sel,d){return {f:f,sel:sel,d:d.map(function(x){return {p:x[0],v:x[1],orig:x[1],on:true};})};}
+var RULES=[
+ R_('mat','.mat-mdc-form-field',[['display','inline-flex'],['flex-direction','column'],['min-width','0']]),
+ R_('mat','.mat-mdc-text-field-wrapper',[['display','flex'],['align-items','center'],['height','var(--mat-form-field-container-height, 56px)'],['padding','0 16px'],['border','1px solid var(--muted)'],['border-radius','4px'],['background','var(--surface)']]),
+ R_('mat','.mat-mdc-form-field-infix',[['flex','auto'],['width','180px'],['min-width','0']]),
+ R_('mat','.mdc-floating-label',[['display','block'],['font-size','11px'],['color','var(--muted)']]),
+ R_('mat','.mat-mdc-input-element',[['font','inherit'],['border','0'],['padding','0'],['background','transparent'],['color','var(--ink)'],['width','100%']]),
+ R_('mat','.mat-mdc-form-field-subscript-wrapper',[['height','20px']]),
+ R_('mat','.cdk-overlay-container',[['position','absolute'],['inset','0'],['pointer-events','none']]),
+ R_('mat','.cdk-overlay-pane',[['position','absolute'],['pointer-events','auto']]),
+ R_('mat','.mat-mdc-menu-panel',[['min-width','160px'],['padding','4px 0'],['border-radius','4px'],['background','var(--surface)'],['box-shadow','0 6px 18px rgba(0,0,0,.2)']]),
+ R_('mat','.mat-mdc-menu-item',[['display','flex'],['align-items','center'],['width','100%'],['min-height','48px'],['padding','0 16px'],['border','0'],['background','transparent'],['color','var(--ink)'],['font','inherit'],['cursor','pointer']]),
+ R_('lib','.lib-btn[_ngcontent-lib]',[['display','inline-flex'],['align-items','center'],['height','var(--lib-button-height, var(--lib-control-height, 40px))'],['padding','0 18px'],['border','0'],['border-radius','999px'],['background','var(--ref)'],['color','var(--surface)'],['font-weight','600'],['cursor','pointer']]),
+ R_('lib','lib-select[_nghost-lib]',[['display','inline-block']]),
+ R_('lib','.lib-select__box[_ngcontent-lib]',[['box-sizing','border-box'],['width','var(--lib-select-width, 220px)'],['height','var(--lib-control-height, 40px)'],['display','flex'],['flex-direction','column'],['justify-content','center'],['padding','0 12px'],['border','1px solid var(--muted)'],['border-radius','6px'],['background','var(--surface)']]),
+ R_('lib','.lib-select__label[_ngcontent-lib]',[['font-size','11px'],['color','var(--muted)']]),
+ R_('g','.app',[['--mat-form-field-container-height','56px'],['--lib-control-height','40px'],['font-family','"IBM Plex Sans", sans-serif'],['font-size','14px'],['color','var(--ink)']]),
+ R_('g','.title',[['margin','0'],['font-size','18px'],['color','var(--muted)']]),
+ R_('g','.row-menu .mat-mdc-menu-item',[['min-height','36px']]),
+ R_('p','[_nghost-p]',[['display','block']]),
+ R_('p','.head[_ngcontent-p]',[['display','flex'],['justify-content','space-between'],['align-items','center'],['margin-bottom','12px']]),
+ R_('p','.title[_ngcontent-p]',[['font-size','20px'],['color','var(--ink)']]),
+ R_('p','.row[_ngcontent-p]',[['display','flex'],['align-items','center'],['gap','12px'],['margin-bottom','12px']]),
+ R_('p','mat-form-field[_ngcontent-p]',[['flex','1']]),
+ R_('p','.grid[_ngcontent-p]',[['display','grid'],['grid-template-columns','1fr 1fr'],['gap','8px'],['margin-bottom','12px']]),
+ R_('p','.cell[_ngcontent-p]',[['padding','8px 10px'],['border','1px solid var(--line)'],['border-radius','6px'],['background','var(--surface)']]),
+ R_('c','[_nghost-c]',[['display','flex'],['align-items','center'],['gap','8px'],['padding','12px'],['border','1.5px solid var(--ok)'],['border-radius','8px'],['background','var(--surface)']]),
+ R_('c','.compact[_nghost-c]',[['padding','6px 10px']]),
+ R_('c','.name[_ngcontent-c]',[['flex','1'],['font-weight','600']]),
+ R_('c','.btn-remove[_ngcontent-c]',[['padding','4px 12px'],['border','1px solid var(--line)'],['border-radius','999px'],['background','transparent'],['color','var(--ref)'],['cursor','pointer']]),
+ R_('c','.btn-remove[_ngcontent-c]:hover',[['background','var(--ref-soft)'],['border-color','var(--ref)']]),
+ R_('c','.btn-menu[_ngcontent-c]',[['padding','0 6px'],['border','0'],['background','transparent'],['color','var(--ink)'],['font-size','18px'],['cursor','pointer']])
+];
+(function(){var cnt={}; RULES.forEach(function(r,i){r.i=i; cnt[r.f]=(cnt[r.f]||0); r.line=cnt[r.f]*6+1; cnt[r.f]++;});})();
+var INH=['color','font-size','font-weight','font-family','line-height'];
+function tSel(s){return s.replace(/:hover/g,':is(:hover,.__hover)').replace(/:focus(?![\w-])/g,':is(:focus,.__focus)');}
+function specOf(sel){
+  var s=sel;
+  var a=(s.match(/#[\w-]+/g)||[]).length;
+  var b=(s.match(/\.[\w-]+|\[[^\]]+\]|:(?!:)[\w-]+/g)||[]).length;
+  var c=(s.replace(/\[[^\]]+\]|\((?:[^()]|\([^()]*\))*\)/g,'').match(/(^|[\s>+~])[a-zA-Z][\w-]*|::[\w-]+/g)||[]).length;
+  return [a,b,c];
+}
+function cmpSpec(x,y){for(var i=0;i<3;i++){if(x[i]!==y[i])return x[i]-y[i];}return 0;}
+RULES.forEach(function(r){r.sp=specOf(r.sel);});
+function cssText(){return RULES.map(function(r){var d=r.d.filter(function(x){return x.on;}); return d.length?tSel(r.sel)+'{'+d.map(function(x){return x.p+':'+x.v;}).join(';')+'}':'';}).join('\n');}
+var FIXED_CSS=':host{display:block}.root{position:relative;font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif}'+
+ '.dt-layer{position:absolute;inset:0;pointer-events:none;z-index:20}'+
+ '.dt-hl{position:absolute;background:rgba(111,168,220,.35);outline:1px solid rgba(60,120,200,.9)}'+
+ '.dt-tip{position:absolute;background:#1f2430;color:#fff;font:11px "JetBrains Mono",monospace;padding:2px 6px;border-radius:4px;white-space:nowrap}'+
+ '.dt-sel{position:absolute;outline:2px solid #2356d3;outline-offset:0}'+
+ '.dt-box{position:absolute;outline:1px dashed #7c3aed}'+
+ '.dt-cont{position:absolute;outline:2px solid #7c3aed}'+
+ '.dt-gap{position:absolute;background:repeating-linear-gradient(45deg,rgba(124,58,237,.35),rgba(124,58,237,.35) 3px,transparent 3px,transparent 7px)}'+
+ '.dt-num{position:absolute;font:600 10px "JetBrains Mono",monospace;color:#fff;background:#7c3aed;padding:0 4px;border-radius:3px}';
+var host=document.getElementById('sim-host'), sr=host.attachShadow({mode:'open'});
+sr.innerHTML='<style>'+FIXED_CSS+'</style><style id="m"></style><div class="root">'+SCENE_HTML+'<div class="dt-layer"></div></div>';
+var ROOT=sr.querySelector('.root'), LAYER=sr.querySelector('.dt-layer'), STY=sr.getElementById('m');
+function applyCSS(){STY.textContent=cssText();}
+applyCSS();
+var Q=function(s){return ROOT.querySelector(s);};
+var dossierHost=Q('app-dossier'), partyHost=Q('app-party-card');
+
+/* ================= État ================= */
+var S={sel:null,pick:false,paused:false,emu:false,menu:false,overlays:[],panel:'el',sub:'styles',open:{},hist:[]};
+var INST=new Map();
+INST.set(dossierHost,{__name:'DossierComponent',dossierId:'2026/0042',type:'Succession',mode:'edit',parties:[{name:'Dupont Marie',role:'Usufruitier'}]});
+INST.set(Q('mat-form-field'),{__name:'MatFormField',appearance:'outline',subscriptSizing:'fixed',floatLabel:'auto'});
+INST.set(Q('header lib-button'),{__name:'LibButtonComponent',variant:'primary',size:'md',disabled:false});
+INST.set(Q('lib-select'),{__name:'LibSelectComponent',label:'Type',value:'Personne physique'});
+INST.set(partyHost,{__name:'PartyCardComponent',party:{name:'Dupont Marie',role:'Usufruitier',share:'1/2'},compact:true,menuOpen:false,remove:function remove(){},toggleMenu:function toggleMenu(){}});
+function ownerHost(el){
+  var a=Array.prototype.find.call(el.attributes||[],function(x){return /^_ngcontent-/.test(x.name);});
+  if(a){var id=a.name.slice(11); for(var e=el.parentElement;e;e=e.parentElement){if(e.hasAttribute&&e.hasAttribute('_nghost-'+id)&&INST.has(e))return e;} }
+  for(var e2=el.parentElement;e2&&e2!==ROOT;e2=e2.parentElement){ if(e2.localName==='mat-form-field') return e2; }
+  if(el.closest&&el.closest('.cdk-overlay-container')) return partyHost;
+  return null;
+}
+var NG={
+  getComponent:function(el){return (el&&INST.get(el))||null;},
+  getOwningComponent:function(el){var h=el&&ownerHost(el); return h?INST.get(h):null;},
+  getDirectives:function(el){return el&&el.matches&&el.matches('input[matinput]')?[{__name:'MatInput',value:el.value,disabled:false}]:[];},
+  getHostElement:function(inst){var r=null; INST.forEach(function(v,k){if(v===inst)r=k;}); return r;},
+  getRootComponents:function(){return [INST.get(dossierHost)];},
+  applyChanges:function(){syncFromInst(); return undefined;}
+};
+function syncFromInst(){
+  var pc=INST.get(partyHost); partyHost.classList.toggle('compact',!!pc.compact);
+  Q('.name').textContent=pc.party&&pc.party.name||''; render();
+}
+
+/* ================= Menu (overlay) ================= */
+function openMenu(){
+  if(S.menu) return; S.menu=true; INST.get(partyHost).menuOpen=true;
+  var b=Q('.btn-menu').getBoundingClientRect(), r=ROOT.getBoundingClientRect();
+  var pane=document.createElement('div'); pane.className='cdk-overlay-pane';
+  pane.style.top=Math.round(b.bottom-r.top+4)+'px'; pane.style.left=Math.round(Math.max(0,b.right-r.left-180))+'px';
+  pane.innerHTML='<div class="mat-mdc-menu-panel row-menu"><button type="button" class="mat-mdc-menu-item">Modifier</button><button type="button" class="mat-mdc-menu-item">Dupliquer</button><button type="button" class="mat-mdc-menu-item">Supprimer</button></div>';
+  Q('.cdk-overlay-container').appendChild(pane);
+  var ph=pane.getBoundingClientRect().height; if(b.bottom-r.top+4+ph>ROOT.getBoundingClientRect().height) pane.style.top=Math.max(0,Math.round(b.top-r.top-ph-4))+'px';
+  render();
+}
+function closeMenu(reason){
+  if(!S.menu) return; S.menu=false; INST.get(partyHost).menuOpen=false;
+  var c=Q('.cdk-overlay-container'); while(c.firstChild) c.removeChild(c.firstChild);
+  if(S.sel&&!ROOT.contains(S.sel)) S.sel=Q('.btn-menu');
+  if(reason) toast(reason); render();
+}
+var toastT=null;
+function toast(m){var t=document.getElementById('sim-toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(function(){t.hidden=true;},3200);}
+
+/* ================= Interactions page ================= */
+function inScene(t){return t&&t.nodeType===1&&ROOT.contains(t)&&!LAYER.contains(t)&&t!==ROOT;}
+sr.addEventListener('mousemove',function(e){ if(S.pick&&inScene(e.target)) highlight(e.target); });
+sr.addEventListener('mouseleave',function(){ if(S.pick) highlight(null); });
+sr.addEventListener('click',function(e){
+  var t=e.target;
+  if(S.pick){ e.preventDefault(); e.stopPropagation(); if(inScene(t)){ select(t); } setPick(false); highlight(null); return; }
+  if(S.paused){ e.preventDefault(); return; }
+  if(t.closest&&t.closest('.btn-menu')){ S.menu?closeMenu():openMenu(); return; }
+  if(t.closest&&t.closest('.mat-mdc-menu-item')){ closeMenu('Action « '+t.textContent.trim()+' » : le menu se ferme.'); return; }
+},true);
+sr.addEventListener('mousedown',function(e){
+  if(S.pick||S.paused) return; var t=e.target;
+  if(S.menu&&!(t.closest&&(t.closest('.cdk-overlay-pane')||t.closest('.btn-menu')))) closeMenu();
+},true);
+document.getElementById('dev').addEventListener('mousedown',function(e){
+  if(S.menu&&!S.emu&&!S.paused){ var t=e.target; if(t.closest&&t.closest('#b-pause')) return; closeMenu('Le menu s\'est fermé : la page a perdu le focus quand tu as cliqué dans DevTools.'); }
+});
+function setPick(v){S.pick=v; document.getElementById('b-pick').setAttribute('aria-pressed',v?'true':'false');}
+document.getElementById('b-pick').addEventListener('click',function(){setPick(!S.pick);});
+function setPause(v){S.paused=v; document.getElementById('b-pause').setAttribute('aria-pressed',v?'true':'false'); document.getElementById('sim-paused').hidden=!v; check();}
+document.getElementById('b-pause').addEventListener('click',function(){setPause(!S.paused);});
+document.getElementById('sim-resume').addEventListener('click',function(){setPause(false);});
+
+/* ================= Surlignage et overlays ================= */
+function relRect(el){var a=ROOT.getBoundingClientRect(),b=el.getBoundingClientRect();return {l:b.left-a.left,t:b.top-a.top,w:b.width,h:b.height,r:b.right-a.left,b:b.bottom-a.top};}
+function box(cls,r,extra){var d=document.createElement('div');d.className=cls;d.style.left=r.l+'px';d.style.top=r.t+'px';d.style.width=Math.max(0,r.w)+'px';d.style.height=Math.max(0,r.h)+'px';if(extra)d.textContent=extra;return d;}
+var hlEl=null;
+function highlight(el){hlEl=el; drawLayer();}
+function nameOf(el){var s=el.localName; Array.prototype.forEach.call(el.classList,function(c){if(c.indexOf('__')!==0)s+='.'+c;}); return s;}
+function drawLayer(){
+  LAYER.innerHTML='';
+  if(S.sel&&ROOT.contains(S.sel)) LAYER.appendChild(box('dt-sel',relRect(S.sel)));
+  S.overlays=S.overlays.filter(function(c){return ROOT.contains(c);});
+  S.overlays.forEach(function(c){
+    var cr=relRect(c), cs=getComputedStyle(c), kids=Array.prototype.filter.call(c.children,function(k){return getComputedStyle(k).display!=='none';});
+    LAYER.appendChild(box('dt-cont',cr));
+    var rs=kids.map(relRect);
+    rs.forEach(function(r){LAYER.appendChild(box('dt-box',r));});
+    for(var i=1;i<rs.length;i++){var a=rs[i-1],b=rs[i];
+      if(Math.min(a.b,b.b)-Math.max(a.t,b.t)>2&&b.l>a.r+0.5) LAYER.appendChild(box('dt-gap',{l:a.r,t:Math.max(a.t,b.t),w:b.l-a.r,h:Math.min(a.b,b.b)-Math.max(a.t,b.t)}));
+    }
+    if(/grid/.test(cs.display)){
+      var cols=cs.gridTemplateColumns.split(' ').filter(Boolean).map(parseFloat), cg=parseFloat(cs.columnGap)||0, x=cr.l+(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.borderLeftWidth)||0);
+      cols.forEach(function(w,i){var n=document.createElement('div');n.className='dt-num';n.textContent=String(i+1);n.style.left=(x+2)+'px';n.style.top=(cr.t-14)+'px';LAYER.appendChild(n); x+=w; if(i<cols.length-1){LAYER.appendChild(box('dt-gap',{l:x,t:cr.t,w:cg,h:cr.h})); x+=cg;}});
+      var rows=cs.gridTemplateRows.split(' ').filter(Boolean).map(parseFloat), rg=parseFloat(cs.rowGap)||0, y=cr.t+(parseFloat(cs.paddingTop)||0);
+      rows.forEach(function(h,i){y+=h; if(i<rows.length-1){LAYER.appendChild(box('dt-gap',{l:cr.l,t:y,w:cr.w,h:rg})); y+=rg;}});
+    }
+  });
+  if(hlEl&&ROOT.contains(hlEl)){var r=relRect(hlEl); LAYER.appendChild(box('dt-hl',r)); var tip=box('dt-tip',{l:r.l,t:Math.max(0,r.t-18),w:0,h:0}); tip.style.width='auto'; tip.style.height='auto'; tip.textContent=nameOf(hlEl)+'  '+Math.round(r.w)+' × '+Math.round(r.h); LAYER.appendChild(tip);}
+}
+function toggleOverlay(el){var i=S.overlays.indexOf(el); if(i>=0) S.overlays.splice(i,1); else S.overlays.push(el); render();}
+
+/* ================= Règles qui touchent un élément ================= */
+function matches(el,sel){try{return el.matches(tSel(sel));}catch(e){return false;}}
+function ruleList(el){return RULES.filter(function(r){return matches(el,r.sel);}).sort(function(a,b){return cmpSpec(b.sp,a.sp)||(b.i-a.i);});}
+function isInh(p){return p.indexOf('--')===0||INH.indexOf(p)>=0;}
+
+/* ================= Rendu des panneaux ================= */
+var body=document.getElementById('dev-body');
+function render(){
+  document.querySelectorAll('.dev-bar [role=tab]').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-p')===S.panel?'true':'false');});
+  if(S.sel&&!ROOT.contains(S.sel)) S.sel=null;
+  if(S.panel==='el'){ body.className='dev-body'; body.innerHTML='<div class="dom" id="dom"></div><div class="side" id="side"></div>'; renderDom(); renderSide(); }
+  else if(S.panel==='con'){ body.className='dev-body one'; renderConsole(); }
+  else if(S.panel==='ng'){ body.className='dev-body'; renderNg(); }
+  else { body.className='dev-body one'; renderRendering(); }
+  drawLayer(); check();
+}
+var NODES=[];
+function renderDom(){
+  NODES=[]; var out=[];
+  function attrs(el){return Array.prototype.map.call(el.attributes,function(a){
+    var v=a.name==='class'?a.value.split(/\s+/).filter(function(c){return c&&c.indexOf('__')!==0;}).join(' '):a.value;
+    if(a.name==='class'&&!v) return '';
+    var ng=/^_ng/.test(a.name);
+    return ' <span class="'+(ng?'t-ng':'t-an')+'">'+esc(a.name)+'</span>'+(v!==''?'<span class="t-p">="</span><span class="t-av">'+esc(v)+'</span><span class="t-p">"</span>':'');}).join('');}
+  function walk(el,d){
+    var i=NODES.length; NODES.push(el);
+    var kids=Array.prototype.filter.call(el.children,function(k){return !k.classList.contains('dt-layer');});
+    var txt=Array.prototype.filter.call(el.childNodes,function(n){return n.nodeType===3;}).map(function(n){return n.textContent;}).join('').trim();
+    var disp=getComputedStyle(el).display, bd=/grid/.test(disp)?'grid':(/flex/.test(disp)?'flex':'');
+    var badge=bd?'<span class="bdg" data-ov="'+i+'" aria-pressed="'+(S.overlays.indexOf(el)>=0)+'">'+bd+'</span>':'';
+    var open='<span class="t-p">&lt;</span><span class="t-tag">'+el.localName+'</span>'+attrs(el)+'<span class="t-p">&gt;</span>';
+    var close='<span class="t-p">&lt;/</span><span class="t-tag">'+el.localName+'</span><span class="t-p">&gt;</span>';
+    var pad='padding-left:'+(8+d*14)+'px';
+    if(!kids.length){ out.push('<div class="nd'+(el===S.sel?' on':'')+'" data-n="'+i+'" style="'+pad+'">'+open+(txt?esc(txt.length>34?txt.slice(0,33)+'…':txt):'')+(el.localName==='input'?'':close)+badge+'</div>'); return; }
+    out.push('<div class="nd'+(el===S.sel?' on':'')+'" data-n="'+i+'" style="'+pad+'">'+open+badge+'</div>');
+    kids.forEach(function(k){walk(k,d+1);});
+    out.push('<div class="nd" data-n="'+i+'" style="'+pad+'">'+close+'</div>');
+  }
+  Array.prototype.forEach.call(ROOT.children,function(c){if(!c.classList.contains('dt-layer')) walk(c,0);});
+  var dom=document.getElementById('dom'); dom.innerHTML=out.join('');
+  var on=dom.querySelector('.nd.on'); if(on){var tp=on.offsetTop, bh=dom.clientHeight; if(tp<dom.scrollTop||tp>dom.scrollTop+bh-24) dom.scrollTop=Math.max(0,tp-bh/2);}
+  dom.addEventListener('click',function(e){var b=e.target.closest('.bdg'); if(b){toggleOverlay(NODES[+b.getAttribute('data-ov')]);return;} var n=e.target.closest('.nd'); if(n) select(NODES[+n.getAttribute('data-n')]);});
+  dom.addEventListener('mouseover',function(e){var n=e.target.closest('.nd'); highlight(n?NODES[+n.getAttribute('data-n')]:null);});
+  dom.addEventListener('mouseleave',function(){highlight(null);});
+}
+function select(el){S.sel=el; render();}
+function renderSide(){
+  var side=document.getElementById('side'), el=S.sel;
+  var tabs=[['styles','Styles'],['computed','Calculé'],['layout','Mise en page'],['changes','Modifications']];
+  var html='<div class="subbar" role="tablist">'+tabs.map(function(t){return '<button type="button" role="tab" data-s="'+t[0]+'" aria-selected="'+(S.sub===t[0])+'">'+t[1]+'</button>';}).join('')+'</div>';
+  if(S.sub==='layout'){ html+=layoutHTML(); }
+  else if(S.sub==='changes'){ html+=changesHTML(); }
+  else if(!el){ html+='<p style="padding:10px;font-size:13px;color:var(--muted)">Sélectionne un élément dans l\'arbre ou avec ⌖.</p>'; }
+  else if(S.sub==='styles'){ html+=stylesHTML(el); }
+  else { html+=computedHTML(el); }
+  side.innerHTML=html;
+  side.querySelectorAll('.subbar button').forEach(function(b){b.addEventListener('click',function(){S.sub=b.getAttribute('data-s'); render();});});
+  side.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.matches('.hov input')){var c='__'+t.value; S.sel.classList.toggle(c,t.checked); render(); return;}
+    if(t.matches('[data-ix]')){toggleOverlay(ROOT.querySelectorAll('*')[+t.getAttribute('data-ix')]);return;}
+    var ri=t.getAttribute('data-r'), di=t.getAttribute('data-d'); if(ri==null) return;
+    var d=RULES[+ri].d[+di];
+    if(t.type==='checkbox') d.on=t.checked; else d.v=t.value.trim()||d.orig;
+    applyCSS(); render();
+  });
+  side.addEventListener('click',function(e){var b=e.target.closest('.cmp-row > button'); if(b){var p=b.getAttribute('data-p'); S.open[p]=!S.open[p]; render();}});
+}
+function resolveVars(el,v){
+  var names=v.match(/--[\w-]+/g); if(!names) return '';
+  var cs=getComputedStyle(el); for(var i=0;i<names.length;i++){var x=cs.getPropertyValue(names[i]).trim(); if(x) return names[i]+' = '+x;}
+  return 'aucune variable définie → valeur de secours';
+}
+function declHTML(r,j,d,over,el){
+  var rv=/var\(/.test(d.v)?'<span class="rv" title="valeur de la variable">'+esc(resolveVars(el,d.v))+'</span>':'';
+  return '<div class="dcl'+(d.on?'':' off')+(over?' over':'')+'"><input type="checkbox" data-r="'+r.i+'" data-d="'+j+'"'+(d.on?' checked':'')+' aria-label="Activer '+esc(d.p)+'"><span class="pp">'+esc(d.p)+'</span>:<input type="text" data-r="'+r.i+'" data-d="'+j+'" value="'+esc(d.v)+'" aria-label="Valeur de '+esc(d.p)+'" spellcheck="false">'+rv+'</div>';
+}
+function stylesHTML(el){
+  var h='<div class="hov"><span>:hov</span>'+['hover','focus'].map(function(s){return '<label><input type="checkbox" value="'+s+'"'+(el.classList.contains('__'+s)?' checked':'')+'>:'+s+'</label>';}).join('')+'</div>';
+  var seen={};
+  if(el.getAttribute('style')){ h+='<div class="rul"><div class="hd"><span class="sl">element.style</span></div>'+el.getAttribute('style').split(';').filter(Boolean).map(function(x){return '<div class="dcl"><span class="pp">'+esc(x.split(':')[0].trim())+'</span>: <span>'+esc(x.split(':').slice(1).join(':').trim())+'</span></div>';}).join('')+'</div>'; }
+  ruleList(el).forEach(function(r){
+    h+='<div class="rul"><div class="hd"><span class="sl">'+esc(r.sel)+' {</span><span class="src">'+esc(FN[r.f])+':'+r.line+'</span></div>'+
+      r.d.map(function(d,j){var over=d.on&&seen[d.p]; if(d.on&&!seen[d.p]) seen[d.p]=1; return declHTML(r,j,d,over,el);}).join('')+'<div>}</div></div>';
+  });
+  for(var a=el.parentElement;a&&a!==ROOT;a=a.parentElement){
+    var rs=ruleList(a).filter(function(r){return r.d.some(function(d){return isInh(d.p);});}); if(!rs.length) continue;
+    h+='<div class="inh">Hérité de <b>'+esc(nameOf(a))+'</b></div>';
+    rs.forEach(function(r){
+      h+='<div class="rul"><div class="hd"><span class="sl">'+esc(r.sel)+' {</span><span class="src">'+esc(FN[r.f])+':'+r.line+'</span></div>'+
+        r.d.map(function(d,j){ if(!isInh(d.p)) return ''; var over=d.on&&seen[d.p]; if(d.on&&!seen[d.p]) seen[d.p]=1; return declHTML(r,j,d,over,a);}).join('')+'<div>}</div></div>';
+    });
+  }
+  return h;
+}
+var CPROPS=['display','width','height','padding-top','margin-bottom','gap','align-items','justify-content','flex-grow','grid-template-columns','font-size','font-weight','color','min-height','position'];
+var LONG={'padding-top':['padding-top','padding'],'margin-bottom':['margin-bottom','margin'],'flex-grow':['flex-grow','flex'],'gap':['gap','row-gap','column-gap'],'border-color':['border-color','border']};
+function computedHTML(el){
+  var cs=getComputedStyle(el), px=function(p){return Math.round(parseFloat(cs.getPropertyValue(p))||0);};
+  var h='<div class="bm"><div class="m"><span class="lb">margin</span>'+px('margin-top')+'<div class="b"><span class="lb">border</span>'+px('border-top-width')+'<div class="p"><span class="lb">padding</span>'+px('padding-top')+'<div class="c">'+Math.round(el.getBoundingClientRect().width-px('padding-left')-px('padding-right')-px('border-left-width')-px('border-right-width'))+' × '+Math.round(el.getBoundingClientRect().height-px('padding-top')-px('padding-bottom')-px('border-top-width')-px('border-bottom-width'))+'</div>'+px('padding-bottom')+'</div>'+px('border-bottom-width')+'</div>'+px('margin-bottom')+'</div></div>';
+  CPROPS.forEach(function(p){
+    var v=cs.getPropertyValue(p); if(p==='grid-template-columns'&&!/grid/.test(cs.display)) return; if((p==='gap'||p==='align-items'||p==='justify-content')&&!/flex|grid/.test(cs.display)) return;
+    h+='<div class="cmp-row"><button type="button" data-p="'+p+'" aria-expanded="'+!!S.open[p]+'"><span>'+(S.open[p]?'▾':'▸')+'</span><span class="pp">'+p+'</span><span class="vv">'+esc(v)+'</span></button>';
+    if(S.open[p]){
+      var names=LONG[p]||[p], items=[];
+      ruleList(el).forEach(function(r){r.d.forEach(function(d){if(d.on&&names.indexOf(d.p)>=0) items.push({r:r,d:d,own:true});});});
+      if(isInh(p)) for(var a=el.parentElement;a&&a!==ROOT;a=a.parentElement){ruleList(a).forEach(function(r){r.d.forEach(function(d){if(d.on&&d.p===p) items.push({r:r,d:d,from:a});});});}
+      h+='<div class="trace">'+(items.length?items.map(function(it,k){return '<div class="'+(k===0?'w':'l')+'">'+(k===0?'✓ ':'')+esc(it.d.p+': '+it.d.v)+' <span class="f">'+esc(it.r.sel)+' · '+esc(FN[it.r.f])+':'+it.r.line+(it.from?' · hérité de '+nameOf(it.from):'')+'</span>'+(k===0&&/var\(/.test(it.d.v)?'<div class="f">↳ '+esc(resolveVars(it.from||el,it.d.v))+'</div>':'')+'</div>';}).join(''):'<div class="f">Aucune règle : valeur calculée par la mise en page ou valeur par défaut.</div>')+'</div>';
+    }
+    h+='</div>';
+  });
+  return h;
+}
+function layoutHTML(){
+  var all=ROOT.querySelectorAll('*'), rows=[];
+  Array.prototype.forEach.call(all,function(el,ix){ if(LAYER.contains(el)) return; var d=getComputedStyle(el).display; if(/flex|grid/.test(d)) rows.push('<label><input type="checkbox" data-ov data-ix="'+ix+'"'+(S.overlays.indexOf(el)>=0?' checked':'')+'><span>'+esc(nameOf(el))+'</span> <span style="color:var(--muted)">'+(/grid/.test(d)?'grid':'flex')+'</span></label>'); });
+  return '<div class="lay"><div style="color:var(--muted)">Conteneurs flex et grid de la page :</div>'+rows.join('')+'</div>';
+}
+function changesHTML(){
+  var by={};
+  RULES.forEach(function(r){r.d.forEach(function(d){ if(d.v!==d.orig||!d.on){ (by[r.f]=by[r.f]||[]).push({r:r,d:d}); } });});
+  var ks=Object.keys(by); if(!ks.length) return '<div class="chg" style="color:var(--muted)">Aucune modification. Change une valeur ou décoche une déclaration dans Styles.</div>';
+  return '<div class="chg">'+ks.map(function(f){return '<div class="fl">'+esc(FN[f])+'</div>'+by[f].map(function(x){return '<div>'+esc(x.r.sel)+' {</div><div class="mi">-   '+esc(x.d.p+': '+x.d.orig)+';</div>'+(x.d.on?'<div class="pl">+   '+esc(x.d.p+': '+x.d.v)+';</div>':'<div class="pl">+   /* supprimée */</div>')+'<div>}</div>';}).join('')+(f==='mat'||f==='lib'?'<div class="f" style="color:var(--cand)">⚠ Fichier d\'une bibliothèque : à reporter comme token, variable ou règle sur la balise hôte, dans TON fichier (partie 5).</div>':'');}).join('')+'</div>';
+}
+
+/* ================= Console ================= */
+var LOG=[];
+function fmt(v,d){
+  d=d||0;
+  if(v===null) return 'null'; if(v===undefined) return 'undefined';
+  if(typeof v==='string') return '"'+esc(v)+'"';
+  if(typeof v==='number'||typeof v==='boolean') return esc(String(v));
+  if(typeof v==='function') return 'ƒ '+esc(v.name||'')+'()';
+  if(v.nodeType===1){ var i=REFS.push(v)-1; return '<span class="el-link" data-ref="'+i+'">'+esc(nameOf(v))+'</span>'; }
+  if(v instanceof CSSStyleDeclaration) return 'CSSStyleDeclaration {…}';
+  if(Array.isArray(v)) return d>2?'[…]':'['+v.map(function(x){return fmt(x,d+1);}).join(', ')+']';
+  if(typeof v==='object'){ if(d>2) return '{…}'; var ks=Object.keys(v).filter(function(k){return k!=='__name';}); var pad='  '.repeat(d+1);
+    return (v.__name?esc(v.__name)+' ':'')+'{\n'+ks.map(function(k){return pad+esc(k)+': '+fmt(v[k],d+1);}).join(',\n')+'\n'+'  '.repeat(d)+'}'; }
+  return esc(String(v));
+}
+var REFS=[];
+function runCmd(code){
+  LOG.push({c:'in',h:'› '+esc(code)}); S.hist.push(code);
+  var $=function(s){return ROOT.querySelector(s);}, $$=function(s){return Array.prototype.slice.call(ROOT.querySelectorAll(s));};
+  var fn;
+  try{ fn=new Function('$0','ng','$','$$','return ('+code+'\n);'); }catch(e){ try{ fn=new Function('$0','ng','$','$$',code); }catch(e2){ LOG.push({c:'er',h:esc(String(e2))}); render(); return; } }
+  try{ var res=fn(S.sel,NG,$,$$); LOG.push({c:'',h:fmt(res)}); S.usedNg=S.usedNg||/ng\.get/.test(code); }catch(e){ LOG.push({c:'er',h:esc(String(e))}); }
+  render();
+}
+function renderConsole(){
+  body.innerHTML='<div class="cons"><div class="cons-help">Exemples :'+['$0','ng.getComponent($0)','ng.getOwningComponent($0)','getComputedStyle($0).height','ng.getDirectives($0)'].map(function(x){return '<button type="button" data-c="'+esc(x)+'">'+esc(x)+'</button>';}).join('')+'<span>· <code>$0</code> = élément sélectionné ('+(S.sel?esc(nameOf(S.sel)):'aucun')+')</span></div><div class="cons-out" id="cons-out">'+LOG.map(function(l){return '<div class="'+l.c+'">'+l.h+'</div>';}).join('')+'</div><div class="cons-in"><span>›</span><input id="cons-in" spellcheck="false" autocomplete="off" aria-label="Commande console" placeholder="tape une expression, puis Entrée"></div></div>';
+  var out=document.getElementById('cons-out'); out.scrollTop=out.scrollHeight;
+  var inp=document.getElementById('cons-in'), hi=S.hist.length;
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&inp.value.trim()){runCmd(inp.value.trim()); var n=document.getElementById('cons-in'); if(n) n.focus();}
+    if(e.key==='ArrowUp'&&S.hist.length){hi=Math.max(0,hi-1); inp.value=S.hist[hi]; e.preventDefault();}
+    if(e.key==='ArrowDown'&&S.hist.length){hi=Math.min(S.hist.length,hi+1); inp.value=S.hist[hi]||''; e.preventDefault();}
+  });
+  body.querySelector('.cons-help').addEventListener('click',function(e){var b=e.target.closest('button'); if(b){runCmd(b.getAttribute('data-c')); var n=document.getElementById('cons-in'); if(n) n.focus();}});
+  out.addEventListener('click',function(e){var a=e.target.closest('.el-link'); if(a){S.sel=REFS[+a.getAttribute('data-ref')]; S.panel='el'; render();}});
+}
+
+/* ================= Angular DevTools ================= */
+var ngSel=null;
+function renderNg(){
+  var hosts=[]; ROOT.querySelectorAll('*').forEach(function(el){if(INST.has(el)) hosts.push(el);});
+  var depth=function(el){var d=0;for(var e=el.parentElement;e&&e!==ROOT;e=e.parentElement){if(INST.has(e))d++;}return d;};
+  if(!ngSel) ngSel=partyHost;
+  body.innerHTML='<div class="dom ngt">'+hosts.map(function(h,i){return '<div class="nd'+(h===ngSel?' on':'')+'" data-h="'+i+'" style="padding-left:'+(8+depth(h)*16)+'px">'+(INST.get(h).__name.indexOf('Mat')===0||INST.get(h).__name.indexOf('Lib')===0?'<span class="t-an">':'<span class="t-tag">')+esc(h.localName)+'</span></div>';}).join('')+'</div>'+
+   '<div class="side"><div class="subbar"><button type="button" aria-selected="true">Propriétés</button><span class="sp"></span><button type="button" id="ng-show">Afficher dans Éléments</button></div><div class="ngp">'+fmt(INST.get(ngSel))+'</div><div class="ngp" style="color:var(--muted);font-family:var(--font-body)">Dans la vraie extension, les propriétés sont modifiables ici et la détection de changements s\'applique aussitôt.</div></div>';
+  body.querySelector('.ngt').addEventListener('click',function(e){var n=e.target.closest('.nd'); if(n){ngSel=hosts[+n.getAttribute('data-h')]; render();}});
+  document.getElementById('ng-show').addEventListener('click',function(){S.sel=ngSel; S.panel='el'; render();});
+}
+function renderRendering(){
+  body.innerHTML='<div class="rend"><p style="margin:0;color:var(--muted)">Panneau « Rendering » (dans Chrome : palette de commandes → « Show Rendering »).</p><label><input type="checkbox" id="emu"'+(S.emu?' checked':'')+'> <span>Emulate a focused page<br><span style="font-weight:400;color:var(--muted);font-size:13px">La page croit garder le focus même quand tu cliques dans DevTools : les menus et les select restent ouverts.</span></span></label></div>';
+  document.getElementById('emu').addEventListener('change',function(e){S.emu=e.target.checked; check();});
+}
+document.querySelector('.dev-bar').addEventListener('click',function(e){var b=e.target.closest('[role=tab]'); if(b){S.panel=b.getAttribute('data-p'); render();}});
+
+/* ================= Missions du simulateur ================= */
+function norm(s){return String(s||'').trim().replace(/^["']|["']$/g,'').toUpperCase().replace(/\s+/g,'');}
+var MIS=[
+ {t:'Avec le sélecteur d\'élément <b>⌖</b>, clique sur le bouton « Enregistrer » de la page.',f:function(){return S.sel&&S.sel.closest&&!!S.sel.closest('header lib-button');}},
+ {t:'Sélectionne le titre « Dossier 2026/0042 ». Dans Styles, deux règles fixent <code>font-size</code>. Quelle taille s\'applique ?',a:'20PX',alt:['20']},
+ {t:'Sélectionne la ligne Montant / Type (<code>div.row</code>) et <b>décoche</b> la déclaration qui centre ses éléments verticalement. Observe, puis recoche-la si tu veux.',f:function(){var r=RULES.find(function(x){return x.sel==='.row[_ngcontent-p]';});return r.d.some(function(d){return d.p==='align-items'&&!d.on;})||S.m3;}},
+ {t:'Sélectionne le bouton « Enregistrer » (<code>button.lib-btn</code>). Dans Calculé, ouvre <code>height</code> : quelle variable fixe finalement les 40px ?',a:'--LIB-CONTROL-HEIGHT',alt:['LIB-CONTROL-HEIGHT']},
+ {t:'Allume l\'overlay du bloc d\'adresse (badge <b>grid</b> dans l\'arbre ou onglet Mise en page). Combien de colonnes ?',a:'2',need:function(){return S.overlays.some(function(o){return o.classList.contains('grid');});}},
+ {t:'Force l\'état <code>:hover</code> sur le bouton « Retirer » (Styles → <code>:hov</code>). Une nouvelle règle apparaît en haut.',f:function(){var b=Q('.btn-remove');return b&&b.classList.contains('__hover');}},
+ {t:'Ouvre le menu <b>⋮</b> de la carte, puis sélectionne l\'option « Supprimer » <b>dans l\'arbre</b>, sans que le menu se ferme (onglet Rendu ou pause ⏸).',f:function(){return S.menu&&S.sel&&S.sel.matches&&S.sel.matches('.mat-mdc-menu-item')&&S.sel.textContent.trim()==='Supprimer';}},
+ {t:'Dans la console, sélectionne la carte (<code>app-party-card</code>) puis tape <code>ng.getComponent($0)</code>. Quel est le <code>role</code> de la partie ?',a:'USUFRUITIER'},
+ {t:'Dans Styles, passe le <code>gap</code> de <code>.row</code> à <code>24px</code>, puis ouvre l\'onglet Modifications pour voir quoi reporter, et où.',f:function(){var r=RULES.find(function(x){return x.sel==='.row[_ngcontent-p]';});return r.d.some(function(d){return d.p==='gap'&&d.on&&d.v.replace(/\s/g,'')==='24px';});}},
+ {t:'Dans la console, avec la carte sélectionnée : <code>ng.getComponent($0).compact = false</code>, puis <code>ng.applyChanges($0)</code>. La classe <code>compact</code> disparaît de l\'hôte.',f:function(){return !partyHost.classList.contains('compact');}}
+];
+var MS={}; try{MS=JSON.parse(localStorage.getItem('css-angular-devtools-v1')||'{}')||{};}catch(e){MS={};}
+function saveMS(){try{localStorage.setItem('css-angular-devtools-v1',JSON.stringify(MS));}catch(e){}}
+var misBox=document.getElementById('mis');
+misBox.innerHTML='<div class="mis-h"><span>Missions du simulateur</span><span>'+'<b class="score-sim">0</b> / '+MIS.length+'</span></div><ol>'+MIS.map(function(m,i){return '<li data-m="'+i+'"><span class="st">'+(i+1)+'</span><div>'+m.t+(m.a?'<div><input class="ans" id="ma-'+i+'" data-m="'+i+'" autocomplete="off" aria-label="Réponse mission '+(i+1)+'" placeholder="ta réponse"></div>':'')+'</div></li>';}).join('')+'</ol>';
+misBox.addEventListener('input',function(e){if(e.target.matches('.ans')) check();});
+function check(){
+  MIS.forEach(function(m,i){
+    var ok=false;
+    if(m.f) ok=!!m.f();
+    else { var v=norm((document.getElementById('ma-'+i)||{}).value); ok=(v===m.a||(m.alt||[]).indexOf(v)>=0)&&(!m.need||m.need()); }
+    if(ok) MS['s'+i]=1;
+    var li=misBox.querySelector('li[data-m="'+i+'"]'); if(li){var done=!!MS['s'+i]; li.classList.toggle('ok',done); li.querySelector('.st').textContent=done?'✓':String(i+1);}
+  });
+  saveMS(); score();
+}
+
+/* ================= Missions réelles ================= */
+document.querySelectorAll('.rm').forEach(function(rm){
+  var inp=rm.querySelector('input'), fb=rm.querySelector('.fb'), ans=rm.getAttribute('data-ans'), num=rm.hasAttribute('data-num'), key='r'+inp.id;
+  if(MS[key]){fb.textContent='✓ Trouvé'; fb.className='fb ok';}
+  inp.addEventListener('input',function(){
+    var v=num?String(parseInt(inp.value,10)):norm(inp.value), ok=num?v===ans:v===norm(ans);
+    if(!inp.value.trim()){fb.textContent='';fb.className='fb';return;}
+    if(ok){fb.textContent='✓ Trouvé'; fb.className='fb ok'; MS[key]=1; saveMS(); score();} else {fb.textContent='Pas encore'; fb.className='fb ko';}
+  });
+});
+var realMenu=null;
+function closeReal(){ if(realMenu){realMenu.remove(); realMenu=null;} }
+document.getElementById('m-r3').addEventListener('click',function(e){
+  e.stopPropagation(); if(realMenu){closeReal();return;}
+  var r=e.currentTarget.getBoundingClientRect(); realMenu=document.createElement('div'); realMenu.className='m-menu';
+  realMenu.innerHTML='<div>Modifier</div><div>Dupliquer</div><div data-code>Code : ZEPHYR</div><div>Supprimer</div>';
+  realMenu.style.left=(r.left+window.scrollX)+'px'; realMenu.style.top=(r.bottom+window.scrollY+6)+'px'; document.body.appendChild(realMenu);
+});
+document.addEventListener('mousedown',function(e){ if(realMenu&&!realMenu.contains(e.target)&&e.target.id!=='m-r3') closeReal(); });
+window.addEventListener('blur',closeReal);
+document.addEventListener('keydown',function(e){if(e.key==='Escape') closeReal();});
+
+function score(){
+  var simN=MIS.filter(function(m,i){return MS['s'+i];}).length, realN=document.querySelectorAll('.rm').length, rn=0;
+  document.querySelectorAll('.rm input').forEach(function(i){if(MS['r'+i.id]) rn++;});
+  var tot=MIS.length+realN, n=simN+rn;
+  document.querySelectorAll('.score-n').forEach(function(e){e.textContent=n;}); document.querySelectorAll('.score-t').forEach(function(e){e.textContent=tot;});
+  var s=document.querySelector('.score-sim'); if(s) s.textContent=simN;
+  var m=document.getElementById('meter'); if(m) m.style.width=(n/tot*100)+'%';
+}
+document.querySelectorAll('pre[data-hl]').forEach(function(p){p.innerHTML=hl(p.textContent);});
+S.sel=Q('.title'); render();
+window.addEventListener('resize',function(){drawLayer();});
+window.__DT__={S:S,RULES:RULES,runCmd:runCmd,render:render,Q:Q,select:select,openMenu:openMenu,MIS:MIS,MS:MS,toggleOverlay:toggleOverlay,check:check};
+
+/* ---------- Sommaire ---------- */
+var toc=document.getElementById('toc');
+if(window.matchMedia&&window.matchMedia('(max-width:980px)').matches) toc.removeAttribute('open');
+var links={}; toc.querySelectorAll('a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(ents){ents.forEach(function(en){if(en.isIntersecting){Object.keys(links).forEach(function(k){links[k].removeAttribute('aria-current');}); var a=links[en.target.id]; if(a) a.setAttribute('aria-current','true');}});},{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('section.lesson').forEach(function(s){io.observe(s);});
+}
+})();
+</script>
+
+</body>
+</html>
