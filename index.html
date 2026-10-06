@@ -1,0 +1,1437 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Sélecteurs CSS &amp; SCSS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : sommaire collant à gauche, colonne de leçons à droite ; chaque atelier = HTML à gauche, boîtes à droite. Motif : le surligneur. */
+:root{
+  --paper:#F4F6F9; --surface:#FFFFFF; --surface-2:#ECF0F5; --ink:#172031; --muted:#5A6679; --line:#D6DCE5;
+  --mark:#FFE05A; --mark-ink:#3A2B00; --mark-edge:#D9AE00;
+  --ref:#2356D3; --ref-soft:rgba(35,86,211,.09);
+  --cand:#C2410C; --cand-soft:rgba(194,65,12,.09);
+  --ok:#157A3A; --ok-soft:rgba(21,122,58,.12); --bad:#BE2A31; --bad-soft:rgba(190,42,49,.10);
+  --syn-tag:#8B2C91; --syn-attr:#965700; --syn-val:#0A6C4E; --syn-text:#172031; --syn-punct:#7A8597;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+    --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+    --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+    --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+    --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+    --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+  --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+  --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+  --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+  --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+  --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--ref)}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);padding:.08em .35em;border-radius:4px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:44px;max-width:1260px;margin:0 auto;padding-inline:24px;padding-block:28px 96px}
+main{min-width:0}
+
+/* Sommaire */
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:14px;padding-right:4px}
+.toc summary{display:none}
+.toc .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 6px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);padding:3px 8px;border-radius:5px;line-height:1.35}
+.toc a span{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:1.6em}
+.toc a:hover{background:var(--surface-2)}
+.toc a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.toc a[aria-current="true"] span{color:inherit;opacity:.7}
+.toc .score{margin-top:18px;font-size:13px;color:var(--muted)}
+@media (max-width:980px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:8px;padding-inline:16px}
+  .toc{position:static;max-height:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px}
+  .toc summary{display:block;cursor:pointer;font-weight:600}
+}
+
+/* En-tête */
+.hero{padding-block:4px 30px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2.3rem,6vw,3.7rem);line-height:1.02;letter-spacing:-.025em;margin:.25em 0 .35em;text-wrap:balance}
+h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%);padding-inline:.06em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;font-size:14px}
+.sw{display:inline-block;width:20px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:7px}
+.sw.sel{background:var(--mark);border:1px solid var(--mark-edge)}
+.sw.ref{border:2px dashed var(--ref)}
+.sw.cand{border:2px dotted var(--cand);background:var(--cand-soft)}
+
+/* Parties et leçons */
+.part{margin-block:52px 4px;padding:22px 24px;border-radius:12px;background:var(--ink);color:var(--paper)}
+.part .kicker{color:inherit;opacity:.65}
+.part h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;margin:.15em 0 .3em;letter-spacing:-.015em}
+.part p{margin:0;opacity:.85;max-width:66ch}
+.part code{background:transparent;color:inherit;border-color:currentColor}
+section.lesson{padding-block:38px;border-bottom:1px solid var(--line);scroll-margin-top:12px}
+.lesson-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.num{font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--muted);min-width:2em}
+.lesson h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.45rem,3.2vw,1.95rem);line-height:1.15;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.syntax{font-family:var(--font-mono);font-size:14px;color:var(--muted)}
+.lesson h3{font-size:1.08rem;font-weight:600;margin:30px 0 6px}
+.prose{max-width:70ch}
+.prose p{margin:.55em 0}
+.big{font-size:1.05em}
+.callout{border-left:3px solid var(--ref);background:var(--ref-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:74ch;margin:16px 0;font-size:15px}
+.callout.warn{border-color:var(--cand);background:var(--cand-soft)}
+.callout.good{border-color:var(--ok);background:var(--ok-soft)}
+.callout > b:first-child{display:block;margin-bottom:2px}
+pre.ascii{font-family:var(--font-mono);font-size:13px;line-height:1.6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;overflow-x:auto;margin:16px 0;white-space:pre;color:var(--ink)}
+.a-ok{color:var(--ok);font-weight:600}.a-no{color:var(--bad);font-weight:600}.a-ref{color:var(--ref);font-weight:600}
+.a-sel{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+.a-amp{color:var(--cand);font-weight:700}.a-dim{color:var(--muted)}.a-tag{color:var(--syn-tag)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.t{border-collapse:collapse;font-size:14px;width:100%}
+.t th,.t td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+.codes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0}
+.cblock{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.cblock .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px}
+pre.code{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.cblock pre.code{background:transparent}
+pre.code.solo{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:14px 0}
+.amp{color:var(--cand);font-weight:700}
+.cm{color:var(--muted);font-style:italic}
+.pr{color:var(--syn-attr)}
+.br{color:var(--syn-punct)}
+
+/* Atelier */
+.lab{margin:20px 0 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.lab-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{font-family:var(--font-mono);font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;white-space:pre-wrap}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.try{display:flex;align-items:center;gap:8px;flex:1 1 240px;max-width:380px;min-width:0}
+.try label{font-size:12px;color:var(--muted);white-space:nowrap}
+.try input{flex:1;min-width:0;font-family:var(--font-mono);font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,.bx:focus-visible,.toc a:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
+.lab-panes{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.lab-panes.compact{grid-template-columns:minmax(0,1fr)}
+.lab-panes.compact .pane-code{display:none}
+.pane{min-width:0;padding:12px 14px}
+.pane-code{border-right:1px solid var(--line)}
+.pane-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+@media (max-width:760px){.lab-panes{grid-template-columns:minmax(0,1fr)}.pane-code{border-right:0;border-bottom:1px solid var(--line)}}
+.code{font-family:var(--font-mono);font-size:12.5px;line-height:1.8;overflow-x:auto}
+.ln{display:flex;white-space:pre;min-width:max-content}
+.gut{width:1.5em;flex:none;text-align:center;font-size:10px}
+.ln.on-sel .gut::before{content:"▶";color:var(--ink)}
+.ln.on-cand .gut::before{content:"▷";color:var(--cand)}
+.ln.on-ref:not(.on-sel):not(.on-cand) .gut::before{content:"◇";color:var(--ref)}
+.el{border-radius:3px}
+.el.sel{background:var(--mark);box-shadow:0 0 0 1px var(--mark-edge)}
+.code .el.sel span{color:var(--mark-ink)}
+.el.ref{outline:1.5px dashed var(--ref);outline-offset:1px}
+.el.cand{outline:1.5px dotted var(--cand);outline-offset:1px;background:var(--cand-soft)}
+.el.hov{text-decoration:underline;text-decoration-color:var(--muted);text-underline-offset:3px}
+.s-tag{color:var(--syn-tag)}.s-attr{color:var(--syn-attr)}.s-val{color:var(--syn-val)}.s-p{color:var(--syn-punct)}.s-text{color:var(--syn-text)}
+.s-cls{color:var(--syn-val)}.s-id{color:var(--syn-attr)}.s-attrb{color:var(--syn-attr);font-size:11px}
+.boxes{display:flex;flex-direction:column;gap:8px}
+.bx{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:background-color .15s,box-shadow .15s}
+.bx-head{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;min-width:0}
+.bx-lbl{display:flex;flex-wrap:wrap;min-width:0;word-break:break-all}
+.bx-text{font-family:var(--font-body);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.bx-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.badge{font-family:var(--font-body);font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap;line-height:1.6}
+.bx-kids{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:1px dashed var(--line);margin-left:2px}
+.bx-inl > .bx-kids{flex-direction:row;flex-wrap:wrap;align-items:center;border-left:0;padding-left:0;margin-left:0}
+.bx.sel{background:var(--mark);border-color:var(--mark-edge)}
+.bx.sel > .bx-head .bx-lbl span,.bx.sel > .bx-head .bx-text,.bx.sel > .bx-kids > .bx-text{color:var(--mark-ink)}
+.badge.b-sel{background:var(--ink);color:var(--paper)}
+.bx.ref{outline:2px dashed var(--ref);outline-offset:2px}
+.badge.b-ref{background:var(--ref);color:var(--surface)}
+.bx.cand{outline:2px dotted var(--cand);outline-offset:2px;background:var(--cand-soft)}
+.badge.b-cand{background:var(--cand);color:var(--surface)}
+.ghost{border:1.5px dashed var(--cand);color:var(--cand);font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:5px;align-self:flex-start;background:var(--surface)}
+.bx.hov{box-shadow:0 0 0 2px var(--muted)}
+.lab-foot{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:8px;font-size:14px}
+.read b,.verdict b{font-weight:600}
+.read code,.verdict code{white-space:normal}
+.verdict{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:5px;background:var(--mark);color:var(--mark-ink)}
+.pill.c{background:var(--cand-soft);color:var(--cand);outline:1px dotted var(--cand)}
+.err{color:var(--bad);font-weight:600}
+.rule{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rule .sx{color:var(--ink);font-weight:600}
+
+/* Démo vivante */
+.live{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;background:var(--surface)}
+.live-stage{padding:18px;min-width:0}
+.live-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.live pre.code{background:var(--surface-2);border-left:1px solid var(--line)}
+@media (max-width:760px){.live{grid-template-columns:minmax(0,1fr)}.live pre.code{border-left:0;border-top:1px solid var(--line)}}
+
+/* Transformateur SCSS */
+.xf{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin:20px 0 0}
+.xf-col{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.xf-col + .xf-col{border-left:1px solid var(--line)}
+@media (max-width:760px){.xf{grid-template-columns:minmax(0,1fr)}.xf-col + .xf-col{border-left:0;border-top:1px solid var(--line)}}
+.xf textarea{width:100%;min-height:250px;font-family:var(--font-mono);font-size:13px;line-height:1.6;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:12px;resize:vertical;tab-size:2}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:500 12.5px var(--font-body);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.trace{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tr{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;display:grid;gap:3px;min-width:0}
+.tr-src{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tr code{white-space:normal;overflow-wrap:anywhere}
+.tg{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px}
+.tg-amp{background:var(--cand-soft);color:var(--cand)}
+.tg-sp{background:var(--ref-soft);color:var(--ref)}
+.tg-root{background:var(--surface-2);color:var(--muted)}
+.tr-how{color:var(--muted)}
+.tr-res{font-family:var(--font-mono);font-size:13px;overflow-wrap:anywhere}
+mark.par{background:var(--ref-soft);color:var(--ref);border-bottom:2px solid var(--ref);padding:0 2px;border-radius:2px}
+.spc{color:var(--cand);font-weight:700}
+.xf-err{color:var(--bad);font-size:13px}
+pre.css-out{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:10px 12px;background:var(--surface-2);border-radius:8px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.sub-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* Cartes d'erreurs */
+.errc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;margin:18px 0}
+.errc h3{margin:0 0 6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}
+.duo > div{min-width:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.duo .cap{font-size:12px;font-weight:600;padding:6px 12px;border-bottom:1px solid var(--line)}
+.duo .no .cap{background:var(--bad-soft);color:var(--bad)}
+.duo .yes .cap{background:var(--ok-soft);color:var(--ok)}
+.duo .out{font-family:var(--font-mono);font-size:13px;padding:8px 12px;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.errc .lab{margin-bottom:0}
+
+/* Exercices */
+.scorebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.meter{flex:1 1 200px;max-width:320px;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.ex{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden}
+.ex-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ex-n{font-weight:600}
+.lvl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 9px;border-radius:999px;border:1px solid currentColor}
+.lvl-1{color:var(--ok)}.lvl-2{color:var(--ref)}.lvl-3{color:var(--cand)}.lvl-4{color:var(--bad)}
+.ex-status{margin-left:auto;font-size:13px;font-weight:600;color:var(--ok)}
+.ex-q{padding:12px 14px 4px}
+.ex-q p{margin:.3em 0}
+.ex-tip{font-size:13px;color:var(--muted)}
+.ex .bx,.ex .el{cursor:pointer}
+.bx.picked{background:var(--ref-soft);border-color:var(--ref);box-shadow:inset 0 0 0 1px var(--ref)}
+.el.picked{background:var(--ref-soft);box-shadow:0 0 0 1px var(--ref)}
+.badge.b-pick{background:var(--ref);color:var(--surface)}
+.bx.r-ok{background:var(--ok-soft);border-color:var(--ok)}
+.bx.r-miss{outline:2px dashed var(--ok);outline-offset:2px}
+.bx.r-wrong{background:var(--bad-soft);border-color:var(--bad)}
+.el.r-ok{background:var(--ok-soft);box-shadow:0 0 0 1px var(--ok)}
+.el.r-miss{outline:1.5px dashed var(--ok);outline-offset:1px}
+.el.r-wrong{background:var(--bad-soft);box-shadow:0 0 0 1px var(--bad)}
+.badge.b-ok{background:var(--ok);color:var(--surface)}
+.badge.b-wrong{background:var(--bad);color:var(--surface)}
+.badge.b-miss{background:transparent;color:var(--ok);outline:1.5px dashed var(--ok)}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.btn{font:600 14px var(--font-body);padding:7px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+.ex-fb{font-size:14px;font-weight:600}
+.ex-fb.good{color:var(--ok)}.ex-fb.bad{color:var(--bad)}
+.ex-explain{padding:0 14px 14px;font-size:14.5px;max-width:78ch}
+.ex-explain p{margin:.4em 0}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<details class="toc" open id="toc">
+  <summary>Sommaire</summary>
+  <div class="grp">Départ</div>
+  <ol><li><a href="#s0"><span>0</span>Les 3 idées de base</a></li></ol>
+  <div class="grp">Partie 1 · CSS</div>
+  <ol>
+    <li><a href="#s1"><span>1</span>Élément</a></li>
+    <li><a href="#s2"><span>2</span>Classe</a></li>
+    <li><a href="#s3"><span>3</span>ID</a></li>
+    <li><a href="#s4"><span>4</span>Plusieurs classes</a></li>
+    <li><a href="#s5"><span>5</span>Descendant</a></li>
+    <li><a href="#s6"><span>6</span>Enfant direct</a></li>
+    <li><a href="#s7"><span>7</span>Frère adjacent</a></li>
+    <li><a href="#s8"><span>8</span>Frères suivants</a></li>
+    <li><a href="#s9"><span>9</span>Sélecteurs combinés</a></li>
+    <li><a href="#s10"><span>10</span>Attributs</a></li>
+    <li><a href="#s11"><span>11</span>Pseudo-classes</a></li>
+    <li><a href="#s12"><span>12</span>Pseudo-éléments</a></li>
+    <li><a href="#s13"><span>13</span>Universel *</a></li>
+    <li><a href="#s14"><span>14</span>Groupement</a></li>
+    <li><a href="#s15"><span>15</span>La grande comparaison</a></li>
+  </ol>
+  <div class="grp">Partie 2 · SCSS</div>
+  <ol>
+    <li><a href="#s16"><span>16</span>Le symbole &amp;</a></li>
+    <li><a href="#s17"><span>17</span>span vs &amp; span</a></li>
+    <li><a href="#s18"><span>18</span>Erreurs avec &amp;</a></li>
+    <li><a href="#sng"><span>★</span>Spécial Angular</a></li>
+  </ol>
+  <div class="grp">Synthèse</div>
+  <ol>
+    <li><a href="#s19"><span>19</span>Récapitulatif</a></li>
+    <li><a href="#s20"><span>20</span>Exercices</a></li>
+  </ol>
+  <div class="score">Exercices réussis : <b class="score-n">0</b> / <span class="score-t">16</span></div>
+</details>
+
+<main>
+<header class="hero">
+  <div class="kicker">Cours interactif · CSS d'abord, SCSS ensuite</div>
+  <h1>Les <span class="hl">sélecteurs</span> CSS &amp; SCSS, vus de près</h1>
+  <p class="lead">Chaque leçon montre un petit HTML à gauche et une vue « boîtes » à droite. Le sélecteur surligne exactement ce qu'il attrape. Dans chaque atelier tu peux taper ton propre sélecteur : tout se recalcule en direct, avec le vrai moteur du navigateur.</p>
+  <div class="legend" aria-label="Légende des couleurs">
+    <span><i class="sw sel"></i>Sélectionné : reçoit le style</span>
+    <span><i class="sw ref"></i>Repère : l'élément qui sert de condition</span>
+    <span><i class="sw cand"></i>Candidat : stylé seulement dans un état (:hover…) ou via un pseudo-élément</span>
+  </div>
+</header>
+
+<!-- ============ 0 ============ -->
+<section class="lesson" id="s0">
+  <div class="lesson-head"><span class="num">0</span><h2>Avant de commencer : trois idées qui débloquent tout</h2></div>
+
+  <h3>Idée 1 · Le HTML est un arbre généalogique</h3>
+  <div class="prose"><p>Chaque balise a un parent (celle qui la contient), parfois des enfants (celles qu'elle contient directement) et des frères (même parent). Tous les sélecteurs « relationnels » utilisent ce vocabulaire.</p></div>
+<pre class="ascii"><span class="a-dim">HTML</span>                              <span class="a-dim">L'arbre</span>
+&lt;div class="parent"&gt;              div.parent
+  &lt;p class="child"&gt;A&lt;/p&gt;           ├── p.child  « A »
+  &lt;div class="box"&gt;                └── div.box
+    &lt;p class="child"&gt;B&lt;/p&gt;                └── p.child  « B »
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <div class="tbl"><table class="t">
+    <tr><th>Mot</th><th>Signifie</th><th>Dans l'exemple</th></tr>
+    <tr><td><b>parent</b></td><td>la balise juste au-dessus</td><td><code>div.parent</code> est le parent de « A » et de <code>div.box</code></td></tr>
+    <tr><td><b>enfant</b></td><td>juste en dessous, un seul niveau</td><td>« A » et <code>div.box</code> sont les enfants de <code>div.parent</code></td></tr>
+    <tr><td><b>descendant</b></td><td>en dessous, à n'importe quel niveau</td><td>« A », <code>div.box</code> et « B » sont des descendants de <code>div.parent</code></td></tr>
+    <tr><td><b>ancêtre</b></td><td>au-dessus, à n'importe quel niveau</td><td><code>div.parent</code> est un ancêtre de « B »</td></tr>
+    <tr><td><b>frère</b></td><td>même parent</td><td>« A » et <code>div.box</code> sont frères</td></tr>
+  </table></div>
+  <div class="callout warn"><b>Le piège n°1</b>« B » est un <b>descendant</b> de <code>.parent</code>, mais ce n'est <b>pas son enfant</b> : son parent est <code>.box</code>. Garde ça en tête pour les leçons 5 et 6.</div>
+
+  <h3>Idée 2 · Un sélecteur se lit de droite à gauche</h3>
+  <div class="prose"><p>Le <b>dernier morceau</b> désigne l'élément qui reçoit le style (le <b>sujet</b>). Tout ce qui est à sa gauche, ce sont des <b>conditions</b> sur l'endroit où il doit se trouver.</p></div>
+<pre class="ascii">  <span class="a-ref">.card</span>  &gt;  <span class="a-sel">.title:hover</span>
+  ─────  ─  ────────────
+    │    │       │
+    │    │       └── <b>SUJET</b> : c'est LUI qui reçoit le style
+    │    └────────── <b>combinateur</b> : la relation entre les deux
+    └─────────────── <b>condition</b> : où doit se trouver le sujet</pre>
+  <div class="prose"><p>Lecture : « un élément <code>.title</code>, survolé, qui est l'enfant direct d'un <code>.card</code> ». Les ateliers affichent cette lecture automatiquement sous chaque sélecteur.</p></div>
+
+  <h3>Idée 3 · Ce qu'il y a <em>entre</em> deux morceaux change tout</h3>
+<pre class="ascii"><span class="a-dim">écrit</span>       <span class="a-dim">symbole</span>    <span class="a-dim">signifie</span>
+.a .b       espace  →  .b est <b>à l'intérieur</b> de .a, à n'importe quelle profondeur
+.a &gt; .b     &gt;       →  .b est un <b>enfant direct</b> de .a
+.a.b        collé   →  <span class="a-sel">UN SEUL élément</span> qui porte .a ET .b
+.a + .b     +       →  .b vient <b>juste après</b> .a (même parent)
+.a ~ .b     ~       →  .b vient <b>quelque part après</b> .a (même parent)
+.a, .b      ,       →  .a <b>OU</b> .b : deux sélecteurs indépendants</pre>
+  <div class="callout"><b>Comment utiliser les ateliers</b>Clique sur les sélecteurs proposés, ou tape le tien dans le champ « Ton sélecteur ». Survole une boîte pour retrouver sa ligne de HTML, et inversement.</div>
+</section>
+
+<div class="part">
+  <div class="kicker">Partie 1</div>
+  <h2>Les sélecteurs CSS, sans SCSS</h2>
+  <p>Ici, uniquement du CSS classique. Tout ce que tu écriras plus tard en SCSS finira transformé en ces sélecteurs-là.</p>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="lesson" id="s1">
+  <div class="lesson-head"><span class="num">1</span><h2>Sélecteur d'élément</h2><span class="syntax">p · div · span</span></div>
+  <div class="prose"><p>Tu écris simplement le nom de la balise. Il attrape <b>toutes</b> les balises de ce type, peu importe où elles se trouvent dans la page.</p></div>
+  <div data-lab="L1"></div>
+  <div class="callout"><b>Côté Angular</b>Tes composants sont aussi des balises. <code>app-header</code> est un sélecteur d'élément qui vise <code>&lt;app-header&gt;</code>.</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="lesson" id="s2">
+  <div class="lesson-head"><span class="num">2</span><h2>Sélecteur de classe</h2><span class="syntax">.parent · .child</span></div>
+  <div class="prose"><p>Le point veut dire « qui a cette classe dans son attribut <code>class</code> ». La position dans la page ne compte pas du tout.</p></div>
+  <div data-lab="L2"></div>
+  <div class="callout warn"><b>Le nom d'une classe ne crée aucune relation</b><code>.child</code> ne veut pas dire « enfant ». C'est juste un nom, comme <code>.banane</code>. Regarde : le <code>p.child</code> « Hors du parent » est sélectionné aussi. Pour exprimer une relation, il faut un combinateur (espace, <code>&gt;</code>, <code>+</code>, <code>~</code>).</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="lesson" id="s3">
+  <div class="lesson-head"><span class="num">3</span><h2>Sélecteur d'ID</h2><span class="syntax">#header</span></div>
+  <div class="prose"><p>Le dièse vise l'élément dont l'attribut <code>id</code> a cette valeur. Un id doit être unique dans la page, donc ce sélecteur attrape au plus un élément.</p></div>
+  <div data-lab="L3"></div>
+  <div class="prose"><p>Pourquoi on l'évite pour le style : un ID « pèse » beaucoup plus lourd qu'une classe quand deux règles se contredisent (c'est la <b>spécificité</b>).</p></div>
+<pre class="ascii"><span class="a-dim">sélecteur        poids (ID · classe · élément)</span>
+p                0 · 0 · 1
+.child           0 · 1 · 0
+p.child          0 · 1 · 1
+#header          <span class="a-no">1 · 0 · 0</span>   ← bat n'importe quel nombre de classes</pre>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="lesson" id="s4">
+  <div class="lesson-head"><span class="num">4</span><h2>Plusieurs classes sur le même élément</h2><span class="syntax">.button.primary</span></div>
+  <div class="prose"><p>Deux classes <b>collées, sans espace</b> : le même élément doit porter les deux. C'est un « ET ».</p></div>
+<pre class="ascii">   .button.primary
+   └──┬──┘└──┬──┘
+      └──┬───┘
+   <span class="a-sel">le MÊME élément</span> doit avoir .button ET .primary
+
+   &lt;button class="button primary"&gt;   <span class="a-ok">✔</span> les deux
+   &lt;button class="button"&gt;           <span class="a-no">✘</span> il manque primary
+   &lt;button class="primary"&gt;          <span class="a-no">✘</span> il manque button</pre>
+  <div data-lab="L4"></div>
+  <div class="callout"><b>L'ordre ne compte pas</b><code>.button.primary</code> et <code>.primary.button</code> donnent exactement le même résultat. Et une classe en plus (<code>large</code>) ne gêne pas.</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="lesson" id="s5">
+  <div class="lesson-head"><span class="num">5</span><h2>Descendant : l'espace</h2><span class="syntax">.parent .child</span></div>
+  <div class="prose"><p>Un <b>espace</b> entre deux sélecteurs veut dire « à l'intérieur de, à n'importe quelle profondeur ». Enfant, petit-enfant, arrière-petit-enfant : tous comptent.</p></div>
+<pre class="ascii"><span class="a-ref">div.parent</span>  ◀──────── repère
+ ├── <span class="a-sel">p.child « Niveau 1 »</span>      <span class="a-ok">✔</span> enfant
+ └── div.box
+      ├── <span class="a-sel">p.child « Niveau 2 »</span> <span class="a-ok">✔</span> petit-enfant
+      └── div
+           └── <span class="a-sel">p.child « Niveau 3 »</span>  <span class="a-ok">✔</span> arrière-petit-enfant
+p.child « Dehors »                <span class="a-no">✘</span> pas à l'intérieur de .parent</pre>
+  <div data-lab="L5"></div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="lesson" id="s6">
+  <div class="lesson-head"><span class="num">6</span><h2>Enfant direct : le chevron</h2><span class="syntax">.parent &gt; .child</span></div>
+  <div class="prose"><p>Le <code>&gt;</code> limite à <b>un seul niveau</b> : le sujet doit avoir pour parent immédiat l'élément de gauche. Même HTML que la leçon 5, résultat très différent.</p></div>
+<pre class="ascii"><span class="a-ref">div.parent</span>  ◀──── repère
+ ├── <span class="a-sel">p.child « Niveau 1 »</span>      <span class="a-ok">✔</span> son parent EST .parent
+ └── div.box
+      ├── p.child « Niveau 2 » <span class="a-no">✘</span> son parent est .box
+      └── div
+           └── p.child « Niveau 3 »  <span class="a-no">✘</span> son parent est une div</pre>
+  <div data-lab="L6"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Sélecteur</th><th>Profondeur autorisée</th><th>Ici</th></tr>
+    <tr><td><code>.parent .child</code></td><td>1, 2, 3… tous les niveaux</td><td>Niveau 1, 2 et 3</td></tr>
+    <tr><td><code>.parent &gt; .child</code></td><td>exactement 1</td><td>Niveau 1 seulement</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="lesson" id="s7">
+  <div class="lesson-head"><span class="num">7</span><h2>Frère adjacent : le plus</h2><span class="syntax">.title + .text</span></div>
+  <div class="prose"><p>Le <code>+</code> vise l'élément qui vient <b>immédiatement après</b> le repère, avec le même parent. Un seul élément par repère, et seulement s'il correspond.</p></div>
+<pre class="ascii">section
+ ├── p.text   « Avant le titre »         <span class="a-no">✘</span> avant : jamais sélectionné
+ ├── <span class="a-ref">h2.title « Titre »</span>         ─┐
+ ├── <span class="a-sel">p.text   « Juste après »</span>   ◀┘ +  <span class="a-ok">✔</span> collé juste après
+ ├── p.text   « Deuxième texte »         <span class="a-no">✘</span> son voisin d'avant est un .text
+ ├── <span class="a-ref">h2.title « Autre titre »</span>   ─┐
+ ├── div      « Intrus »         ◀┘ +     le voisin est une div, pas un .text
+ └── p.text   « Après l'intrus »         <span class="a-no">✘</span></pre>
+  <div data-lab="L7"></div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="lesson" id="s8">
+  <div class="lesson-head"><span class="num">8</span><h2>Frères suivants : le tilde</h2><span class="syntax">.title ~ .text</span></div>
+  <div class="prose"><p>Le <code>~</code> vise <b>tous les frères qui viennent après</b> le repère, même s'il y a d'autres éléments entre les deux. Jamais ceux d'avant.</p></div>
+<pre class="ascii">section
+ ├── p.text   « Avant le titre »         <span class="a-no">✘</span> avant le premier .title
+ ├── <span class="a-ref">h2.title « Titre »</span>        ─┐
+ ├── <span class="a-sel">p.text   « Juste après »</span>    │ ~  <span class="a-ok">✔</span>
+ ├── <span class="a-sel">p.text   « Deuxième texte »</span> │ ~  <span class="a-ok">✔</span>
+ ├── h2.title « Autre titre »     │
+ ├── div      « Intrus »          │     (pas un .text)
+ └── <span class="a-sel">p.text   « Après l'intrus »</span> ▼ ~  <span class="a-ok">✔</span> l'intrus ne bloque pas</pre>
+  <div data-lab="L8"></div>
+  <div class="callout"><b>+ ou ~ ?</b><code>+</code> = le voisin collé, un seul. <code>~</code> = tous ceux qui suivent. Dans les deux cas : <b>même parent</b>, et seulement <b>vers l'avant</b>.</div>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="lesson" id="s9">
+  <div class="lesson-head"><span class="num">9</span><h2>Sélecteurs combinés</h2><span class="syntax">div.card · div.card.active</span></div>
+  <div class="prose"><p>Tu peux coller une balise et des classes : <code>div.card</code> = « une div qui a la classe card ». La balise se met toujours <b>en premier</b>. Tout ce qui est collé porte sur <b>le même élément</b>.</p></div>
+<pre class="ascii">div.card.active
+│  │    └── et la classe active
+│  └─────── et la classe card
+└────────── une &lt;div&gt;
+→ <span class="a-sel">un seul élément</span> qui remplit les 3 conditions
+
+div .card     ← <span class="a-no">attention à l'espace</span> : un .card À L'INTÉRIEUR d'une div</pre>
+  <div data-lab="L9"></div>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="lesson" id="s10">
+  <div class="lesson-head"><span class="num">10</span><h2>Sélecteurs d'attribut</h2><span class="syntax">[type="text"] · [disabled] · [href^="https"] · [class*="button"]</span></div>
+  <div class="prose"><p>Les crochets testent un attribut HTML. On peut tester sa simple présence, ou comparer sa valeur.</p></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Écrit</th><th>Signifie</th><th>Exemple qui correspond</th></tr>
+    <tr><td><code>[disabled]</code></td><td>l'attribut existe (peu importe sa valeur)</td><td><code>&lt;button disabled&gt;</code></td></tr>
+    <tr><td><code>[type="text"]</code></td><td>valeur exactement égale</td><td><code>type="text"</code></td></tr>
+    <tr><td><code>[href^="https"]</code></td><td>commence par (^ comme le début d'une regex)</td><td><code>href="https://angular.dev"</code></td></tr>
+    <tr><td><code>[href$=".be"]</code></td><td>finit par ($ comme la fin d'une regex)</td><td><code>href="http://exemple.be"</code></td></tr>
+    <tr><td><code>[class*="button"]</code></td><td>contient ce texte, n'importe où</td><td><code>class="nav-button"</code></td></tr>
+    <tr><td><code>[class~="button"]</code></td><td>contient ce mot entier (séparé par des espaces)</td><td><code>class="big button"</code></td></tr>
+  </table></div>
+  <div data-lab="L10"></div>
+  <div class="callout warn"><b>*= cherche du texte, pas des classes</b><code>[class*="button"]</code> attrape aussi <code>nav-button</code> et <code>button-primary</code>, parce que le mot apparaît dans le texte de l'attribut. Pour une vraie classe, préfère <code>.button</code>.</div>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="lesson" id="s11">
+  <div class="lesson-head"><span class="num">11</span><h2>Pseudo-classes</h2><span class="syntax">:hover · :first-child · :nth-child() · :not() · :has()</span></div>
+  <div class="prose"><p>Une pseudo-classe s'écrit avec <b>un seul</b> deux-points et se colle au sélecteur, comme une classe. Elle ajoute une condition sur <b>le même élément</b> : un état (survolé, focus…) ou une position (premier, dernier, 3e…).</p></div>
+
+  <h3>11a · Les états : :hover, :focus, :active</h3>
+  <div class="prose"><p>Ces conditions dépendent de ce que fait l'utilisateur. Dans l'atelier, les éléments concernés sont marqués comme <b>candidats</b> : ils reçoivent le style seulement pendant l'état. Essaie pour de vrai dans la démo juste en dessous.</p></div>
+  <div data-lab="L11a"></div>
+  <div data-live="states"></div>
+
+  <h3>11b · La position : :first-child, :last-child, :nth-child()</h3>
+  <div class="prose"><p>Ces pseudo-classes regardent le <b>rang de l'élément parmi les enfants de son parent</b>. <code>li:first-child</code> se lit « un li qui est le premier enfant de son parent ». Ce n'est pas « le premier enfant du li » !</p></div>
+<pre class="ascii"><span class="a-dim">formule             rangs sélectionnés     (n vaut 0, 1, 2, 3…)</span>
+:nth-child(2)       2
+:nth-child(odd)     1, 3, 5…               = 2n+1
+:nth-child(even)    2, 4, 6…               = 2n
+:nth-child(3n)      3, 6, 9…
+:nth-child(n+3)     3, 4, 5…               à partir du 3e
+:nth-child(-n+3)    1, 2, 3                les 3 premiers</pre>
+  <div data-lab="L11b"></div>
+
+  <h3>11c · Le piège classique : :nth-child() contre :nth-of-type()</h3>
+  <div class="prose"><p><code>:nth-child</code> compte <b>tous</b> les frères, quelle que soit leur balise. <code>:nth-of-type</code> compte seulement les frères <b>de la même balise</b>.</p></div>
+<pre class="ascii">article
+ ├── h2  « Titre »         rang 1 parmi les enfants
+ ├── p   « Paragraphe 1 »  rang 2 parmi les enfants · rang 1 parmi les &lt;p&gt;
+ ├── p   « Paragraphe 2 »  rang 3 parmi les enfants · rang 2 parmi les &lt;p&gt;
+ └── p   « Paragraphe 3 »  rang 4 parmi les enfants · rang 3 parmi les &lt;p&gt;
+
+p:first-child      → <span class="a-no">rien !</span> le premier enfant est un h2, pas un p
+p:first-of-type    → <span class="a-sel">Paragraphe 1</span></pre>
+  <div data-lab="L11c"></div>
+
+  <h3>11d · La logique : :not() et :has()</h3>
+  <div class="prose"><p><code>:not(X)</code> exclut les éléments qui correspondent à X. <code>:has(X)</code> garde les éléments qui <b>contiennent</b> X : c'est le seul sélecteur qui regarde vers le bas pour choisir l'élément du haut (« le parent qui a… »).</p></div>
+  <div data-lab="L11d"></div>
+  <div class="callout"><b>Dans l'atelier</b>Avec <code>:has()</code>, l'élément trouvé à l'intérieur est encadré en bleu (« condition ») : c'est grâce à lui que la carte est sélectionnée.</div>
+</section>
+
+<!-- ============ 12 ============ -->
+<section class="lesson" id="s12">
+  <div class="lesson-head"><span class="num">12</span><h2>Pseudo-éléments</h2><span class="syntax">::before · ::after · ::first-letter · ::first-line · ::placeholder</span></div>
+  <div class="prose"><p>Un pseudo-élément s'écrit avec <b>deux</b> deux-points. Il ne sélectionne pas une balise : il cible une <b>partie</b> d'un élément qui n'existe pas dans le HTML (un contenu ajouté, la première lettre, le texte d'aide d'un input…). <code>::before</code> et <code>::after</code> créent une boîte <b>à l'intérieur</b> de l'élément, au début ou à la fin, et ont besoin de <code>content</code>.</p></div>
+  <div data-live="pseudo"></div>
+  <div data-lab="L12"></div>
+<pre class="ascii"><span class="a-dim">un deux-points  = pseudo-CLASSE   → une condition sur l'élément   (:hover, :first-child)</span>
+<span class="a-dim">deux deux-points = pseudo-ÉLÉMENT → une partie de l'élément       (::before, ::placeholder)</span></pre>
+  <div class="callout warn"><b>::first-child n'existe pas</b>Il y a <code>:first-child</code> (pseudo-classe, un seul deux-points, leçon 11) et <code>::first-line</code> / <code>::first-letter</code> (pseudo-éléments). Le chip <code>p::first-child</code> de l'atelier te montre ce qui se passe : sélecteur invalide, donc le navigateur ignore la règle entière.</div>
+</section>
+
+<!-- ============ 13 ============ -->
+<section class="lesson" id="s13">
+  <div class="lesson-head"><span class="num">13</span><h2>Le sélecteur universel</h2><span class="syntax">*</span></div>
+  <div class="prose"><p>L'étoile veut dire « n'importe quel élément ». Seule, elle attrape tout. Combinée, elle sert de joker : <code>.box *</code> = tout ce qui est dans <code>.box</code>, <code>.box &gt; *</code> = tous ses enfants directs.</p></div>
+  <div data-lab="L13"></div>
+  <div class="callout"><b>Le classique que tu as sûrement déjà vu</b><code>*, *::before, *::after { box-sizing: border-box; }</code> applique le même calcul de taille à absolument tous les éléments et à leurs pseudo-éléments.</div>
+</section>
+
+<!-- ============ 14 ============ -->
+<section class="lesson" id="s14">
+  <div class="lesson-head"><span class="num">14</span><h2>Groupement : la virgule</h2><span class="syntax">h1, h2, h3</span></div>
+  <div class="prose"><p>La virgule veut dire <b>OU</b>. <code>h1, h2, h3</code> est un raccourci pour écrire trois règles qui ont le même contenu. Chaque morceau entre les virgules est un sélecteur <b>complet et indépendant</b>.</p></div>
+  <div data-lab="L14"></div>
+<pre class="ascii">.card h1, h2         se coupe en :   <span class="a-sel">.card h1</span>   OU   <span class="a-no">h2</span>  ← n'importe quel h2 de la page !
+.card h1, .card h2   se coupe en :   <span class="a-sel">.card h1</span>   OU   <span class="a-sel">.card h2</span></pre>
+</section>
+
+<!-- ============ 15 ============ -->
+<section class="lesson" id="s15">
+  <div class="lesson-head"><span class="num">15</span><h2>La grande comparaison</h2><span class="syntax">.parent .child · &gt; · .parent.child · + · ~</span></div>
+  <div class="prose"><p>Un seul HTML, cinq sélecteurs qui ne diffèrent que par ce qu'il y a <b>entre</b> <code>.parent</code> et <code>.child</code>. Clique sur chacun.</p></div>
+  <div data-lab="L15"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Sélecteur</th><th>Se lit</th><th>Relation</th><th>Résultat ici</th></tr>
+    <tr><td><code>.parent .child</code></td><td>un .child quelque part dans un .parent</td><td>descendant</td><td>A, B</td></tr>
+    <tr><td><code>.parent &gt; .child</code></td><td>un .child directement dans un .parent</td><td>enfant direct</td><td>A</td></tr>
+    <tr><td><code>.parent.child</code></td><td>un élément qui a les deux classes</td><td><b>même élément</b></td><td>E</td></tr>
+    <tr><td><code>.parent + .child</code></td><td>un .child juste après un .parent</td><td>frère adjacent</td><td>C</td></tr>
+    <tr><td><code>.parent ~ .child</code></td><td>un .child après un .parent</td><td>frères suivants</td><td>C, D, E</td></tr>
+  </table></div>
+<pre class="ascii"><span class="a-dim">l'arbre                               .parent␣.child  &gt;   .parent.child   +   ~</span>
+<span class="a-ref">div.parent</span>  (1er)
+ ├── p.child « A »                    <span class="a-ok">✔</span>           <span class="a-ok">✔</span>
+ └── div
+      └── p.child « B »               <span class="a-ok">✔</span>
+p.child « C »                                                          <span class="a-ok">✔</span>   <span class="a-ok">✔</span>
+p.child « D »                                                              <span class="a-ok">✔</span>
+div.parent.child « E »                                <span class="a-ok">✔</span>                <span class="a-ok">✔</span></pre>
+  <div class="callout"><b>Pourquoi E est pris par ~</b>E a la classe <code>.child</code> et vient après le premier <code>.parent</code> (même parent : la page). Le fait que E soit aussi un <code>.parent</code> n'empêche rien.</div>
+</section>
+
+<div class="part">
+  <div class="kicker">Partie 2</div>
+  <h2>SCSS : la même chose, écrite en imbriqué</h2>
+  <p>SCSS n'invente aucun sélecteur. Le compilateur Sass (lancé par Angular CLI à chaque build) <b>aplatit</b> ton code imbriqué en sélecteurs CSS de la partie 1. Le navigateur ne voit jamais de SCSS.</p>
+</div>
+
+<!-- ============ 16 ============ -->
+<section class="lesson" id="s16">
+  <div class="lesson-head"><span class="num">16</span><h2>Le symbole &amp;, très clairement</h2><span class="syntax">&amp; = « le sélecteur parent, copié ici »</span></div>
+<pre class="ascii">fichier .scss (imbriqué) ──[ Sass, au build ]──▶ fichier .css (plat) ──▶ navigateur</pre>
+  <div class="prose"><p>Toute la transformation tient en <b>deux règles</b>. Retiens-les, elles expliquent 100 % des cas.</p></div>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>Règle 1 · pas de &amp;</span></div><pre class="ascii" style="margin:0;border:0;border-radius:0">PARENT <span class="spc">␣</span> SÉLECTEUR
+
+Sass colle le parent devant,
+puis <b>ajoute un espace</b>.
+→ relation <b>descendant</b></pre></div>
+    <div class="cblock"><div class="cap"><span>Règle 2 · avec &amp;</span></div><pre class="ascii" style="margin:0;border:0;border-radius:0">chaque <span class="a-amp">&amp;</span> ← PARENT complet
+
+Sass remplace le &amp; par le parent,
+<b>exactement à cet endroit</b>,
+et n'ajoute <b>rien d'autre</b>.</pre></div>
+  </div>
+  <div class="prose"><p>Ton exemple, pas à pas. À chaque niveau, <span class="a-amp">&amp;</span> vaut le sélecteur <b>complet</b> du bloc qui l'entoure, pas seulement le dernier nom :</p></div>
+<pre class="ascii"><span class="a-ref">.parent</span> {                    → <span class="a-ref">.parent</span>
+  .child {                    → <span class="a-ref">.parent</span><span class="spc">␣</span>.child          règle 1 : pas de &amp;, donc un espace
+                                  └── ici, <span class="a-amp">&amp;</span> vaut <span class="a-sel">.parent .child</span>
+    <span class="a-amp">&amp;</span> span {}                → <span class="a-sel">.parent .child</span> span     règle 2 : &amp; remplacé, l'espace était déjà écrit
+    <span class="a-amp">&amp;</span>:hover {}              → <span class="a-sel">.parent .child</span>:hover    règle 2 : collé, donc le MÊME élément survolé
+    <span class="a-amp">&amp;</span>.active {}             → <span class="a-sel">.parent .child</span>.active   règle 2 : collé, donc le MÊME élément avec .active
+  }
+}</pre>
+  <div class="tbl"><table class="t">
+    <tr><th>SCSS écrit</th><th>CSS généré</th><th>Ce que ça cible</th></tr>
+    <tr><td><code>.child</code> dans <code>.parent</code></td><td><code>.parent .child</code></td><td>un .child descendant de .parent</td></tr>
+    <tr><td><code>&amp; span</code></td><td><code>.parent .child span</code></td><td>un span <b>à l'intérieur</b> de ce .child</td></tr>
+    <tr><td><code>&amp;:hover</code></td><td><code>.parent .child:hover</code></td><td>ce <b>même</b> .child, quand il est survolé</td></tr>
+    <tr><td><code>&amp;.active</code></td><td><code>.parent .child.active</code></td><td>ce <b>même</b> .child, s'il a aussi .active</td></tr>
+  </table></div>
+
+  <h3>Le transformateur : tape du SCSS, regarde Sass travailler</h3>
+  <div class="prose"><p>À gauche ton SCSS. À droite, chaque sélecteur imbriqué avec la règle appliquée : le parent recopié est <mark class="par">en bleu</mark>, l'espace ajouté par la règle 1 apparaît comme <span class="spc">␣</span>. En dessous, clique sur un sélecteur généré pour voir ce qu'il attrape.</p></div>
+  <div class="xf">
+    <div class="xf-col">
+      <div class="sub-cap">SCSS · modifiable</div>
+      <div class="presets" id="xf-presets" role="group" aria-label="Exemples"></div>
+      <label for="xf-src" class="sub-cap" style="position:absolute;left:-9999px">Code SCSS</label>
+      <textarea id="xf-src" spellcheck="false"></textarea>
+    </div>
+    <div class="xf-col">
+      <div class="sub-cap">Ce que fait Sass, sélecteur par sélecteur</div>
+      <ol class="trace" id="xf-trace"></ol>
+      <div class="xf-err" id="xf-err"></div>
+      <div class="sub-cap">CSS généré</div>
+      <pre class="css-out" id="xf-out"></pre>
+    </div>
+  </div>
+  <div id="xf-lab"></div>
+  <div class="callout"><b>Note</b>Sass n'écrit pas les règles vides dans le fichier final. Le transformateur les affiche quand même pour que tu voies chaque sélecteur.</div>
+</section>
+
+<!-- ============ 17 ============ -->
+<section class="lesson" id="s17">
+  <div class="lesson-head"><span class="num">17</span><h2>span {} contre &amp; span {}</h2><span class="syntax">c'est la même chose</span></div>
+  <div class="codes">
+    <div class="cblock"><div class="cap"><span>SCSS</span><span>sans &amp;</span></div><pre class="code" data-hl>.parent {
+  span { color: red; }
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>SCSS</span><span>avec &amp; et un espace</span></div><pre class="code" data-hl>.parent {
+  &amp; span { color: red; }
+}</pre></div>
+    <div class="cblock"><div class="cap"><span>CSS généré</span><span>identique</span></div><pre class="code" data-hl>.parent span {
+  color: red;
+}</pre></div>
+  </div>
+  <div class="prose">
+    <p><b>Les deux donnent exactement le même CSS</b>, dans tous les contextes. Applique les deux règles :</p>
+    <p>Sans &amp; (règle 1) : <code>.parent</code> + <span class="spc">␣</span> + <code>span</code> = <code>.parent span</code>.<br>
+    Avec &amp; (règle 2) : on remplace &amp; dans <code>&amp; span</code>, l'espace est déjà là = <code>.parent span</code>.</p>
+    <p>Écrire <code>&amp; span</code> revient donc à écrire à la main l'espace que Sass aurait ajouté tout seul. Le <code>&amp;</code> devient utile uniquement quand tu veux <b>autre chose</b> que « parent + espace » :</p>
+  </div>
+  <div class="tbl"><table class="t">
+    <tr><th>Dans <code>.parent { … }</code></th><th>CSS généré</th><th>Signification</th></tr>
+    <tr><td><code>span {}</code></td><td><code>.parent span</code></td><td>span descendant</td></tr>
+    <tr><td><code>&amp; span {}</code></td><td><code>.parent span</code></td><td>identique à la ligne du dessus</td></tr>
+    <tr><td><code>&gt; span {}</code> ou <code>&amp; &gt; span {}</code></td><td><code>.parent &gt; span</code></td><td>span enfant direct (identiques aussi)</td></tr>
+    <tr><td><code>&amp;span {}</code></td><td><code>.parentspan</code></td><td><b>une autre classe</b> : plus du tout un span !</td></tr>
+    <tr><td><code>&amp;:hover {}</code></td><td><code>.parent:hover</code></td><td>le parent lui-même, survolé</td></tr>
+    <tr><td><code>:hover {}</code></td><td><code>.parent :hover</code></td><td>n'importe quel descendant survolé</td></tr>
+    <tr><td><code>&amp;.active {}</code></td><td><code>.parent.active</code></td><td>le parent lui-même, s'il a .active</td></tr>
+    <tr><td><code>.active {}</code></td><td><code>.parent .active</code></td><td>un descendant qui a .active</td></tr>
+    <tr><td><code>span &amp; {}</code></td><td><code>span .parent</code></td><td>le parent quand il est <b>dans</b> un span (ordre inversé)</td></tr>
+  </table></div>
+  <div class="callout good"><b>La règle à retenir</b>Le <code>&amp;</code> ne change quelque chose que s'il est <b>collé</b> à ce qui suit (<code>&amp;:hover</code>, <code>&amp;.active</code>, <code>&amp;-title</code>) ou placé <b>ailleurs qu'au début</b> (<code>.dark &amp;</code>). Avec <code>&amp;</code> + espace au début, c'est du décor.</div>
+  <div data-lab="L17"></div>
+  <div class="callout"><b>Et le CSS natif ?</b>Les navigateurs récents comprennent aussi l'imbrication sans Sass. Là, <code>span {}</code> et <code>&amp; span {}</code> restent équivalents, mais <code>&amp;span</code> ou <code>&amp;-title</code> ne collent pas du texte comme Sass. Dans un projet Angular avec des fichiers <code>.scss</code>, ce sont les règles de Sass qui s'appliquent.</div>
+</section>
+
+<!-- ============ 18 ============ -->
+<section class="lesson" id="s18">
+  <div class="lesson-head"><span class="num">18</span><h2>Les erreurs classiques avec &amp;</h2></div>
+  <div class="prose"><p>Pour chaque erreur : ce qu'on écrit, ce que Sass génère vraiment, et l'effet sur un HTML. Clique sur les deux versions pour comparer.</p></div>
+  <div id="errors"></div>
+</section>
+
+<!-- ============ Angular ============ -->
+<section class="lesson" id="sng">
+  <div class="lesson-head"><span class="num">★</span><h2>Spécial Angular : pourquoi ton style « ne marche pas »</h2><span class="syntax">_ngcontent · :host · ::ng-deep</span></div>
+  <div class="prose">
+    <p>Par défaut (<code>ViewEncapsulation.Emulated</code>), Angular ajoute un attribut unique à chaque balise de ton template, puis réécrit chaque morceau de tes sélecteurs pour exiger cet attribut. C'est un sélecteur d'attribut (leçon 10) collé à chaque morceau (leçon 9).</p>
+  </div>
+<pre class="ascii"><span class="a-dim">Ce que tu écris dans parent.component.scss</span>
+.wrapper span { color: red; }
+
+<span class="a-dim">Ce qu'Angular envoie au navigateur (attribut réel : _ngcontent-ng-c1234567)</span>
+.wrapper<span class="a-sel">[_ngcontent-p]</span> span<span class="a-sel">[_ngcontent-p]</span> { color: red; }
+         └── seulement les balises écrites dans le template du PARENT
+
+app-child  ← reçoit _nghost-c (son « :host ») et _ngcontent-p (il est dans le template du parent)
+  └── span ← reçoit _ngcontent-c : <span class="a-no">pas _ngcontent-p</span>, donc la règle du parent ne l'atteint pas</pre>
+  <div data-lab="LNG"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Dans le SCSS du composant</th><th>Vise</th></tr>
+    <tr><td><code>:host</code></td><td>la balise du composant elle-même (<code>&lt;app-child&gt;</code>)</td></tr>
+    <tr><td><code>:host(.active)</code></td><td><code>&lt;app-child class="active"&gt;</code></td></tr>
+    <tr><td><code>:host-context(.theme-dark)</code></td><td>le composant quand un ancêtre a <code>.theme-dark</code></td></tr>
+    <tr><td><code>:host ::ng-deep .x</code></td><td><code>.x</code> n'importe où sous le composant, y compris dans ses composants enfants (déprécié mais encore très répandu)</td></tr>
+  </table></div>
+  <div class="codes">
+    <div class="cblock"><div class="cap" style="color:var(--bad)"><span>✗ Piège avec &amp;</span></div><pre class="code" data-hl>:host {
+  &amp;.active { border: 1px solid; }
+}
+/* devient :host.active
+   → ne correspond jamais */</pre></div>
+    <div class="cblock"><div class="cap" style="color:var(--ok)"><span>✓ Correct</span></div><pre class="code" data-hl>:host(.active) {
+  border: 1px solid;
+}
+:host {
+  .title { font-weight: 600; }
+  /* → :host .title : OK */
+}</pre></div>
+  </div>
+</section>
+
+<!-- ============ 19 ============ -->
+<section class="lesson" id="s19">
+  <div class="lesson-head"><span class="num">19</span><h2>Le grand récapitulatif</h2></div>
+<pre class="ascii"><b>SÉLECTEUR</b>
+    │
+    ├── élément ............. p                 toutes les balises &lt;p&gt;
+    ├── classe .............. .card             class="… card …"
+    ├── ID .................. #header           id="header"  (unique, très lourd)
+    ├── universel ........... *                 n'importe quel élément
+    │
+    ├── <span class="a-sel">même élément</span> ........ .a.b   div.a     <b>COLLÉ</b>   toutes les conditions sur 1 seul élément
+    ├── descendant .......... .a .b             <b>ESPACE</b>  dedans, toute profondeur
+    ├── enfant direct ....... .a &gt; .b           <b>&gt;</b>       dedans, exactement 1 niveau
+    ├── frère adjacent ...... .a + .b           <b>+</b>       juste après, même parent
+    ├── frères suivants ..... .a ~ .b           <b>~</b>       tous ceux d'après, même parent
+    ├── groupement .......... .a, .b            <b>,</b>       OU : sélecteurs indépendants
+    │
+    ├── attribut ............ [attr]            présent
+    │     ├── [attr="v"]                        égal
+    │     ├── [attr^="v"]                       commence par
+    │     ├── [attr$="v"]                       finit par
+    │     └── [attr*="v"]                       contient
+    │
+    ├── pseudo-classe ....... <b>:</b>               condition sur le même élément
+    │     ├── état            :hover :focus :active
+    │     ├── position        :first-child :last-child :nth-child(2n) :nth-of-type(1)
+    │     └── logique         :not(.x)  :has(img)
+    │
+    └── pseudo-élément ...... <b>::</b>              une partie de l'élément
+          └──                 ::before ::after ::first-letter ::first-line ::placeholder
+
+<b>SCSS</b> (imbrication, compilée en CSS ci-dessus)
+    │
+    ├── .a { .b {} }         →  .a .b        pas de &amp; : parent + ESPACE
+    ├── .a { &gt; .b {} }       →  .a &gt; .b
+    ├── .a { + .b {} }       →  .a + .b
+    ├── .a { <span class="a-amp">&amp;</span> .b {} }       →  .a .b        identique à la 1re ligne
+    ├── .a { <span class="a-amp">&amp;</span>.b {} }        →  .a.b         COLLÉ : même élément
+    ├── .a { <span class="a-amp">&amp;</span>:hover {} }    →  .a:hover     même élément, survolé
+    ├── .a { <span class="a-amp">&amp;</span>::before {} }  →  .a::before
+    ├── .a { <span class="a-amp">&amp;</span>-b {} }        →  .a-b         collage de texte (BEM)
+    ├── .a { .x <span class="a-amp">&amp;</span> {} }       →  .x .a        &amp; ailleurs : parent déplacé
+    └── .a, .b { .c {} }     →  .a .c, .b .c chaque parent × chaque enfant</pre>
+</section>
+
+<!-- ============ 20 ============ -->
+<section class="lesson" id="s20">
+  <div class="lesson-head"><span class="num">20</span><h2>Exercices : à toi de sélectionner</h2></div>
+  <div class="prose"><p>Pour chaque exercice, clique sur les boîtes (ou les lignes de HTML) que le sélecteur va attraper, puis « Vérifier ». Les réponses sont calculées par le navigateur lui-même. La difficulté augmente progressivement, et les quatre derniers sont en SCSS.</p></div>
+  <div class="scorebar"><span>Réussis : <b class="score-n">0</b> / <span class="score-t">16</span></span><div class="meter" aria-hidden="true"><i id="meter"></i></div></div>
+  <div id="exercises"></div>
+</section>
+
+<footer>Tous les surlignages sont calculés en direct avec <code>querySelectorAll</code> du navigateur. Le transformateur SCSS reproduit les règles d'imbrication et de <code>&amp;</code> de Sass (pas les variables ni les mixins).</footer>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var clean=function(t){return t.replace(/\s+/g,' ');};
+var VOID=new Set(['input','img','br','hr','meta','link']);
+var INLINE=new Set(['span','a','em','strong','b','i','code','small','label','img','input','button','mark']);
+
+/* ---------- Parsing ---------- */
+function parse(html){
+  var doc=new DOMParser().parseFromString('<!doctype html><html><body>'+html+'</body></html>','text/html');
+  var body=doc.body, n=0;
+  body._all=Array.prototype.slice.call(body.querySelectorAll('*'));
+  body._all.forEach(function(el){el._i=n++;});
+  return body;
+}
+
+/* ---------- Rendu code ---------- */
+function attrsHTML(el){
+  return Array.prototype.map.call(el.attributes,function(a){
+    return ' <span class="s-attr">'+esc(a.name)+'</span>'+(a.value!==''?'<span class="s-p">=</span><span class="s-val">"'+esc(a.value)+'"</span>':'');
+  }).join('');
+}
+function openTag(el){return '<span class="s-p">&lt;</span><span class="s-tag">'+el.localName+'</span>'+attrsHTML(el)+'<span class="s-p">&gt;</span>';}
+function closeTag(el){return '<span class="s-p">&lt;/</span><span class="s-tag">'+el.localName+'</span><span class="s-p">&gt;</span>';}
+function inlineable(el){
+  if(VOID.has(el.localName)) return true;
+  for(var k=0;k<el.children.length;k++){var c=el.children[k]; if(!INLINE.has(c.localName)||c.children.length) return false;}
+  return clean(el.outerHTML).length<=74;
+}
+function inlineHTML(el){
+  var s='<span class="el" data-i="'+el._i+'">'+openTag(el);
+  if(VOID.has(el.localName)) return s+'</span>';
+  var nodes=el.childNodes;
+  for(var k=0;k<nodes.length;k++){
+    var n=nodes[k];
+    if(n.nodeType===3){var t=clean(n.textContent); if(k===0) t=t.replace(/^ /,''); if(k===nodes.length-1) t=t.replace(/ $/,''); if(t) s+='<span class="s-text">'+esc(t)+'</span>';}
+    else if(n.nodeType===1) s+=inlineHTML(n);
+  }
+  return s+closeTag(el)+'</span>';
+}
+function renderCode(body){
+  var out=[];
+  function walk(el,d){
+    if(inlineable(el)){out.push({i:el._i,d:d,h:inlineHTML(el)});return;}
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+openTag(el)+'</span>'});
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) out.push({i:null,d:d+1,h:'<span class="s-text">'+esc(t)+'</span>'});}
+      else if(n.nodeType===1) walk(n,d+1);
+    });
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+closeTag(el)+'</span>'});
+  }
+  Array.prototype.forEach.call(body.children,function(el){walk(el,0);});
+  return out.map(function(l){return '<div class="ln"'+(l.i!==null?' data-li="'+l.i+'"':'')+'><span class="gut"></span><span class="lc">'+'  '.repeat(l.d)+l.h+'</span></div>';}).join('');
+}
+
+/* ---------- Rendu boîtes ---------- */
+function boxHTML(el){
+  var elKids=Array.prototype.slice.call(el.children);
+  var inline=elKids.length>0&&elKids.every(function(c){return INLINE.has(c.localName);});
+  var label='<span class="s-tag">'+el.localName+'</span>'+(el.id?'<span class="s-id">#'+esc(el.id)+'</span>':'')+
+    Array.prototype.map.call(el.classList,function(c){return '<span class="s-cls">.'+esc(c)+'</span>';}).join('')+
+    Array.prototype.filter.call(el.attributes,function(a){return a.name!=='class'&&a.name!=='id';}).map(function(a){return '<span class="s-attrb">&nbsp;['+esc(a.name)+(a.value!==''?'="'+esc(a.value)+'"':'')+']</span>';}).join('');
+  var head, kids='';
+  if(!elKids.length){
+    var t=clean(el.textContent).trim();
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span>'+(t?'<span class="bx-text">'+esc(t)+'</span>':'')+'<span class="bx-badges"></span></div>';
+  } else {
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span><span class="bx-badges"></span></div>';
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) kids+='<span class="bx-text">'+esc(t)+'</span>';}
+      else if(n.nodeType===1) kids+=boxHTML(n);
+    });
+    kids='<div class="bx-kids">'+kids+'</div>';
+  }
+  return '<div class="bx'+(inline?' bx-inl':'')+'" data-i="'+el._i+'">'+head+kids+'</div>';
+}
+function renderBoxes(body){return Array.prototype.map.call(body.children,boxHTML).join('');}
+
+/* ---------- Analyse de sélecteur ---------- */
+function splitTop(sel){
+  var out=[],cur='',d=0,q=null;
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(ch===','&&d===0){out.push(cur.trim());cur='';continue;}
+    cur+=ch;
+  }
+  if(cur.trim())out.push(cur.trim());
+  return out;
+}
+function tokenize(sel){
+  var parts=[],cur='',d=0,q=null,sp=false;
+  sel=sel.trim();
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(d===0&&/\s/.test(ch)){if(cur){parts.push(cur);cur='';}sp=true;continue;}
+    if(d===0&&'>+~'.indexOf(ch)>=0){if(cur){parts.push(cur);cur='';}parts.push({c:ch});sp=false;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(sp){if(parts.length&&typeof parts[parts.length-1]==='string'&&!cur)parts.push({c:' '});sp=false;}
+    cur+=ch;
+  }
+  if(cur)parts.push(cur);
+  return parts;
+}
+function joinTok(t){return t.map(function(x){return typeof x==='string'?x:(x.c===' '?' ':' '+x.c+' ');}).join('').trim();}
+var PE=/::?(before|after|first-letter|first-line|placeholder|marker|selection)(?![\w-])/g;
+var ST=/:(hover|focus-visible|focus-within|focus|active|visited)(?![\w-])/g;
+function prep(g){
+  var pseudo=null,states=[];
+  var s=g.replace(PE,function(m,n){pseudo=n;return '\u0000';}).replace(ST,function(m,n){states.push(':'+n);return '\u0000';});
+  s=s.replace(/(^|[\s>+~(,])\u0000+/g,'$1*').replace(/\u0000/g,'');
+  return {s:s.trim(),pseudo:pseudo,states:states};
+}
+function extractHas(comp){
+  var k=comp.indexOf(':has('); if(k<0) return null;
+  var d=0; for(var j=k+4;j<comp.length;j++){ if(comp[j]==='(')d++; else if(comp[j]===')'){d--; if(d===0) return comp.slice(k+5,j).trim();} }
+  return null;
+}
+function anchors(el,comb,left,body){
+  var out=[], m=function(x){try{return x.matches(left);}catch(e){return false;}}, p;
+  if(comb===' '){for(p=el.parentElement;p&&p!==body;p=p.parentElement) if(m(p)) out.push(p);}
+  else if(comb==='>'){p=el.parentElement; if(p&&p!==body&&m(p)) out.push(p);}
+  else if(comb==='+'){p=el.previousElementSibling; if(p&&m(p)) out.push(p);}
+  else if(comb==='~'){for(p=el.previousElementSibling;p;p=p.previousElementSibling) if(m(p)) out.push(p);}
+  return out;
+}
+var FRAG=document.createDocumentFragment();
+function evaluate(body,sel){
+  var r={sel:sel,error:null,matched:new Set(),refs:new Map(),pseudo:null,states:[]};
+  var raw=(sel||'').trim();
+  if(!raw){r.error='empty';return r;}
+  if(raw.indexOf('&')>=0){r.error='amp';return r;}
+  var groups=splitTop(raw);
+  for(var gi=0;gi<groups.length;gi++){
+    var g=groups[gi];
+    try{FRAG.querySelector(g);}catch(e){r.error='invalid';return r;}
+    var p=prep(g), els;
+    try{ if(!p.s) throw 0; els=Array.prototype.slice.call(body.querySelectorAll(p.s)); }catch(e){r.error='invalid';return r;}
+    els.forEach(function(el){r.matched.add(el);});
+    if(p.pseudo) r.pseudo=p.pseudo;
+    p.states.forEach(function(s){if(r.states.indexOf(s)<0) r.states.push(s);});
+    var toks=tokenize(p.s);
+    if(toks.length>=3&&typeof toks[toks.length-2]==='object'){
+      var comb=toks[toks.length-2].c, left=joinTok(toks.slice(0,-2));
+      els.forEach(function(el){anchors(el,comb,left,body).forEach(function(a){if(!r.refs.has(a)) r.refs.set(a,'repère');});});
+    }
+    var last=toks[toks.length-1], has=typeof last==='string'?extractHas(last):null;
+    if(has&&!/:not\(/.test(last)){
+      els.forEach(function(el){try{
+        var found=/^>/.test(has)?el.querySelectorAll(':scope '+has):(/^[+~]/.test(has)?[]:el.querySelectorAll(has));
+        Array.prototype.forEach.call(found,function(f){r.refs.set(f,'condition');});
+      }catch(e){}});
+    }
+  }
+  return r;
+}
+
+/* ---------- Lecture en français ---------- */
+var PC={hover:'survolé par la souris',focus:'qui a le focus (clic ou Tab)','focus-visible':'qui a le focus clavier','focus-within':"qui contient l'élément qui a le focus",active:"pendant qu'on clique dessus",visited:'déjà visité',
+'first-child':'qui est le premier enfant de son parent','last-child':'qui est le dernier enfant de son parent','only-child':'qui est le seul enfant de son parent',
+'first-of-type':'qui est le premier de sa balise parmi ses frères','last-of-type':'qui est le dernier de sa balise parmi ses frères',
+empty:'vide',checked:'coché',disabled:'désactivé',enabled:'activé',root:'racine du document','placeholder-shown':'dont le placeholder est visible'};
+var PEL={before:'le pseudo-élément ::before (contenu ajouté au début, à l\'intérieur)',after:'le pseudo-élément ::after (contenu ajouté à la fin, à l\'intérieur)','first-letter':'la première lettre','first-line':'la première ligne',placeholder:"le texte d'aide (placeholder)",marker:'la puce',selection:'le texte sélectionné'};
+function ord(n){return n===1?'1er':n+'e';}
+function nth(arg,ofType){
+  var a=arg.trim().toLowerCase().replace(/\s+/g,'');
+  var scope=ofType?'parmi les frères de même balise':'parmi les enfants de son parent';
+  if(/^\d+$/.test(a)) return 'qui est le '+ord(+a)+' '+scope;
+  if(a==='odd'||a==='2n+1') return 'de rang impair (1er, 3e, 5e…) '+scope;
+  if(a==='even'||a==='2n') return 'de rang pair (2e, 4e, 6e…) '+scope;
+  var m=a.match(/^([+-]?\d*)n([+-]\d+)?$/);
+  if(m){
+    var A=(m[1]===''||m[1]==='+')?1:(m[1]==='-'?-1:parseInt(m[1],10)), B=m[2]?parseInt(m[2],10):0, ranks=[];
+    for(var n=0;n<40&&ranks.length<5;n++){var v=A*n+B; if(v>=1) ranks.push(v); else if(A<=0) break;}
+    ranks.sort(function(x,y){return x-y;});
+    return 'dont le rang '+scope+' vaut '+ranks.join(', ')+(A>0?'…':'');
+  }
+  return 'qui correspond à la formule <code>'+esc(arg)+'</code> '+scope;
+}
+function attrPhrase(n,op,v){
+  var N='<code>'+esc(n)+'</code>', V='<code>"'+esc(v)+'"</code>';
+  if(!op) return "qui a l'attribut "+N;
+  return {'=':'dont '+N+' vaut exactement '+V,'^=':'dont '+N+' commence par '+V,'$=':'dont '+N+' finit par '+V,'*=':'dont '+N+' contient '+V,'~=':'dont '+N+' contient le mot '+V,'|=':'dont '+N+' vaut '+V+' ou commence par « '+esc(v)+'- »'}[op];
+}
+function describeCompound(c){
+  var rest=c, tag=null, cls=[], ids=[], bits=[], pel=null, m, guard=0;
+  m=rest.match(/^(\*|[a-zA-Z][\w-]*)/); if(m){tag=m[1];rest=rest.slice(m[0].length);}
+  while(rest&&guard++<30){
+    if((m=rest.match(/^#([\w-]+)/))) ids.push(m[1]);
+    else if((m=rest.match(/^\.([\w-]+)/))) cls.push(m[1]);
+    else if((m=rest.match(/^\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\]\s]+))\s*)?\]/))) bits.push(attrPhrase(m[1],m[2],m[3]!=null?m[3]:(m[4]!=null?m[4]:m[5])));
+    else if((m=rest.match(/^(::?)([\w-]+)(\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\))?/))){
+      var name=m[2].toLowerCase(), arg=m[3]?m[3].slice(1,-1):null;
+      if(m[1]==='::'||(['before','after','first-letter','first-line'].indexOf(name)>=0)) pel=PEL[name]||('::'+esc(name));
+      else if(name==='nth-child') bits.push(nth(arg,false));
+      else if(name==='nth-of-type') bits.push(nth(arg,true));
+      else if(name==='not') bits.push('qui ne correspond PAS à <code>'+esc(arg)+'</code>');
+      else if(name==='has') bits.push('qui contient <code>'+esc(arg)+'</code>');
+      else if(name==='is'||name==='where') bits.push("qui correspond à l'un de <code>"+esc(arg)+'</code>');
+      else if(PC[name]) bits.push(PC[name]);
+      else bits.push('<code>:'+esc(name)+(arg!==null?'('+esc(arg)+')':'')+'</code>');
+    }
+    else return null;
+    rest=rest.slice(m[0].length);
+  }
+  var head=tag==='*'?"n'importe quel élément":(tag?'un <code>&lt;'+esc(tag)+'&gt;</code>':'un élément');
+  var parts=[];
+  if(ids.length) parts.push("avec l'id <code>#"+esc(ids[0])+'</code>');
+  if(cls.length===1) parts.push('avec la classe <code>.'+esc(cls[0])+'</code>');
+  else if(cls.length>1) parts.push('avec les classes '+cls.map(function(x){return '<code>.'+esc(x)+'</code>';}).join(' ET '));
+  parts=parts.concat(bits);
+  return {s:head+(parts.length?' '+parts.join(', '):''),pel:pel};
+}
+function describeGroup(g){
+  var toks=tokenize(g); if(!toks.length) return null;
+  var last=toks[toks.length-1]; if(typeof last!=='string') return null;
+  var d=describeCompound(last); if(!d) return null;
+  var out=d.s;
+  for(var k=toks.length-2;k>=1;k-=2){
+    var c=toks[k].c, prev=toks[k-1]; if(typeof prev!=='string') return null;
+    var pd=describeCompound(prev); if(!pd) return null;
+    var rel={' ':"qui se trouve quelque part à l'intérieur de",'>':"qui est l'enfant direct de",'+':'placé juste après','~':'placé après (même parent)'}[c];
+    out+=', '+rel+' '+pd.s;
+  }
+  out=out.replace(/ de un /g," d'un ");
+  if(d.pel) out='cible '+d.pel+' de : '+out;
+  return out;
+}
+function describe(sel){
+  var gs=splitTop(sel), res=[];
+  for(var k=0;k<gs.length;k++){var d=describeGroup(gs[k]); if(!d) return null; res.push(d.charAt(0).toUpperCase()+d.slice(1));}
+  return res.join('<br><b>OU</b> ');
+}
+function short(el){
+  var s=el.localName+(el.id?'#'+el.id:'')+Array.prototype.map.call(el.classList,function(c){return '.'+c;}).join('');
+  var t=clean(el.textContent).trim();
+  if(!t&&el.getAttribute('placeholder')) t=el.getAttribute('placeholder');
+  if(t) s+=' « '+(t.length>22?t.slice(0,21)+'…':t)+' »';
+  return s;
+}
+
+/* ---------- Surlignage ---------- */
+function addBadge(bx,text,cls){
+  var b=bx.querySelector(':scope > .bx-head > .bx-badges'); if(!b) return;
+  var s=document.createElement('span'); s.className='badge '+cls; s.textContent=text; b.appendChild(s);
+}
+function q(root,i){return root.querySelectorAll('[data-i="'+i+'"]');}
+function apply(root,r){
+  root.querySelectorAll('.sel,.ref,.cand').forEach(function(e){e.classList.remove('sel','ref','cand');});
+  root.querySelectorAll('.ln').forEach(function(l){l.classList.remove('on-sel','on-ref','on-cand');});
+  root.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+  root.querySelectorAll('.ghost').forEach(function(g){g.remove();});
+  if(r.error) return;
+  var special=r.states.length||r.pseudo, mk=special?'cand':'sel';
+  r.matched.forEach(function(el){
+    q(root,el._i).forEach(function(n){
+      n.classList.add(mk);
+      if(n.classList.contains('bx')) addBadge(n,special?(r.states.length?r.states.join(' '):'::'+r.pseudo):'✓ sélectionné',special?'b-cand':'b-sel');
+    });
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-'+mk);});
+    if(r.pseudo==='before'||r.pseudo==='after'){
+      root.querySelectorAll('.bx[data-i="'+el._i+'"]').forEach(function(bx){
+        var gh=document.createElement('div'); gh.className='ghost'; gh.textContent='::'+r.pseudo+' (contenu ajouté)';
+        var head=bx.querySelector(':scope > .bx-head');
+        if(r.pseudo==='before') bx.insertBefore(gh,head.nextSibling); else bx.appendChild(gh);
+      });
+    }
+  });
+  r.refs.forEach(function(label,el){
+    q(root,el._i).forEach(function(n){n.classList.add('ref'); if(n.classList.contains('bx')) addBadge(n,label,'b-ref');});
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-ref');});
+  });
+}
+function hoverSync(panes){
+  var cur=null;
+  function set(i){
+    if(cur!==null) q(panes,cur).forEach(function(n){n.classList.remove('hov');});
+    cur=i; if(i!==null) q(panes,i).forEach(function(n){n.classList.add('hov');});
+  }
+  panes.addEventListener('mouseover',function(e){var t=e.target.closest('[data-i]'); set(t?t.getAttribute('data-i'):null);});
+  panes.addEventListener('mouseleave',function(){set(null);});
+}
+
+/* ---------- Atelier ---------- */
+function Lab(host,cfg,key){
+  var id='in-'+key;
+  host.classList.add('lab');
+  host.innerHTML='<div class="lab-top"><div class="chips" role="group" aria-label="Sélecteurs à essayer"></div>'+
+    '<div class="try"><label for="'+id+'">Ton sélecteur</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
+    '<div class="lab-panes'+(cfg.compact?' compact':'')+'"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code"></div></div>'+
+    '<div class="pane pane-box"><div class="pane-cap">Aperçu en boîtes · une boîte = une balise</div><div class="boxes"></div></div></div>'+
+    '<div class="lab-foot"><div class="read"></div><div class="verdict" role="status"></div><pre class="rule"></pre></div>';
+  var chipsEl=host.querySelector('.chips'), input=host.querySelector('input'), codeEl=host.querySelector('.code'), boxesEl=host.querySelector('.boxes'),
+      readEl=host.querySelector('.read'), verdictEl=host.querySelector('.verdict'), ruleEl=host.querySelector('.rule'), panes=host.querySelector('.lab-panes');
+  var body, chips=[];
+  hoverSync(panes);
+  function setHTML(html){body=parse(html);codeEl.innerHTML=renderCode(body);boxesEl.innerHTML=renderBoxes(body);}
+  function setChips(list){
+    chips=list;
+    chipsEl.innerHTML=list.map(function(c,k){return '<button type="button" class="chip" data-k="'+k+'" aria-pressed="false">'+esc(c.label||c.sel)+'</button>';}).join('');
+  }
+  function syncPressed(){
+    var v=input.value.trim();
+    chipsEl.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',chips[+b.getAttribute('data-k')].sel===v?'true':'false');});
+  }
+  function update(){
+    var sel=input.value, r=evaluate(body,sel);
+    apply(panes,r); syncPressed();
+    var k=-1; for(var j=0;j<chips.length;j++) if(chips[j].sel===sel.trim()) {k=j;break;}
+    var note=k>=0&&chips[k].note?'<div style="margin-top:4px">'+chips[k].note+'</div>':'';
+    if(r.error==='empty'){readEl.innerHTML='';verdictEl.innerHTML='Tape un sélecteur, ou clique sur un des exemples.';ruleEl.textContent='';return;}
+    if(r.error==='amp'){readEl.innerHTML='';verdictEl.innerHTML='<span class="err">Le &amp; n\'existe pas dans un sélecteur CSS classique.</span> C\'est une notation SCSS : voir la partie 2.';ruleEl.textContent='';return;}
+    if(r.error==='invalid'){readEl.innerHTML=note;verdictEl.innerHTML='<span class="err">Sélecteur invalide.</span> Le navigateur ignorerait toute la règle.';ruleEl.textContent='';return;}
+    var d=describe(sel.trim());
+    readEl.innerHTML=(d?'<b>Lecture :</b> '+d+'.':'')+note;
+    var list=body._all.filter(function(el){return r.matched.has(el);});
+    var special=r.states.length||r.pseudo, n=list.length, msg;
+    if(!n) msg='<b>Aucun élément</b> ne correspond.';
+    else if(r.states.length) msg='<b>'+n+' candidat'+(n>1?'s':'')+'</b> : stylé'+(n>1?'s':'')+' seulement pendant '+r.states.join(', ')+'.';
+    else if(r.pseudo) msg='<b>'+n+' élément'+(n>1?'s':'')+' hôte'+(n>1?'s':'')+'</b> : le style vise '+(PEL[r.pseudo]||'::'+r.pseudo)+' de '+(n>1?'chacun':'cet élément')+'.';
+    else msg='<b>'+n+' élément'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'')+'</b> :';
+    verdictEl.innerHTML=msg+' '+list.map(function(el){return '<span class="pill'+(special?' c':'')+'">'+esc(short(el))+'</span>';}).join('');
+    ruleEl.innerHTML='<span class="sx">'+esc(sel.trim())+'</span> {\n  background: jaune;   /* la règle CSS complète */\n}';
+  }
+  function select(k){input.value=chips[k].sel;update();}
+  chipsEl.addEventListener('click',function(e){var b=e.target.closest('.chip'); if(b) select(+b.getAttribute('data-k'));});
+  input.addEventListener('input',update);
+  setHTML(cfg.html); setChips(cfg.chips||[]);
+  if(chips.length) select(cfg.start||0); else update();
+  return {setHTML:setHTML,setChips:setChips,select:select,update:update};
+}
+
+/* ---------- Coloration du code statique ---------- */
+function hl(text){
+  var s=esc(text);
+  s=s.replace(/\/\*[\s\S]*?\*\//g,function(m){return '<span class="cm">'+m+'</span>';});
+  s=s.replace(/(^|[\s{;])([a-z-]+)(:\s)/g,'$1<span class="pr">$2</span>$3');
+  s=s.replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  s=s.replace(/([{}])/g,'<span class="br">$1</span>');
+  return s;
+}
+
+/* ---------- Mini compilateur Sass (imbrication + &) ---------- */
+function compile(src){
+  src=src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:"'])\/\/.*$/gm,'$1');
+  var i=0;
+  function block(){
+    var node={decls:[],kids:[]}, buf='';
+    while(i<src.length){
+      var ch=src[i++];
+      if(ch==='{'){var k=block(); k.raw=buf.trim().replace(/\s+/g,' '); buf=''; node.kids.push(k);}
+      else if(ch==='}'){if(buf.trim()) node.decls.push(buf.trim()); return node;}
+      else if(ch===';'){if(buf.trim()) node.decls.push(buf.trim()); buf='';}
+      else buf+=ch;
+    }
+    return node;
+  }
+  var root=block(), rules=[], errors=[];
+  function walk(node,parents,depth){
+    node.kids.forEach(function(k){
+      var parts=splitTop(k.raw||''), sel=[], trace=[];
+      parts.forEach(function(part){
+        if(!parents){
+          if(part.indexOf('&')>=0) errors.push('« '+part+' » : un & au premier niveau n\'a pas de parent à recopier (Sass refuse).');
+          sel.push(part); trace.push({kind:'root',part:part,res:part}); return;
+        }
+        parents.forEach(function(p){
+          var res;
+          if(part.indexOf('&')>=0){res=part.replace(/&/g,function(){return p;}); trace.push({kind:'amp',part:part,parent:p,res:res});}
+          else {res=p+' '+part; trace.push({kind:'space',part:part,parent:p,res:res});}
+          sel.push(res);
+        });
+      });
+      rules.push({sel:sel,decls:k.decls,depth:depth,trace:trace});
+      walk(k,sel,depth+1);
+    });
+  }
+  walk(root,null,0);
+  return {rules:rules,errors:errors};
+}
+function cssText(rules){
+  return rules.map(function(r){
+    return r.sel.join(',\n')+' {'+(r.decls.length?'\n'+r.decls.map(function(d){return '  '+d+';';}).join('\n')+'\n':' ')+'}';
+  }).join('\n\n');
+}
+function traceHTML(t){
+  var P='<mark class="par">'+esc(t.parent||'')+'</mark>';
+  if(t.kind==='root') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-root">premier niveau</span></div><div class="tr-how">Pas de parent : reste tel quel.</div><div class="tr-res">'+esc(t.res)+'</div></li>';
+  if(t.kind==='space') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-sp">pas de &amp; · règle 1</span></div><div class="tr-how">parent + espace + sélecteur</div><div class="tr-res">'+P+'<span class="spc">␣</span>'+esc(t.part)+'</div></li>';
+  var src=esc(t.part).replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  var res=esc(t.part).replace(/&amp;/g,P);
+  return '<li class="tr"><div class="tr-src"><code>'+src+'</code><span class="tg tg-amp">contient &amp; · règle 2</span></div><div class="tr-how"><span class="amp">&amp;</span> ← <code>'+esc(t.parent)+'</code>, rien d\'autre n\'est ajouté</div><div class="tr-res">'+res+'</div></li>';
+}
+
+/* ---------- Données des ateliers ---------- */
+var LABS={
+L1:{html:'<div class="card">\n<h2>Titre</h2>\n<p>Premier paragraphe avec un <span>mot</span>.</p>\n<p>Deuxième paragraphe.</p>\n</div>\n<span>Un span seul</span>',
+ chips:[{sel:'p',note:'Les deux paragraphes. Le fait qu\'ils soient dans une div ne change rien.'},{sel:'span',note:'Le span caché dans le paragraphe ET le span isolé : la position ne compte pas.'},{sel:'div'},{sel:'h2'}]},
+L2:{html:'<div class="parent">\n<p class="child">Enfant 1</p>\n<p>Sans classe</p>\n<span class="child">Enfant 2</span>\n</div>\n<p class="child">Hors du parent</p>',
+ chips:[{sel:'.parent'},{sel:'.child',note:'Trois éléments, dont un qui n\'est même pas dans <code>.parent</code>. Le nom « child » ne crée aucune relation.'},{sel:'p'}],start:1},
+L3:{html:'<header id="header">\n<h1>Mon site</h1>\n</header>\n<main>\n<p id="intro">Bienvenue</p>\n<p>Suite</p>\n</main>',
+ chips:[{sel:'#header'},{sel:'#intro'},{sel:'main p'}]},
+L4:{html:'<button class="button">Normal</button>\n<button class="button primary">Principal</button>\n<button class="primary">Primary seul</button>\n<button class="button primary large">Gros principal</button>',
+ chips:[{sel:'.button'},{sel:'.primary'},{sel:'.button.primary',note:'Seulement ceux qui portent les deux classes à la fois.'},{sel:'.primary.button',note:'Même résultat : l\'ordre des classes collées ne compte pas.'},{sel:'.button.primary.large'}],start:2},
+L5:{html:'<div class="parent">\n<p class="child">Niveau 1</p>\n<div class="box">\n<p class="child">Niveau 2</p>\n<div>\n<p class="child">Niveau 3</p>\n</div>\n</div>\n</div>\n<p class="child">Dehors</p>',
+ chips:[{sel:'.parent .child',note:'Les trois niveaux sont pris. Le repère en pointillés bleus, c\'est <code>.parent</code>.'},{sel:'.box .child'},{sel:'.child'}]},
+L6:{html:'<div class="parent">\n<p class="child">Niveau 1</p>\n<div class="box">\n<p class="child">Niveau 2</p>\n<div>\n<p class="child">Niveau 3</p>\n</div>\n</div>\n</div>\n<p class="child">Dehors</p>',
+ chips:[{sel:'.parent > .child',note:'Un seul niveau : seul « Niveau 1 » a <code>.parent</code> comme parent immédiat.'},{sel:'.box > .child'},{sel:'.parent > div > .child',note:'On peut enchaîner : .parent, puis une div enfant, puis un .child enfant de cette div.'},{sel:'.parent .child',note:'Pour comparer : la version avec un espace (leçon 5).'}]},
+L7:{html:'<section>\n<p class="text">Avant le titre</p>\n<h2 class="title">Titre</h2>\n<p class="text">Juste après</p>\n<p class="text">Deuxième texte</p>\n<h2 class="title">Autre titre</h2>\n<div>Intrus</div>\n<p class="text">Après l\'intrus</p>\n</section>',
+ chips:[{sel:'.title + .text',note:'Un seul : le .text collé au premier titre. Le second titre est suivi par une div.'},{sel:'.title + div'},{sel:'.text + .text',note:'Un .text juste après un autre .text.'}]},
+L8:{html:'<section>\n<p class="text">Avant le titre</p>\n<h2 class="title">Titre</h2>\n<p class="text">Juste après</p>\n<p class="text">Deuxième texte</p>\n<h2 class="title">Autre titre</h2>\n<div>Intrus</div>\n<p class="text">Après l\'intrus</p>\n</section>',
+ chips:[{sel:'.title ~ .text',note:'Tous les .text placés après un .title. « Avant le titre » n\'est jamais pris.'},{sel:'.title + .text',note:'Pour comparer : la version + (leçon 7).'},{sel:'div ~ p'}]},
+L9:{html:'<div class="card">Div card</div>\n<section class="card">Section card</section>\n<div class="card active">Div card active</div>\n<div class="active">Div active</div>',
+ chips:[{sel:'.card'},{sel:'div.card',note:'La section a bien .card, mais ce n\'est pas une div.'},{sel:'div.card.active'},{sel:'div .card',note:'Avec un espace, on cherche un .card À L\'INTÉRIEUR d\'une div : il n\'y en a aucun ici.'}],start:1},
+L10:{html:'<form>\n<input type="text" placeholder="Nom">\n<input type="email" placeholder="Email">\n<input type="text" placeholder="Bloqué" disabled>\n<button class="button-primary" disabled>Envoyer</button>\n</form>\n<a href="https://angular.dev">Lien sécurisé</a>\n<a href="http://exemple.be">Lien http</a>\n<a href="/contact" class="nav-button">Contact</a>',
+ chips:[{sel:'[type="text"]'},{sel:'[disabled]',note:'Peu importe la balise : l\'input et le bouton ont tous les deux l\'attribut.'},{sel:'[href^="https"]'},{sel:'[href$=".be"]'},{sel:'[class*="button"]',note:'« button-primary » et « nav-button » contiennent tous les deux le texte « button ».'},{sel:'input[type="text"]:not([disabled])'}]},
+L11a:{html:'<nav>\n<a href="#accueil">Accueil</a>\n<a href="#profil">Profil</a>\n</nav>\n<input type="text" placeholder="Clique ici">\n<button>Appuie</button>',
+ chips:[{sel:'a:hover'},{sel:'input:focus'},{sel:'button:active'},{sel:'nav :hover',note:'Avec un espace avant <code>:hover</code> : n\'importe quel descendant de nav, survolé.'},{sel:'nav:hover a',note:'Quand on survole la nav, TOUS ses liens changent.'}]},
+L11b:{html:'<ul>\n<li>Un</li>\n<li>Deux</li>\n<li>Trois</li>\n<li>Quatre</li>\n<li>Cinq</li>\n<li>Six</li>\n</ul>',
+ chips:[{sel:'li:first-child'},{sel:'li:last-child'},{sel:'li:nth-child(2)'},{sel:'li:nth-child(odd)'},{sel:'li:nth-child(3n)'},{sel:'li:nth-child(n+3)'},{sel:'li:nth-child(-n+3)'},{sel:'li:not(:last-child)',note:'Le grand classique pour mettre une bordure entre les éléments, sauf après le dernier.'}]},
+L11c:{html:'<article>\n<h2>Titre</h2>\n<p>Paragraphe 1</p>\n<p>Paragraphe 2</p>\n<p>Paragraphe 3</p>\n</article>',
+ chips:[{sel:'p:first-child',note:'Rien : le premier enfant de article est le h2. Un p ne peut pas être « premier enfant » ici.'},{sel:'p:first-of-type'},{sel:'p:nth-child(2)',note:'Le 2e enfant (tous types confondus) est Paragraphe 1.'},{sel:'p:nth-of-type(2)',note:'Le 2e p parmi les p : Paragraphe 2.'},{sel:'p:last-child'}]},
+L11d:{html:'<div class="card">\n<img src="photo.jpg" alt="photo">\n<p>Carte avec image</p>\n</div>\n<div class="card">\n<p>Carte sans image</p>\n</div>\n<div class="card featured">\n<p>Carte mise en avant</p>\n</div>',
+ chips:[{sel:'.card:not(.featured)'},{sel:'.card:has(img)',note:'La carte est sélectionnée parce qu\'elle contient une img (encadrée « condition »).'},{sel:'.card:has(> img)',note:'Même idée, mais l\'img doit être un enfant direct.'},{sel:'.card:not(:has(img))'},{sel:'.card:has(img) p',note:'On peut continuer après : le p qui est dans une carte qui contient une image.'}],start:1},
+L12:{html:'<p class="note">Attention à ce point.</p>\n<a class="external" href="https://angular.dev">Docs Angular</a>\n<p class="intro">Il était une fois un sélecteur.</p>\n<input type="text" placeholder="Votre nom">',
+ chips:[{sel:'.note::before'},{sel:'.external::after'},{sel:'.intro::first-letter'},{sel:'.intro::first-line'},{sel:'input::placeholder'},{sel:'p::first-child',note:'<code>::first-child</code> n\'existe pas. La bonne écriture est <code>p:first-child</code> (un seul deux-points).'}]},
+L13:{html:'<div class="box">\n<h3>Titre</h3>\n<p>Texte <em>important</em></p>\n</div>\n<p>Dehors</p>',
+ chips:[{sel:'*'},{sel:'.box *',note:'Tout ce qui est dans .box, à toute profondeur (y compris le em).'},{sel:'.box > *',note:'Seulement les enfants directs : le em n\'en fait pas partie.'}],start:1},
+L14:{html:'<h1>Titre hors carte</h1>\n<div class="card">\n<h1>Titre carte</h1>\n<h2>Sous-titre carte</h2>\n</div>\n<h2>Sous-titre hors carte</h2>\n<h3>Petit titre</h3>',
+ chips:[{sel:'h1, h2, h3'},{sel:'.card h1, h2',note:'Piège : le second morceau est juste <code>h2</code>, donc tous les h2 de la page.'},{sel:'.card h1, .card h2'},{sel:'.card :is(h1, h2)',note:'Bonus : <code>:is()</code> factorise la fin du sélecteur.'}]},
+L15:{html:'<div class="parent">\n<p class="child">A</p>\n<div>\n<p class="child">B</p>\n</div>\n</div>\n<p class="child">C</p>\n<p class="child">D</p>\n<div class="parent child">E</div>',
+ chips:[{sel:'.parent .child'},{sel:'.parent > .child'},{sel:'.parent.child'},{sel:'.parent + .child'},{sel:'.parent ~ .child'}]},
+L17:{html:'<div class="parent">\n<span>Span enfant</span>\n<p>Texte avec un <span>span imbriqué</span></p>\n</div>\n<span class="parentspan">Span avec la classe parentspan</span>\n<span class="theme">\n<em class="parent">.parent dans un span</em>\n</span>',
+ chips:[{label:'span {}  ou  & span {}   →  .parent span',sel:'.parent span'},{label:'> span {}   →  .parent > span',sel:'.parent > span'},{label:'&span {}   →  .parentspan',sel:'.parentspan',note:'Le & collé à « span » fabrique le nom de classe <code>.parentspan</code>. Aucun span n\'est ciblé en tant que balise.'},{label:'span & {}   →  span .parent',sel:'span .parent',note:'Le & placé après : le parent devient le sujet, et il doit se trouver dans un span.'}]},
+LNG:{html:'<div class="wrapper" _ngcontent-p="">\n<span _ngcontent-p="">Span du template parent</span>\n<app-child _ngcontent-p="" _nghost-c="">\n<span _ngcontent-c="">Span du template enfant</span>\n</app-child>\n</div>',
+ chips:[{label:'CSS sans Angular : .wrapper span',sel:'.wrapper span'},{label:'Ce qu\'Angular génère pour .wrapper span',sel:'.wrapper[_ngcontent-p] span[_ngcontent-p]',note:'Le span du composant enfant n\'a pas <code>_ngcontent-p</code> : il échappe à la règle.'},{label:':host du composant enfant',sel:'[_nghost-c]'},{label:'.wrapper ::ng-deep span',sel:'.wrapper[_ngcontent-p] span',note:'<code>::ng-deep</code> retire l\'attribut à partir de lui : le span de l\'enfant est atteint.'},{label:':host span (écrit dans l\'enfant)',sel:'[_nghost-c] span[_ngcontent-c]'}],start:1}
+};
+
+var LIVE={
+ states:{cap:'Démo vivante · survole, clique, maintiens',
+  base:'nav{display:flex;gap:8px;margin-bottom:14px}.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}nav a{display:inline-block;padding:6px 12px;border-radius:6px;color:var(--ref);text-decoration:none;border:1px solid var(--line);font:500 14px var(--font-body)}input{font:14px var(--font-body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);outline:none;min-width:0}button{font:600 14px var(--font-body);padding:8px 14px;border-radius:6px;border:1px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .05s}',
+  html:'<nav><a href="#a">Accueil</a><a href="#b">Profil</a></nav><div class="row"><input placeholder="Clique ici (focus)"><button type="button">Maintiens le clic</button></div>',
+  css:'nav a:hover {\n  background: var(--mark);\n  color: var(--mark-ink);\n}\ninput:focus {\n  border-color: var(--ref);\n  box-shadow: 0 0 0 3px var(--ref-soft);\n}\nbutton:active {\n  background: var(--mark);\n  transform: translateY(2px);\n}'},
+ pseudo:{cap:'Démo vivante · les pseudo-éléments en action',
+  base:'p{margin:0 0 12px;font:15px/1.55 var(--font-body);color:var(--ink)}a{color:var(--ref);font:15px var(--font-body)}input{display:block;margin-top:12px;font:14px var(--font-body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:100%;max-width:260px}',
+  html:'<p class="note">Attention à ce point.</p><a class="external" href="#docs">Docs Angular</a><p class="intro" style="margin-top:12px">Il était une fois un sélecteur qui voulait styler seulement la première ligne d\'un paragraphe, sans toucher au reste du texte.</p><input placeholder="Votre nom">',
+  css:'.note::before {\n  content: "⚠ ";\n  color: var(--cand);\n}\n.external::after {\n  content: " ↗";\n}\n.intro::first-letter {\n  font-size: 2em;\n  font-weight: 700;\n  color: var(--ref);\n}\n.intro::first-line {\n  font-weight: 600;\n}\ninput::placeholder {\n  color: var(--cand);\n  font-style: italic;\n}'}
+};
+
+var ERRS=[
+ {t:'Mettre un espace après & avant :hover',
+  why:'Avec l\'espace, <code>:hover</code> devient un morceau à part (règle 1 du descendant). Le style s\'applique à n\'importe quel élément survolé <b>dans</b> le bouton, ici l\'icône, et pas au bouton.',
+  no:'.btn {\n  & :hover { color: red; }\n}', yes:'.btn {\n  &:hover { color: red; }\n}',
+  html:'<button class="btn">Envoyer <span class="icon">→</span></button>'},
+ {t:'Oublier le & pour une classe d\'état',
+  why:'Sans &, Sass ajoute un espace : on cherche un <code>.active</code> <b>à l\'intérieur</b> de l\'onglet. Le <code>&amp; .active</code> avec espace donne exactement le même résultat. Seul <code>&amp;.active</code> (collé) parle de l\'onglet lui-même.',
+  no:'.tab {\n  .active { font-weight: 700; }\n}', yes:'.tab {\n  &.active { font-weight: 700; }\n}',
+  html:'<div class="tab active">Onglet actif</div>\n<div class="tab">Onglet normal <span class="active">badge actif</span></div>'},
+ {t:'Écrire ::before sans &',
+  why:'<code>.link ::after</code> veut dire « le ::after de chaque descendant de .link ». La flèche apparaîtrait après chaque balise intérieure, pas une seule fois après le lien.',
+  no:'.link {\n  ::after { content: "↗"; }\n}', yes:'.link {\n  &::after { content: "↗"; }\n}',
+  html:'<a class="link">Docs <span>Angular</span> <em>v20</em></a>'},
+ {t:'Croire que &-title vise un enfant',
+  why:'<code>&amp;-title</code> colle du texte au nom : il fabrique la classe <code>.card-title</code> (convention BEM). Il n\'y a aucune relation parent/enfant. Si tu voulais le titre à l\'intérieur de la carte, écris <code>.title</code> sans &.',
+  no:'.card {\n  &-title { color: navy; }\n}', yes:'.card {\n  .title { color: navy; }\n}', noLabel:'si tu voulais le .title dans la carte', yesLabel:'ce qu\'il fallait écrire',
+  html:'<div class="card">\n<h2 class="title">Titre de la carte</h2>\n</div>\n<h2 class="card-title">Titre BEM ailleurs</h2>'},
+ {t:'Coller & devant un nom de balise',
+  why:'<code>&amp;span</code> ne veut pas dire « le span de .parent » : Sass colle les deux textes et produit la classe <code>.parentspan</code>, qui n\'existe pas dans ton HTML.',
+  no:'.parent {\n  &span { color: red; }\n}', yes:'.parent {\n  span { color: red; }\n}',
+  html:'<div class="parent">\n<span>Un span</span>\n</div>'},
+ {t:'Recopier toute la structure HTML en imbrication',
+  why:'Imbriquer comme le HTML produit des sélecteurs longs et fragiles : le lien n\'est stylé que s\'il est exactement à cet endroit, et la spécificité grimpe. Garde 2 ou 3 niveaux maximum.',
+  no:'.page {\n  .content {\n    .list {\n      .item {\n        a { color: blue; }\n      }\n    }\n  }\n}', yes:'.list {\n  a { color: blue; }\n}',
+  html:'<div class="page">\n<div class="content">\n<ul class="list">\n<li class="item"><a>Lien dans la page</a></li>\n</ul>\n</div>\n</div>\n<ul class="list">\n<li class="item"><a>Même liste réutilisée ailleurs</a></li>\n</ul>'}
+];
+
+var LV={1:'Facile',2:'Moyen',3:'Difficile',4:'Expert'};
+var EXS=[
+ {lvl:1,sel:'p',html:'<div>\n<p>Bonjour</p>\n<span>Salut</span>\n</div>\n<p>Au revoir</p>',explain:'Un sélecteur d\'élément attrape toutes les balises de ce type, où qu\'elles soient : les deux <code>&lt;p&gt;</code>.'},
+ {lvl:1,sel:'.highlight',html:'<h2 class="highlight">Titre</h2>\n<p>Texte normal</p>\n<p class="highlight">Texte important</p>\n<span class="highlighted">Presque</span>',explain:'La classe doit être exactement <code>highlight</code>. <code>highlighted</code> est une autre classe. La balise ne compte pas.'},
+ {lvl:1,sel:'.menu .item',html:'<ul class="menu">\n<li class="item">Accueil</li>\n<li class="item">Produits\n<ul>\n<li class="item">Laptops</li>\n</ul>\n</li>\n</ul>\n<li class="item">Hors menu</li>',explain:'L\'espace = descendant à n\'importe quelle profondeur : Laptops compte aussi. « Hors menu » n\'est pas dans <code>.menu</code>.'},
+ {lvl:2,sel:'.menu > .item',html:'<ul class="menu">\n<li class="item">Accueil</li>\n<li class="item">Produits\n<ul>\n<li class="item">Laptops</li>\n</ul>\n</li>\n</ul>\n<li class="item">Hors menu</li>',explain:'Même HTML, mais <code>&gt;</code> limite à un niveau. Le parent de Laptops est le <code>ul</code> intérieur, pas <code>.menu</code>.'},
+ {lvl:2,sel:'.btn.primary',html:'<button class="btn">A</button>\n<button class="btn primary">B</button>\n<div class="btn">\n<span class="primary">C</span>\n</div>\n<button class="primary btn">D</button>',explain:'Classes collées = le même élément porte les deux. C n\'a que <code>primary</code> (c\'est son parent qui a <code>btn</code>). L\'ordre dans l\'attribut ne compte pas pour D.'},
+ {lvl:2,sel:'h2 + p',html:'<p>Intro</p>\n<h2>Titre 1</h2>\n<p>Texte A</p>\n<p>Texte B</p>\n<h2>Titre 2</h2>\n<hr>\n<p>Texte C</p>\n<h2>Titre 3</h2>\n<p>Texte D</p>',explain:'<code>+</code> = le voisin immédiatement après. Après « Titre 2 » vient un <code>hr</code>, donc Texte C n\'est pas pris.'},
+ {lvl:2,sel:'h2 ~ p',html:'<p>Intro</p>\n<h2>Titre 1</h2>\n<p>Texte A</p>\n<p>Texte B</p>\n<h2>Titre 2</h2>\n<hr>\n<p>Texte C</p>\n<h2>Titre 3</h2>\n<p>Texte D</p>',explain:'<code>~</code> = tous les p qui viennent après un h2 (même parent). Seul « Intro », placé avant tout h2, est exclu.'},
+ {lvl:3,sel:'li:nth-child(3n+1)',html:'<ul>\n<li>1</li>\n<li>2</li>\n<li>3</li>\n<li>4</li>\n<li>5</li>\n<li>6</li>\n</ul>',explain:'n = 0, 1, 2… donne 3×0+1 = 1, 3×1+1 = 4, 3×2+1 = 7 (n\'existe pas). Donc le 1er et le 4e.'},
+ {lvl:3,sel:'p:first-child',html:'<article>\n<h2>Titre</h2>\n<p>Un</p>\n<p>Deux</p>\n</article>\n<div>\n<p>Trois</p>\n<p>Quatre</p>\n</div>',explain:'<code>p:first-child</code> = un p qui est le premier enfant de son parent. Dans article, le premier enfant est le h2. Dans la div, c\'est « Trois ».'},
+ {lvl:3,sel:'[class*="btn"]',html:'<button class="btn">A</button>\n<a class="link-btn">B</a>\n<div class="button">C</div>\n<span class="btnGroup">D</span>\n<button>E</button>',explain:'<code>*=</code> cherche le texte « btn » n\'importe où dans l\'attribut class : btn, link-btn, btnGroup. « button » ne contient pas « btn » (b-u-t-t-o-n), et E n\'a pas d\'attribut class.'},
+ {lvl:3,sel:'.card:has(.badge) .title',html:'<div class="card">\n<span class="badge">Nouveau</span>\n<h3 class="title">Produit A</h3>\n</div>\n<div class="card">\n<h3 class="title">Produit B</h3>\n</div>\n<div class="card">\n<div class="body">\n<h3 class="title">Produit C</h3>\n<span class="badge">Promo</span>\n</div>\n</div>',explain:'Lis de droite à gauche : un <code>.title</code>, dans une <code>.card</code> qui contient un <code>.badge</code> quelque part (n\'importe où, même après le titre). Les cartes A et C en ont un.'},
+ {lvl:4,sel:'.list > li:not(:last-child)',html:'<ul class="list">\n<li>Un</li>\n<li>Deux</li>\n<li>Trois</li>\n</ul>\n<ul>\n<li>Quatre</li>\n<li>Cinq</li>\n</ul>',explain:'Les li enfants directs de <code>.list</code>, sauf le dernier. La deuxième liste n\'a pas la classe <code>list</code>.'},
+ {lvl:4,scss:'.nav {\n  a {\n    &.active { color: red; }\n  }\n}',html:'<nav class="nav">\n<a class="active">Accueil</a>\n<a>Profil</a>\n<span class="active">Pas un lien</span>\n</nav>\n<a class="active">Hors nav</a>',explain:'<code>a</code> sans & → <code>.nav a</code>. Puis <code>&amp;.active</code> collé → <code>.nav a.active</code> : un lien, dans .nav, qui a lui-même la classe active.'},
+ {lvl:4,scss:'.card {\n  &-title { color: red; }\n}',html:'<div class="card">\n<h2 class="title">Titre dans la carte</h2>\n<h2 class="card-title">Titre BEM dans la carte</h2>\n</div>\n<h2 class="card-title">Titre BEM hors carte</h2>',explain:'<code>&amp;-title</code> → <code>.card-title</code>, une classe toute seule. La position dans la carte ne compte pas : les deux <code>.card-title</code> sont pris, le <code>.title</code> non.'},
+ {lvl:4,scss:'.item {\n  & + & { margin-top: 8px; }\n}',html:'<div class="item">1</div>\n<div class="item">2</div>\n<div class="item">3</div>\n<hr>\n<div class="item">4</div>',explain:'Chaque & est remplacé : <code>.item + .item</code>. Un .item juste après un autre .item : 2 et 3. Le 4 suit un hr. Pratique pour espacer des éléments sauf le premier.'},
+ {lvl:4,scss:'.form {\n  input {\n    &:not([disabled]) { border-color: blue; }\n  }\n}',html:'<form class="form">\n<input type="text" placeholder="Nom">\n<input type="text" placeholder="Bloqué" disabled>\n<div>\n<input type="email" placeholder="Email">\n</div>\n</form>\n<input type="text" placeholder="Hors formulaire">',explain:'Compilé en <code>.form input:not([disabled])</code> : tout input dans .form (même dans la div), sauf celui qui a l\'attribut disabled.'}
+];
+
+/* ---------- Construction ---------- */
+document.querySelectorAll('[data-lab]').forEach(function(h){var k=h.getAttribute('data-lab'); if(LABS[k]) Lab(h,LABS[k],k);});
+document.querySelectorAll('pre[data-hl]').forEach(function(p){p.innerHTML=hl(p.textContent);});
+
+document.querySelectorAll('[data-live]').forEach(function(h){
+  var d=LIVE[h.getAttribute('data-live')]; if(!d) return;
+  h.className='live';
+  h.innerHTML='<div class="live-stage"><div class="live-cap">'+esc(d.cap)+'</div><div class="live-host"></div></div><pre class="code">'+hl(d.css)+'</pre>';
+  var host=h.querySelector('.live-host'), sr;
+  try{sr=host.attachShadow({mode:'open'});}catch(e){sr=null;}
+  var markup='<style>:host{display:block}'+d.base+d.css+'</style>'+d.html;
+  if(sr){sr.innerHTML=markup; sr.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a'); if(a) e.preventDefault();});}
+  else host.textContent='Démo indisponible dans ce navigateur.';
+});
+
+/* Erreurs */
+var errHost=document.getElementById('errors');
+ERRS.forEach(function(E,k){
+  var cn=compile(E.no).rules.filter(function(r){return r.decls.length;}), cy=compile(E.yes).rules.filter(function(r){return r.decls.length;});
+  var sn=cn.map(function(r){return r.sel.join(', ');}).join(', '), sy=cy.map(function(r){return r.sel.join(', ');}).join(', ');
+  var card=document.createElement('div'); card.className='errc';
+  card.innerHTML='<h3>Erreur '+(k+1)+' · '+esc(E.t)+'</h3><div class="duo"><div class="no"><div class="cap">✗ '+esc(E.noLabel||'ce qu\'on écrit')+'</div><pre class="code">'+hl(E.no)+'</pre><div class="out">→ '+esc(sn)+'</div></div><div class="yes"><div class="cap">✓ '+esc(E.yesLabel||'ce qu\'il faut écrire')+'</div><pre class="code">'+hl(E.yes)+'</pre><div class="out">→ '+esc(sy)+'</div></div></div><p class="prose" style="margin:0">'+E.why+'</p><div class="lab-slot"></div>';
+  errHost.appendChild(card);
+  Lab(card.querySelector('.lab-slot'),{html:E.html,compact:false,chips:[{label:'✗  '+sn,sel:sn},{label:'✓  '+sy,sel:sy}]},'err'+k);
+});
+
+/* Transformateur */
+var PRESETS=[
+ {label:'Ton exemple',scss:'.parent {\n  .child {\n    & span {}\n    &:hover {}\n    &.active {}\n  }\n}',
+  html:'<div class="parent">\n<div class="child">Un child normal <span>avec un span</span></div>\n<div class="child active">Child actif</div>\n<span>Span direct du parent</span>\n</div>\n<div class="child">Child hors du parent</div>'},
+ {label:'span vs & span',scss:'.parent {\n  span { color: red; }\n  & span { color: red; }\n  &span { color: red; }\n  > span { color: red; }\n}',
+  html:'<div class="parent">\n<span>Span enfant</span>\n<p>Texte avec un <span>span imbriqué</span></p>\n</div>\n<span class="parentspan">classe parentspan</span>'},
+ {label:'Virgules',scss:'.alert, .toast {\n  .icon { margin-right: 4px; }\n  &.error { color: red; }\n}',
+  html:'<div class="alert error"><i class="icon">!</i> Alerte erreur</div>\n<div class="toast"><i class="icon">i</i> Toast simple</div>\n<div class="banner error">Bannière erreur</div>'},
+ {label:'BEM (&__ et &--)',scss:'.card {\n  &__title { font-weight: 600; }\n  &--featured { border: 2px solid; }\n  &:hover &__title { color: blue; }\n}',
+  html:'<div class="card card--featured">\n<h3 class="card__title">Carte mise en avant</h3>\n<p class="card__body">Texte</p>\n</div>\n<div class="card">\n<h3 class="card__title">Carte normale</h3>\n</div>'},
+ {label:'& déplacé',scss:'.button {\n  .theme-dark & { background: black; }\n  form & { width: 100%; }\n}',
+  html:'<div class="theme-dark">\n<button class="button">Bouton en thème sombre</button>\n</div>\n<button class="button">Bouton normal</button>\n<form>\n<button class="button">Bouton dans un form</button>\n</form>'},
+ {label:'> et +',scss:'.list {\n  > li { padding: 4px; }\n  li + li { border-top: 1px solid; }\n  & + & { margin-top: 16px; }\n}',
+  html:'<ul class="list">\n<li>Un</li>\n<li>Deux\n<ul>\n<li>Deux-a</li>\n<li>Deux-b</li>\n</ul>\n</li>\n</ul>\n<ul class="list">\n<li>Trois</li>\n</ul>'}
+];
+var ta=document.getElementById('xf-src'), trEl=document.getElementById('xf-trace'), outEl=document.getElementById('xf-out'), errEl=document.getElementById('xf-err'), prEl=document.getElementById('xf-presets');
+var xfLab=Lab(document.getElementById('xf-lab'),{html:PRESETS[0].html,chips:[{sel:'.parent'}]},'xf');
+prEl.innerHTML=PRESETS.map(function(p,k){return '<button type="button" data-k="'+k+'" aria-pressed="'+(k===0)+'">'+esc(p.label)+'</button>';}).join('');
+var lastChips='';
+function runXF(){
+  var c=compile(ta.value);
+  trEl.innerHTML=c.rules.map(function(r){return r.trace.map(traceHTML).join('');}).join('')||'<li class="tr-how">Écris un bloc SCSS à gauche.</li>';
+  errEl.textContent=c.errors.join(' ');
+  outEl.innerHTML=hl(cssText(c.rules));
+  var sels=[]; c.rules.forEach(function(r){r.sel.forEach(function(s){if(sels.indexOf(s)<0) sels.push(s);});});
+  var key=sels.join('|');
+  if(key!==lastChips&&sels.length){lastChips=key; xfLab.setChips(sels.map(function(s){return {sel:s};})); xfLab.select(sels.length-1);}
+}
+prEl.addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return; var p=PRESETS[+b.getAttribute('data-k')];
+  prEl.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+  ta.value=p.scss; xfLab.setHTML(p.html); lastChips=''; runXF();
+});
+ta.addEventListener('input',runXF);
+ta.addEventListener('keydown',function(e){if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();var s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end');runXF();}});
+ta.value=PRESETS[0].scss; runXF();
+
+/* Exercices */
+var solved=new Set(), exHost=document.getElementById('exercises');
+document.querySelectorAll('.score-t').forEach(function(s){s.textContent=EXS.length;});
+function updScore(){
+  document.querySelectorAll('.score-n').forEach(function(s){s.textContent=solved.size;});
+  var m=document.getElementById('meter'); if(m) m.style.width=(solved.size/EXS.length*100)+'%';
+}
+EXS.forEach(function(ex,k){
+  var n=k+1, body=parse(ex.html), sel=ex.sel;
+  if(ex.scss) sel=compile(ex.scss).rules.filter(function(r){return r.decls.length;}).map(function(r){return r.sel.join(', ');}).join(', ');
+  var answer=evaluate(body,sel).matched;
+  var card=document.createElement('div'); card.className='ex';
+  card.innerHTML='<div class="ex-head"><span class="ex-n">Exercice '+n+'</span><span class="lvl lvl-'+ex.lvl+'">'+LV[ex.lvl]+'</span><span class="ex-status"></span></div>'+
+    '<div class="ex-q">'+(ex.scss?'<p>Avec ce SCSS, quels éléments reçoivent le style ?</p><pre class="code solo">'+hl(ex.scss)+'</pre>':'<p>Quels éléments sont sélectionnés par <code class="big">'+esc(sel)+'</code> ?</p>')+
+    '<p class="ex-tip">Clique sur les boîtes ou les lignes de HTML pour les choisir (ou Tab puis Espace), puis vérifie.</p></div>'+
+    '<div class="lab-panes"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code">'+renderCode(body)+'</div></div><div class="pane pane-box"><div class="pane-cap">Clique pour choisir</div><div class="boxes">'+renderBoxes(body)+'</div></div></div>'+
+    '<div class="ex-actions"><button type="button" class="btn" data-a="check">Vérifier</button><button type="button" class="btn alt" data-a="show">Voir la solution</button><button type="button" class="btn alt" data-a="reset">Recommencer</button><span class="ex-fb" role="status"></span></div>'+
+    '<div class="ex-explain" hidden><p>'+ex.explain+'</p>'+(ex.scss?'<p>CSS compilé : <code>'+esc(sel)+'</code></p>':'')+'</div>';
+  exHost.appendChild(card);
+  var panes=card.querySelector('.lab-panes'), fb=card.querySelector('.ex-fb'), expl=card.querySelector('.ex-explain'), status=card.querySelector('.ex-status');
+  var picked=new Set(), shown=false;
+  hoverSync(panes);
+  panes.querySelectorAll('.bx').forEach(function(b){b.tabIndex=0;b.setAttribute('role','checkbox');b.setAttribute('aria-checked','false');});
+  function clearRes(){
+    panes.querySelectorAll('.r-ok,.r-miss,.r-wrong,.sel').forEach(function(e){e.classList.remove('r-ok','r-miss','r-wrong','sel');});
+    panes.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+    fb.textContent=''; fb.className='ex-fb'; shown=false;
+  }
+  function paintPicks(){
+    panes.querySelectorAll('[data-i]').forEach(function(e){
+      var on=picked.has(+e.getAttribute('data-i'));
+      e.classList.toggle('picked',on);
+      if(e.classList.contains('bx')) e.setAttribute('aria-checked',on?'true':'false');
+    });
+  }
+  function toggle(i){ if(shown) clearRes(); if(picked.has(i)) picked.delete(i); else picked.add(i); paintPicks(); }
+  panes.addEventListener('click',function(e){var t=e.target.closest('[data-i]'); if(t) toggle(+t.getAttribute('data-i'));});
+  panes.addEventListener('keydown',function(e){if((e.key===' '||e.key==='Enter')&&e.target.classList.contains('bx')){e.preventDefault();toggle(+e.target.getAttribute('data-i'));}});
+  card.querySelector('.ex-actions').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-a');
+    if(a==='reset'){picked.clear();clearRes();paintPicks();expl.hidden=true;return;}
+    clearRes();
+    if(a==='show'){
+      picked.clear(); paintPicks();
+      body._all.forEach(function(el){ if(answer.has(el)) q(panes,el._i).forEach(function(n){n.classList.add('sel'); if(n.classList.contains('bx')) addBadge(n,'✓ réponse','b-sel');}); });
+      fb.textContent=answer.size?answer.size+' élément'+(answer.size>1?'s':'')+' sélectionné'+(answer.size>1?'s':'')+'.':'Aucun élément : c\'était un piège.';
+      expl.hidden=false; shown=true; return;
+    }
+    var ok=0, miss=0, wrong=0;
+    body._all.forEach(function(el){
+      var p=picked.has(el._i), r=answer.has(el), cls=null, lab=null;
+      if(p&&r){cls='r-ok';lab='✓ juste';ok++;} else if(!p&&r){cls='r-miss';lab='oublié';miss++;} else if(p&&!r){cls='r-wrong';lab='en trop';wrong++;}
+      if(cls) q(panes,el._i).forEach(function(nd){nd.classList.add(cls); if(nd.classList.contains('bx')) addBadge(nd,lab,cls==='r-ok'?'b-ok':(cls==='r-miss'?'b-miss':'b-wrong'));});
+    });
+    picked.forEach(function(){});
+    panes.querySelectorAll('.picked').forEach(function(e){e.classList.remove('picked');});
+    shown=true;
+    if(!miss&&!wrong){
+      fb.textContent=answer.size?'Parfait, '+ok+' sur '+answer.size+'.':'Parfait : aucun élément, c\'était le piège.'; fb.className='ex-fb good';
+      solved.add(n); status.textContent='✓ Réussi'; updScore();
+    } else {
+      var bits=[]; if(miss) bits.push(miss+' oublié'+(miss>1?'s':'')); if(wrong) bits.push(wrong+' en trop');
+      fb.textContent='Presque : '+bits.join(', ')+'.'; fb.className='ex-fb bad';
+    }
+    expl.hidden=false;
+  });
+});
+updScore();
+
+/* Sommaire : section active + repli mobile */
+var toc=document.getElementById('toc');
+if(window.matchMedia&&window.matchMedia('(max-width:980px)').matches) toc.removeAttribute('open');
+var links={}; toc.querySelectorAll('a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(ents){
+    ents.forEach(function(en){ if(en.isIntersecting){ Object.keys(links).forEach(function(k){links[k].removeAttribute('aria-current');}); var a=links[en.target.id]; if(a) a.setAttribute('aria-current','true'); }});
+  },{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('section.lesson').forEach(function(s){io.observe(s);});
+}
+})();
+</script>
+
+</body>
+</html>
