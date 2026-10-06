@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mise en page CSS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : sommaire collant à gauche, colonne de leçons à droite ; chaque atelier = HTML à gauche, boîtes à droite. Motif : le surligneur. */
+:root{
+  --paper:#F4F6F9; --surface:#FFFFFF; --surface-2:#ECF0F5; --ink:#172031; --muted:#5A6679; --line:#D6DCE5;
+  --mark:#FFE05A; --mark-ink:#3A2B00; --mark-edge:#D9AE00;
+  --ref:#2356D3; --ref-soft:rgba(35,86,211,.09);
+  --cand:#C2410C; --cand-soft:rgba(194,65,12,.09);
+  --ok:#157A3A; --ok-soft:rgba(21,122,58,.12); --bad:#BE2A31; --bad-soft:rgba(190,42,49,.10);
+  --syn-tag:#8B2C91; --syn-attr:#965700; --syn-val:#0A6C4E; --syn-text:#172031; --syn-punct:#7A8597;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+    --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+    --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+    --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+    --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+    --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+  --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+  --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+  --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+  --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+  --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--ref)}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);padding:.08em .35em;border-radius:4px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:44px;max-width:1260px;margin:0 auto;padding-inline:24px;padding-block:28px 96px}
+main{min-width:0}
+
+/* Sommaire */
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:14px;padding-right:4px}
+.toc summary{display:none}
+.toc .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 6px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);padding:3px 8px;border-radius:5px;line-height:1.35}
+.toc a span{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:1.6em}
+.toc a:hover{background:var(--surface-2)}
+.toc a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.toc a[aria-current="true"] span{color:inherit;opacity:.7}
+.toc .score{margin-top:18px;font-size:13px;color:var(--muted)}
+@media (max-width:980px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:8px;padding-inline:16px}
+  .toc{position:static;max-height:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px}
+  .toc summary{display:block;cursor:pointer;font-weight:600}
+}
+
+/* En-tête */
+.hero{padding-block:4px 30px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2.3rem,6vw,3.7rem);line-height:1.02;letter-spacing:-.025em;margin:.25em 0 .35em;text-wrap:balance}
+h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%);padding-inline:.06em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;font-size:14px}
+.sw{display:inline-block;width:20px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:7px}
+.sw.sel{background:var(--mark);border:1px solid var(--mark-edge)}
+.sw.ref{border:2px dashed var(--ref)}
+.sw.cand{border:2px dotted var(--cand);background:var(--cand-soft)}
+
+/* Parties et leçons */
+.part{margin-block:52px 4px;padding:22px 24px;border-radius:12px;background:var(--ink);color:var(--paper)}
+.part .kicker{color:inherit;opacity:.65}
+.part h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;margin:.15em 0 .3em;letter-spacing:-.015em}
+.part p{margin:0;opacity:.85;max-width:66ch}
+.part code{background:transparent;color:inherit;border-color:currentColor}
+section.lesson{padding-block:38px;border-bottom:1px solid var(--line);scroll-margin-top:12px}
+.lesson-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.num{font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--muted);min-width:2em}
+.lesson h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.45rem,3.2vw,1.95rem);line-height:1.15;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.syntax{font-family:var(--font-mono);font-size:14px;color:var(--muted)}
+.lesson h3{font-size:1.08rem;font-weight:600;margin:30px 0 6px}
+.prose{max-width:70ch}
+.prose p{margin:.55em 0}
+.big{font-size:1.05em}
+.callout{border-left:3px solid var(--ref);background:var(--ref-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:74ch;margin:16px 0;font-size:15px}
+.callout.warn{border-color:var(--cand);background:var(--cand-soft)}
+.callout.good{border-color:var(--ok);background:var(--ok-soft)}
+.callout > b:first-child{display:block;margin-bottom:2px}
+pre.ascii{font-family:var(--font-mono);font-size:13px;line-height:1.6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;overflow-x:auto;margin:16px 0;white-space:pre;color:var(--ink)}
+.a-ok{color:var(--ok);font-weight:600}.a-no{color:var(--bad);font-weight:600}.a-ref{color:var(--ref);font-weight:600}
+.a-sel{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+.a-amp{color:var(--cand);font-weight:700}.a-dim{color:var(--muted)}.a-tag{color:var(--syn-tag)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.t{border-collapse:collapse;font-size:14px;width:100%}
+.t th,.t td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+.codes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0}
+.cblock{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.cblock .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px}
+pre.code{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.cblock pre.code{background:transparent}
+pre.code.solo{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:14px 0}
+.amp{color:var(--cand);font-weight:700}
+.cm{color:var(--muted);font-style:italic}
+.pr{color:var(--syn-attr)}
+.br{color:var(--syn-punct)}
+
+/* Atelier */
+.lab{margin:20px 0 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.lab-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{font-family:var(--font-mono);font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;white-space:pre-wrap}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.try{display:flex;align-items:center;gap:8px;flex:1 1 240px;max-width:380px;min-width:0}
+.try label{font-size:12px;color:var(--muted);white-space:nowrap}
+.try input{flex:1;min-width:0;font-family:var(--font-mono);font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,.bx:focus-visible,.toc a:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
+.lab-panes{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.lab-panes.compact{grid-template-columns:minmax(0,1fr)}
+.lab-panes.compact .pane-code{display:none}
+.pane{min-width:0;padding:12px 14px}
+.pane-code{border-right:1px solid var(--line)}
+.pane-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+@media (max-width:760px){.lab-panes{grid-template-columns:minmax(0,1fr)}.pane-code{border-right:0;border-bottom:1px solid var(--line)}}
+.code{font-family:var(--font-mono);font-size:12.5px;line-height:1.8;overflow-x:auto}
+.ln{display:flex;white-space:pre;min-width:max-content}
+.gut{width:1.5em;flex:none;text-align:center;font-size:10px}
+.ln.on-sel .gut::before{content:"▶";color:var(--ink)}
+.ln.on-cand .gut::before{content:"▷";color:var(--cand)}
+.ln.on-ref:not(.on-sel):not(.on-cand) .gut::before{content:"◇";color:var(--ref)}
+.el{border-radius:3px}
+.el.sel{background:var(--mark);box-shadow:0 0 0 1px var(--mark-edge)}
+.code .el.sel span{color:var(--mark-ink)}
+.el.ref{outline:1.5px dashed var(--ref);outline-offset:1px}
+.el.cand{outline:1.5px dotted var(--cand);outline-offset:1px;background:var(--cand-soft)}
+.el.hov{text-decoration:underline;text-decoration-color:var(--muted);text-underline-offset:3px}
+.s-tag{color:var(--syn-tag)}.s-attr{color:var(--syn-attr)}.s-val{color:var(--syn-val)}.s-p{color:var(--syn-punct)}.s-text{color:var(--syn-text)}
+.s-cls{color:var(--syn-val)}.s-id{color:var(--syn-attr)}.s-attrb{color:var(--syn-attr);font-size:11px}
+.boxes{display:flex;flex-direction:column;gap:8px}
+.bx{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:background-color .15s,box-shadow .15s}
+.bx-head{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;min-width:0}
+.bx-lbl{display:flex;flex-wrap:wrap;min-width:0;word-break:break-all}
+.bx-text{font-family:var(--font-body);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.bx-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.badge{font-family:var(--font-body);font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap;line-height:1.6}
+.bx-kids{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:1px dashed var(--line);margin-left:2px}
+.bx-inl > .bx-kids{flex-direction:row;flex-wrap:wrap;align-items:center;border-left:0;padding-left:0;margin-left:0}
+.bx.sel{background:var(--mark);border-color:var(--mark-edge)}
+.bx.sel > .bx-head .bx-lbl span,.bx.sel > .bx-head .bx-text,.bx.sel > .bx-kids > .bx-text{color:var(--mark-ink)}
+.badge.b-sel{background:var(--ink);color:var(--paper)}
+.bx.ref{outline:2px dashed var(--ref);outline-offset:2px}
+.badge.b-ref{background:var(--ref);color:var(--surface)}
+.bx.cand{outline:2px dotted var(--cand);outline-offset:2px;background:var(--cand-soft)}
+.badge.b-cand{background:var(--cand);color:var(--surface)}
+.ghost{border:1.5px dashed var(--cand);color:var(--cand);font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:5px;align-self:flex-start;background:var(--surface)}
+.bx.hov{box-shadow:0 0 0 2px var(--muted)}
+.lab-foot{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:8px;font-size:14px}
+.read b,.verdict b{font-weight:600}
+.read code,.verdict code{white-space:normal}
+.verdict{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:5px;background:var(--mark);color:var(--mark-ink)}
+.pill.c{background:var(--cand-soft);color:var(--cand);outline:1px dotted var(--cand)}
+.err{color:var(--bad);font-weight:600}
+.rule{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rule .sx{color:var(--ink);font-weight:600}
+
+/* Démo vivante */
+.live{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;background:var(--surface)}
+.live-stage{padding:18px;min-width:0}
+.live-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.live pre.code{background:var(--surface-2);border-left:1px solid var(--line)}
+@media (max-width:760px){.live{grid-template-columns:minmax(0,1fr)}.live pre.code{border-left:0;border-top:1px solid var(--line)}}
+
+/* Transformateur SCSS */
+.xf{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin:20px 0 0}
+.xf-col{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.xf-col + .xf-col{border-left:1px solid var(--line)}
+@media (max-width:760px){.xf{grid-template-columns:minmax(0,1fr)}.xf-col + .xf-col{border-left:0;border-top:1px solid var(--line)}}
+.xf textarea{width:100%;min-height:250px;font-family:var(--font-mono);font-size:13px;line-height:1.6;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:12px;resize:vertical;tab-size:2}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:500 12.5px var(--font-body);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.trace{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tr{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;display:grid;gap:3px;min-width:0}
+.tr-src{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tr code{white-space:normal;overflow-wrap:anywhere}
+.tg{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px}
+.tg-amp{background:var(--cand-soft);color:var(--cand)}
+.tg-sp{background:var(--ref-soft);color:var(--ref)}
+.tg-root{background:var(--surface-2);color:var(--muted)}
+.tr-how{color:var(--muted)}
+.tr-res{font-family:var(--font-mono);font-size:13px;overflow-wrap:anywhere}
+mark.par{background:var(--ref-soft);color:var(--ref);border-bottom:2px solid var(--ref);padding:0 2px;border-radius:2px}
+.spc{color:var(--cand);font-weight:700}
+.xf-err{color:var(--bad);font-size:13px}
+pre.css-out{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:10px 12px;background:var(--surface-2);border-radius:8px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.sub-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* Cartes d'erreurs */
+.errc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;margin:18px 0}
+.errc h3{margin:0 0 6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}
+.duo > div{min-width:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.duo .cap{font-size:12px;font-weight:600;padding:6px 12px;border-bottom:1px solid var(--line)}
+.duo .no .cap{background:var(--bad-soft);color:var(--bad)}
+.duo .yes .cap{background:var(--ok-soft);color:var(--ok)}
+.duo .out{font-family:var(--font-mono);font-size:13px;padding:8px 12px;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.errc .lab{margin-bottom:0}
+
+/* Exercices */
+.scorebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.meter{flex:1 1 200px;max-width:320px;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.ex{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden}
+.ex-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ex-n{font-weight:600}
+.lvl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 9px;border-radius:999px;border:1px solid currentColor}
+.lvl-1{color:var(--ok)}.lvl-2{color:var(--ref)}.lvl-3{color:var(--cand)}.lvl-4{color:var(--bad)}
+.ex-status{margin-left:auto;font-size:13px;font-weight:600;color:var(--ok)}
+.ex-q{padding:12px 14px 4px}
+.ex-q p{margin:.3em 0}
+.ex-tip{font-size:13px;color:var(--muted)}
+.ex .bx,.ex .el{cursor:pointer}
+.bx.picked{background:var(--ref-soft);border-color:var(--ref);box-shadow:inset 0 0 0 1px var(--ref)}
+.el.picked{background:var(--ref-soft);box-shadow:0 0 0 1px var(--ref)}
+.badge.b-pick{background:var(--ref);color:var(--surface)}
+.bx.r-ok{background:var(--ok-soft);border-color:var(--ok)}
+.bx.r-miss{outline:2px dashed var(--ok);outline-offset:2px}
+.bx.r-wrong{background:var(--bad-soft);border-color:var(--bad)}
+.el.r-ok{background:var(--ok-soft);box-shadow:0 0 0 1px var(--ok)}
+.el.r-miss{outline:1.5px dashed var(--ok);outline-offset:1px}
+.el.r-wrong{background:var(--bad-soft);box-shadow:0 0 0 1px var(--bad)}
+.badge.b-ok{background:var(--ok);color:var(--surface)}
+.badge.b-wrong{background:var(--bad);color:var(--surface)}
+.badge.b-miss{background:transparent;color:var(--ok);outline:1.5px dashed var(--ok)}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.btn{font:600 14px var(--font-body);padding:7px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+.ex-fb{font-size:14px;font-weight:600}
+.ex-fb.good{color:var(--ok)}.ex-fb.bad{color:var(--bad)}
+.ex-explain{padding:0 14px 14px;font-size:14.5px;max-width:78ch}
+.ex-explain p{margin:.4em 0}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+.topnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.topnav a{font:600 13px var(--font-body);padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--surface)}
+.topnav a:hover{border-color:var(--muted)}
+.topnav a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+<style>
+/* Terrain de jeu */
+.pg{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:20px 0 6px;overflow:hidden;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr)}
+.pg-ctl{padding:12px 14px;border-right:1px solid var(--line);background:var(--surface-2);display:flex;flex-direction:column;gap:10px;min-width:0}
+.pg-row{display:grid;gap:4px;min-width:0}
+.pg-row label{font-size:12.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:baseline}
+.pg-row label code{font-size:11.5px}
+.pg-row select,.pg-row input[type=range]{width:100%;min-width:0}
+.pg-row select{font:13px var(--font-mono);padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.pg-row output{font:12px var(--font-mono);color:var(--ink)}
+.pg-main{min-width:0;padding:14px;display:flex;flex-direction:column;gap:10px}
+.pg-stage{min-width:0;overflow-x:auto}
+.pg-note{font-size:14px;min-height:1.4em}
+.pg-note b{font-weight:600}
+.pg-code{grid-column:1 / -1;border-top:1px solid var(--line);background:var(--surface-2)}
+@media (max-width:760px){.pg{grid-template-columns:minmax(0,1fr)}.pg-ctl{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* Pièces de décor */
+.frame{max-width:100%;border:1px dashed var(--muted);border-radius:10px;background:var(--surface-2);padding:10px;position:relative}
+.it{background:var(--surface);border:1.5px solid var(--ref);border-radius:6px;padding:8px 12px;font:600 13px var(--font-mono);color:var(--ink)}
+.it.b{border-color:var(--cand)}.it.c{border-color:var(--ok)}
+.txt{margin:0;font-size:15px;line-height:1.9}
+.mf{border:1px solid var(--muted);border-radius:5px;padding:5px 10px 7px;background:var(--surface);min-width:0}
+.mf small{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+.mf span{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbtn{font:600 13px var(--font-body);padding:7px 14px;border-radius:999px;background:var(--ref);color:var(--surface);border:1px solid var(--ref);white-space:nowrap}
+.mbtn.alt{background:transparent;color:var(--ref);border-color:var(--line)}
+.hdr{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;gap:8px;align-items:center}
+.hdr-t b{display:block;font-family:var(--font-display);font-size:16px}
+.hdr-t small{color:var(--muted);font-size:12px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--ref-soft);border:1px solid var(--ref);flex:none}
+.pname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.cardx{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px}
+.badge-n{background:var(--cand);color:var(--surface);font:700 11px var(--font-body);padding:2px 8px;border-radius:999px}
+.scrollf{height:210px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.scrollf .row{padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.stfoot{display:flex;justify-content:flex-end;gap:8px;padding:10px 12px;background:var(--surface-2);border-top:1px solid var(--line)}
+.sthead{padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
+.ovl{height:118px;overflow:hidden}
+.ovl .row{padding:6px 10px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}
+.appcard{background:var(--surface);border:1.5px solid var(--ok);border-radius:8px;padding:10px}
+.zst{position:relative;height:230px}
+.zA,.zB{position:absolute;left:12px;right:12px;border-radius:8px;padding:10px 12px;font-size:14px;border:1.5px solid}
+.zA{top:10px;height:90px;background:var(--surface);border-color:var(--ref)}
+.zB{top:110px;height:100px;background:var(--surface-2);border-color:var(--cand)}
+.zM{position:absolute;left:40px;top:50px;width:170px;background:var(--surface);border:1.5px solid var(--ok);border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.18);font-size:13px}
+.zM div{padding:6px 10px;border-bottom:1px solid var(--line)}
+.mc-parent{background:var(--surface);border:1px solid var(--line);border-radius:8px;flex-direction:column}
+.mc-p{margin:0;background:var(--ref-soft);border:1px dashed var(--ref);padding:6px 10px;font-size:14px}
+.gform{display:grid}
+.cq{container-type:inline-size}
+.cq-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cq-title{font-family:var(--font-display);font-weight:800;font-size:clamp(16px,5cqi,30px);margin:0 0 10px;line-height:1.1}
+@container (max-width: 460px){.cq-form{grid-template-columns:1fr}}
+.cards{gap:10px}
+.cards .cardx{min-height:56px}
+.cmp{display:grid;gap:12px}
+.cmp .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+/* Box model */
+.bm{overflow-x:auto;padding:4px 0}
+.bm-m{display:inline-block;background:repeating-linear-gradient(45deg,var(--cand-soft),var(--cand-soft) 6px,transparent 6px,transparent 12px);outline:1px dashed var(--cand);position:relative}
+.bm-b{background:var(--ink);position:relative}
+.bm-p{background:var(--ok-soft);position:relative}
+.bm-c{background:var(--ref-soft);outline:1px dashed var(--ref);height:56px;display:grid;place-items:center;font:600 12px var(--font-mono);color:var(--ref)}
+.bm-tag{position:absolute;top:1px;left:4px;font:600 10px var(--font-mono);text-transform:uppercase;letter-spacing:.05em}
+.bm-m > .bm-tag{color:var(--cand)}.bm-b > .bm-tag{color:var(--paper)}.bm-p > .bm-tag{color:var(--ok)}
+.parent-w{border:2px solid var(--muted);padding:0;width:320px;max-width:100%;border-radius:4px}
+.sum{font-family:var(--font-mono);font-size:13px}
+/* Exercices */
+.pred{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden}
+.pred-q{padding:12px 14px}
+.pred-q p{margin:.3em 0}
+.pred-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;padding:0 14px 14px}
+.pred-opt{border:2px solid var(--line);border-radius:10px;padding:10px;background:var(--surface-2);cursor:pointer;text-align:left;font:inherit;color:inherit;min-width:0;display:grid;gap:6px}
+.pred-opt:hover{border-color:var(--muted)}
+.pred-opt[aria-pressed="true"]{border-color:var(--ref)}
+.pred-opt.good{border-color:var(--ok);background:var(--ok-soft)}
+.pred-opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.pred-opt .ol{font:700 12px var(--font-mono);color:var(--muted)}
+.pred-opt .frame{pointer-events:none}
+.fixopts{display:grid;gap:6px;padding:0 14px 12px}
+.fixopts label{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:14px}
+.fixopts label.good{border-color:var(--ok);background:var(--ok-soft)}
+.fixopts label.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fixopts input{margin-top:4px}
+.fixstage{padding:0 14px 12px}
+.goal{font-size:14px;color:var(--muted)}
+</style>
+
+</head>
+<body>
+<div class="shell">
+<details class="toc" open id="toc">
+  <summary>Sommaire</summary>
+  <div class="grp">La boîte</div>
+  <ol>
+    <li><a href="#l1"><span>1</span>Le box model</a></li>
+    <li><a href="#l2"><span>2</span>display</a></li>
+    <li><a href="#l3"><span>3</span>Pièges des marges</a></li>
+    <li><a href="#l4"><span>4</span>overflow</a></li>
+  </ol>
+  <div class="grp">Flexbox</div>
+  <ol>
+    <li><a href="#l5"><span>5</span>L'axe</a></li>
+    <li><a href="#l6"><span>6</span>Grandir, rétrécir</a></li>
+    <li><a href="#l7"><span>7</span>Le fix min-width: 0</a></li>
+  </ol>
+  <div class="grp">Grid</div>
+  <ol>
+    <li><a href="#l8"><span>8</span>Lignes et colonnes</a></li>
+    <li><a href="#l9"><span>9</span>Flex ou Grid ?</a></li>
+  </ol>
+  <div class="grp">Placement</div>
+  <ol>
+    <li><a href="#l10"><span>10</span>position</a></li>
+    <li><a href="#l11"><span>11</span>z-index</a></li>
+    <li><a href="#l12"><span>12</span>Unités et responsive</a></li>
+  </ol>
+  <div class="grp">Pratique</div>
+  <ol>
+    <li><a href="#l13"><span>13</span>Exercices</a></li>
+  </ol>
+  <div class="score">Réussis : <b class="score-n">0</b> / <span class="score-t">0</span></div>
+</details>
+
+<main>
+<header class="hero">
+  <nav class="topnav" aria-label="Parties du cours"><a href="index.html">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html">2 · Angular &amp; Material</a><a href="layout.html" aria-current="page">3 · Mise en page</a></nav>
+  <div class="kicker">Partie 3 · Ce que fait la règle, une fois qu'elle a touché l'élément</div>
+  <h1>La <span class="hl">mise en page</span>, en manipulant</h1>
+  <p class="lead">Les parties 1 et 2 répondaient à « quels éléments ma règle touche-t-elle ? ». Celle-ci répond à « pourquoi c'est placé, espacé ou dimensionné comme ça ? ». Chaque leçon est un terrain de jeu : change une valeur à gauche, regarde les boîtes bouger, et lis le CSS généré en dessous.</p>
+</header>
+
+<!-- 1 -->
+<section class="lesson" id="l1">
+  <div class="lesson-head"><span class="num">1</span><h2>Le box model : quatre couches autour du contenu</h2></div>
+  <div class="prose"><p>Chaque élément est une boîte en couches : le <b>contenu</b>, puis le <b>padding</b> (espace intérieur, il prend la couleur de fond), la <b>bordure</b>, et la <b>marge</b> (espace extérieur, toujours transparent). La question qui piège tout le monde : <code>width</code> mesure-t-il seulement le contenu, ou toute la boîte ? C'est <code>box-sizing</code> qui décide.</p></div>
+  <div data-pg="box"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>box-sizing</th><th>width: 300px veut dire</th><th>Conséquence</th></tr>
+    <tr><td><code>content-box</code> (défaut du navigateur)</td><td>le contenu fait 300px, padding et bordure s'ajoutent</td><td><code>width: 100%</code> + padding = déborde du parent</td></tr>
+    <tr><td><code>border-box</code></td><td>la boîte entière fait 300px, le contenu rétrécit</td><td>ce que tout le monde attend</td></tr>
+  </table></div>
+  <div class="callout"><b>Vérifie ton projet</b>Beaucoup de projets ajoutent en tête de <code>styles.scss</code> : <code>*, *::before, *::after { box-sizing: border-box; }</code>. Si ce n'est pas le cas chez toi, un champ en <code>width: 100%</code> avec du padding dépassera de sa carte.</div>
+</section>
+
+<!-- 2 -->
+<section class="lesson" id="l2">
+  <div class="lesson-head"><span class="num">2</span><h2>display : comment la boîte se place</h2></div>
+  <div class="prose"><p>Les trois éléments ci-dessous ont tous <code>width: 120px</code> et <code>margin-top: 14px</code>. Change leur <code>display</code> et observe ce qui est respecté ou ignoré.</p></div>
+  <div data-pg="display"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>display</th><th>Se place</th><th>width / height</th><th>margins verticales</th></tr>
+    <tr><td><code>inline</code></td><td>dans la ligne de texte</td><td>ignorés</td><td>ignorées</td></tr>
+    <tr><td><code>inline-block</code></td><td>dans la ligne de texte</td><td>respectés</td><td>respectées</td></tr>
+    <tr><td><code>block</code></td><td>sur sa propre ligne, toute la largeur</td><td>respectés</td><td>respectées</td></tr>
+    <tr><td><code>none</code></td><td>n'existe plus dans la page</td><td>—</td><td>—</td></tr>
+  </table></div>
+  <h3>Le piège Angular : tes composants sont inline</h3>
+  <div class="prose"><p>Une balise inconnue du navigateur, comme <code>&lt;app-party-card&gt;</code>, est <code>inline</code> par défaut. Résultat : <code>width</code>, <code>margin-top</code> et les fonds se comportent bizarrement sur l'hôte. Chaque composant devrait décider de son propre <code>display</code> dans <code>:host</code>.</p></div>
+  <div data-pg="host"></div>
+</section>
+
+<!-- 3 -->
+<section class="lesson" id="l3">
+  <div class="lesson-head"><span class="num">3</span><h2>Les pièges des marges</h2><span class="syntax">margin collapse</span></div>
+  <div class="prose"><p>Deux marges verticales qui se touchent ne s'additionnent pas : elles <b>fusionnent</b>, et seule la plus grande compte. Ça n'arrive qu'en flux normal (<code>display: block</code>), jamais dans un conteneur flex ou grid. L'écart réel est mesuré en direct ci-dessous.</p></div>
+  <div data-pg="collapse"></div>
+  <div class="callout good"><b>La solution moderne</b>Arrête de mettre des marges sur les enfants pour les espacer. Mets <code>display: flex; flex-direction: column; gap: 16px</code> (ou <code>grid</code> + <code>gap</code>) sur le parent : l'espacement est au même endroit, et aucune fusion n'est possible.</div>
+</section>
+
+<!-- 4 -->
+<section class="lesson" id="l4">
+  <div class="lesson-head"><span class="num">4</span><h2>overflow : quand le contenu dépasse</h2></div>
+  <div class="prose"><p>Une carte de hauteur fixe contient une liste plus longue qu'elle. <code>overflow</code> décide de ce qui arrive au surplus.</p></div>
+  <div data-pg="overflow"></div>
+  <div class="callout"><b>Pour un mat-table dans une carte</b>Mets <code>overflow: auto</code> sur un conteneur autour de la table (pas sur la table elle-même), avec une hauteur maximale ou une largeur limitée. La barre de défilement n'apparaît que si nécessaire.</div>
+</section>
+
+<!-- 5 -->
+<section class="lesson" id="l5">
+  <div class="lesson-head"><span class="num">5</span><h2>Flexbox : tout part de l'axe</h2></div>
+  <div class="prose"><p><code>display: flex</code> aligne les enfants le long d'un <b>axe principal</b>. <code>justify-content</code> les répartit <b>sur</b> cet axe, <code>align-items</code> les aligne <b>en travers</b>. Si tu changes <code>flex-direction</code>, les deux axes tournent, et les deux propriétés échangent leur rôle visuel.</p></div>
+  <div data-pg="flexaxis"></div>
+  <h3>Le cas réel : l'en-tête d'un dossier</h3>
+  <div class="prose"><p>Titre à gauche, actions à droite. Avec <code>space-between</code> et trois enfants, les deux boutons s'écartent l'un de l'autre. La solution la plus simple : <code>margin-left: auto</code> sur le premier bouton. Une marge <code>auto</code> dans un conteneur flex absorbe tout l'espace libre.</p></div>
+  <div data-pg="header"></div>
+</section>
+
+<!-- 6 -->
+<section class="lesson" id="l6">
+  <div class="lesson-head"><span class="num">6</span><h2>Qui grandit, qui rétrécit</h2><span class="syntax">flex: grow shrink basis</span></div>
+  <div class="prose"><p><code>flex</code> est un raccourci pour trois valeurs : <b>grow</b> (prend-il l'espace libre ?), <b>shrink</b> (accepte-t-il de rétrécir ?) et <b>basis</b> (sa taille de départ). Les largeurs réelles sont mesurées en direct.</p></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Écrit</th><th>Signifie</th><th>Usage</th></tr>
+    <tr><td><code>flex: 0 1 auto</code></td><td>valeur par défaut : taille du contenu, peut rétrécir, ne grandit pas</td><td>les boutons</td></tr>
+    <tr><td><code>flex: 1</code></td><td>prend une part de l'espace libre</td><td>le champ de recherche</td></tr>
+    <tr><td><code>flex: 2</code></td><td>prend deux parts</td><td>colonne principale</td></tr>
+    <tr><td><code>flex: 0 0 120px</code></td><td>120px exactement, ne bouge jamais</td><td>avatar, colonne fixe</td></tr>
+  </table></div>
+  <div data-pg="grow"></div>
+</section>
+
+<!-- 7 -->
+<section class="lesson" id="l7">
+  <div class="lesson-head"><span class="num">7</span><h2>Le fix le plus utile de flexbox : min-width: 0</h2></div>
+  <div class="prose"><p>Une ligne de partie : avatar, nom, boutons. Avec un nom très long, le nom refuse de rétrécir et pousse les boutons hors de la carte, même avec <code>text-overflow: ellipsis</code>. La raison : un enfant flex a <code>min-width: auto</code> par défaut, il ne descend jamais sous la largeur de son texte. Réduis la largeur, puis passe <code>min-width</code> à 0.</p></div>
+  <div data-pg="minw"></div>
+  <div class="callout good"><b>À retenir</b>Texte qui déborde dans un flex ou un grid → <code>min-width: 0</code> sur l'enfant qui contient le texte. Dans un grid, l'équivalent est <code>minmax(0, 1fr)</code> au lieu de <code>1fr</code>.</div>
+</section>
+
+<!-- 8 -->
+<section class="lesson" id="l8">
+  <div class="lesson-head"><span class="num">8</span><h2>Grid : des lignes et des colonnes à la fois</h2></div>
+  <div class="prose"><p>Pour un formulaire en colonnes, grid est fait pour ça. Tu décris les colonnes sur le parent, et les champs s'y rangent tout seuls. <code>fr</code> veut dire « une part de l'espace restant ». Un champ peut s'étendre sur plusieurs colonnes avec <code>grid-column</code>.</p></div>
+  <div data-pg="grid"></div>
+<pre class="ascii">grid-template-columns: 1fr 1fr          ┌──────────┬──────────┐
+                                          │ Nom      │ Prénom   │
+grid-column: 1 / -1  (sur « Rue »)        ├──────────┴──────────┤
+                                          │ Rue                 │  ← de la 1re à la dernière ligne
+                                          ├──────────┬──────────┤
+                                          │ CP       │ Commune  │
+                                          └──────────┴──────────┘</pre>
+  <div class="callout"><b>La formule magique responsive</b><code>repeat(auto-fit, minmax(180px, 1fr))</code> : « autant de colonnes de 180px minimum que la largeur permet ». Rétrécis le conteneur avec ce choix : les champs passent d'eux-mêmes sur plusieurs lignes, sans media query.</div>
+</section>
+
+<!-- 9 -->
+<section class="lesson" id="l9">
+  <div class="lesson-head"><span class="num">9</span><h2>Flex ou Grid ?</h2></div>
+  <div class="prose"><p>Mêmes cinq cartes, deux méthodes. Change la largeur et regarde la dernière ligne.</p></div>
+  <div data-pg="vs"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Choisis</th><th>Quand</th><th>Exemples</th></tr>
+    <tr><td><b>flex</b></td><td>une seule direction, la taille vient du contenu</td><td>barre d'outils, boutons, en-tête, ligne avatar + nom</td></tr>
+    <tr><td><b>grid</b></td><td>deux directions, les éléments doivent s'aligner en lignes ET en colonnes</td><td>formulaire en colonnes, grille de cartes, mise en page de page</td></tr>
+  </table></div>
+</section>
+
+<!-- 10 -->
+<section class="lesson" id="l10">
+  <div class="lesson-head"><span class="num">10</span><h2>position : sortir du flux</h2></div>
+  <div class="prose"><p><code>absolute</code> place l'élément par rapport à son <b>ancêtre positionné le plus proche</b> (le premier qui a une <code>position</code> autre que <code>static</code>). Si aucun ancêtre n'est positionné, il part se coller au coin de la page. Essaie de passer la carte en <code>static</code>.</p></div>
+  <div data-pg="pos"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>position</th><th>Reste dans le flux ?</th><th>Se place par rapport à</th></tr>
+    <tr><td><code>static</code> (défaut)</td><td>oui</td><td>— (top/left ignorés)</td></tr>
+    <tr><td><code>relative</code></td><td>oui, sa place est gardée</td><td>sa propre position normale</td></tr>
+    <tr><td><code>absolute</code></td><td>non</td><td>l'ancêtre positionné le plus proche</td></tr>
+    <tr><td><code>fixed</code></td><td>non</td><td>la fenêtre (sauf si un ancêtre a un <code>transform</code>)</td></tr>
+    <tr><td><code>sticky</code></td><td>oui, jusqu'au seuil</td><td>le conteneur qui défile</td></tr>
+  </table></div>
+  <h3>Le pied de stepper qui reste visible</h3>
+  <div class="prose"><p><code>position: sticky; bottom: 0</code> garde les boutons Précédent / Suivant visibles pendant qu'on fait défiler une longue étape. Défile dans le cadre, puis compare avec <code>static</code>.</p></div>
+  <div data-pg="sticky"></div>
+  <div class="callout warn"><b>Quand sticky ne colle pas</b>Un ancêtre entre l'élément et la zone qui défile a <code>overflow: hidden</code> ou <code>auto</code>. Sticky colle au premier ancêtre qui défile, même si ce n'est pas celui que tu crois.</div>
+</section>
+
+<!-- 11 -->
+<section class="lesson" id="l11">
+  <div class="lesson-head"><span class="num">11</span><h2>z-index et contextes d'empilement</h2><span class="syntax">pourquoi 9999 perd encore</span></div>
+  <div class="prose"><p>Un menu ouvert dans la carte A doit passer au-dessus de la carte B. Un <code>z-index</code> ne se compare qu'avec les éléments du <b>même contexte d'empilement</b>. Un élément crée un nouveau contexte quand il a une <code>position</code> avec un <code>z-index</code> autre que <code>auto</code>, ou un <code>transform</code>, une <code>opacity</code> inférieure à 1, un <code>filter</code>… À partir de là, ses enfants sont enfermés dedans : même un <code>z-index: 9999</code> ne peut pas sortir de la carte A.</p></div>
+  <div data-pg="z"></div>
+<pre class="ascii">page
+ ├── carte A   z-index: 1  ── <b>contexte</b> ──┐
+ │     └── menu  z-index: 9999           │  9999 compte SEULEMENT à l'intérieur de A
+ └── carte B   z-index: 2                │
+                                         └─ A (1) contre B (2) : <span class="a-no">B gagne, menu compris</span></pre>
+  <div class="callout"><b>Le lien avec Material</b>C'est la raison pour laquelle dialogs, menus et select passent par le <code>cdk-overlay-container</code> en bas du <code>body</code> (partie 2, leçon 6) : ils sortent de tous les contextes de ton écran. Si un overlay passe sous un élément de ton app, cherche un <code>z-index</code> très élevé sur un élément fixe (header, barre latérale).</div>
+</section>
+
+<!-- 12 -->
+<section class="lesson" id="l12">
+  <div class="lesson-head"><span class="num">12</span><h2>Unités et responsive</h2></div>
+  <div class="prose"><p><code>rem</code> se calcule sur la taille de police de la <b>racine</b> (html), <code>em</code> sur celle du <b>parent</b>. Avec <code>em</code>, les tailles s'empilent quand on imbrique ; <code>rem</code> reste prévisible. La taille calculée est affichée en direct.</p></div>
+  <div data-pg="units"></div>
+  <div class="tbl"><table class="t">
+    <tr><th>Unité</th><th>Relative à</th><th>Bon usage</th></tr>
+    <tr><td><code>px</code></td><td>rien</td><td>bordures, petites ombres</td></tr>
+    <tr><td><code>rem</code></td><td>la police de html</td><td>tailles de texte, espacements</td></tr>
+    <tr><td><code>em</code></td><td>la police du parent</td><td>ce qui doit suivre le texte autour (icône dans un bouton)</td></tr>
+    <tr><td><code>%</code></td><td>le parent (largeur)</td><td>largeurs fluides</td></tr>
+    <tr><td><code>vw</code> / <code>vh</code></td><td>la fenêtre</td><td>éléments plein écran</td></tr>
+    <tr><td><code>cqi</code></td><td>le conteneur (avec <code>container-type</code>)</td><td>composants qui s'adaptent à leur place</td></tr>
+  </table></div>
+  <h3>Container queries : un composant qui s'adapte à sa place</h3>
+  <div class="prose"><p>Une media query regarde la <b>fenêtre</b>. Une container query regarde le <b>conteneur</b> du composant. C'est bien plus utile en Angular : le même formulaire peut être large dans une page et étroit dans un dialog. Ici, le formulaire passe à une colonne sous 460px de conteneur, et le titre suit <code>clamp(16px, 5cqi, 30px)</code>.</p></div>
+  <div data-pg="cq"></div>
+<pre class="code solo" data-hl>:host {
+  display: block;
+  container-type: inline-size;
+}
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@container (max-width: 460px) {
+  .form { grid-template-columns: 1fr; }
+}</pre>
+</section>
+
+<!-- 13 -->
+<section class="lesson" id="l13">
+  <div class="lesson-head"><span class="num">13</span><h2>Exercices</h2></div>
+  <div class="prose"><p><b>Prédire</b> : lis le CSS, choisis le rendu qui correspond parmi trois. <b>Réparer</b> : choisis la seule déclaration qui donne le résultat demandé ; l'aperçu se met à jour dès que tu sélectionnes une option.</p></div>
+  <div class="scorebar"><span>Réussis : <b class="score-n">0</b> / <span class="score-t">0</span></span><div class="meter" aria-hidden="true"><i id="meter"></i></div></div>
+  <h3>Prédire le rendu</h3>
+  <div id="pred"></div>
+  <h3>Réparer la mise en page</h3>
+  <div id="fix"></div>
+</section>
+
+<footer>Tous les rendus sont du vrai CSS appliqué par ton navigateur. Les champs et boutons imitent l'allure de Material sans en être.</footer>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var clean=function(t){return t.replace(/\s+/g,' ');};
+var VOID=new Set(['input','img','br','hr','meta','link']);
+var INLINE=new Set(['span','a','em','strong','b','i','code','small','label','img','input','button','mark']);
+
+/* ---------- Parsing ---------- */
+function parse(html){
+  var doc=new DOMParser().parseFromString('<!doctype html><html><body>'+html+'</body></html>','text/html');
+  var body=doc.body, n=0;
+  body._all=Array.prototype.slice.call(body.querySelectorAll('*'));
+  body._all.forEach(function(el){el._i=n++;});
+  return body;
+}
+
+/* ---------- Rendu code ---------- */
+function attrsHTML(el){
+  return Array.prototype.map.call(el.attributes,function(a){
+    return ' <span class="s-attr">'+esc(a.name)+'</span>'+(a.value!==''?'<span class="s-p">=</span><span class="s-val">"'+esc(a.value)+'"</span>':'');
+  }).join('');
+}
+function openTag(el){return '<span class="s-p">&lt;</span><span class="s-tag">'+el.localName+'</span>'+attrsHTML(el)+'<span class="s-p">&gt;</span>';}
+function closeTag(el){return '<span class="s-p">&lt;/</span><span class="s-tag">'+el.localName+'</span><span class="s-p">&gt;</span>';}
+function inlineable(el){
+  if(VOID.has(el.localName)) return true;
+  for(var k=0;k<el.children.length;k++){var c=el.children[k]; if(!INLINE.has(c.localName)||c.children.length) return false;}
+  return clean(el.outerHTML).length<=74;
+}
+function inlineHTML(el){
+  var s='<span class="el" data-i="'+el._i+'">'+openTag(el);
+  if(VOID.has(el.localName)) return s+'</span>';
+  var nodes=el.childNodes;
+  for(var k=0;k<nodes.length;k++){
+    var n=nodes[k];
+    if(n.nodeType===3){var t=clean(n.textContent); if(k===0) t=t.replace(/^ /,''); if(k===nodes.length-1) t=t.replace(/ $/,''); if(t) s+='<span class="s-text">'+esc(t)+'</span>';}
+    else if(n.nodeType===1) s+=inlineHTML(n);
+  }
+  return s+closeTag(el)+'</span>';
+}
+function renderCode(body){
+  var out=[];
+  function walk(el,d){
+    if(inlineable(el)){out.push({i:el._i,d:d,h:inlineHTML(el)});return;}
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+openTag(el)+'</span>'});
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) out.push({i:null,d:d+1,h:'<span class="s-text">'+esc(t)+'</span>'});}
+      else if(n.nodeType===1) walk(n,d+1);
+    });
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+closeTag(el)+'</span>'});
+  }
+  Array.prototype.forEach.call(body.children,function(el){walk(el,0);});
+  return out.map(function(l){return '<div class="ln"'+(l.i!==null?' data-li="'+l.i+'"':'')+'><span class="gut"></span><span class="lc">'+'  '.repeat(l.d)+l.h+'</span></div>';}).join('');
+}
+
+/* ---------- Rendu boîtes ---------- */
+function boxHTML(el){
+  var elKids=Array.prototype.slice.call(el.children);
+  var inline=elKids.length>0&&elKids.every(function(c){return INLINE.has(c.localName);});
+  var label='<span class="s-tag">'+el.localName+'</span>'+(el.id?'<span class="s-id">#'+esc(el.id)+'</span>':'')+
+    Array.prototype.map.call(el.classList,function(c){return '<span class="s-cls">.'+esc(c)+'</span>';}).join('')+
+    Array.prototype.filter.call(el.attributes,function(a){return a.name!=='class'&&a.name!=='id';}).map(function(a){return '<span class="s-attrb">&nbsp;['+esc(a.name)+(a.value!==''?'="'+esc(a.value)+'"':'')+']</span>';}).join('');
+  var head, kids='';
+  if(!elKids.length){
+    var t=clean(el.textContent).trim();
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span>'+(t?'<span class="bx-text">'+esc(t)+'</span>':'')+'<span class="bx-badges"></span></div>';
+  } else {
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span><span class="bx-badges"></span></div>';
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) kids+='<span class="bx-text">'+esc(t)+'</span>';}
+      else if(n.nodeType===1) kids+=boxHTML(n);
+    });
+    kids='<div class="bx-kids">'+kids+'</div>';
+  }
+  return '<div class="bx'+(inline?' bx-inl':'')+'" data-i="'+el._i+'">'+head+kids+'</div>';
+}
+function renderBoxes(body){return Array.prototype.map.call(body.children,boxHTML).join('');}
+
+/* ---------- Analyse de sélecteur ---------- */
+function splitTop(sel){
+  var out=[],cur='',d=0,q=null;
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(ch===','&&d===0){out.push(cur.trim());cur='';continue;}
+    cur+=ch;
+  }
+  if(cur.trim())out.push(cur.trim());
+  return out;
+}
+function tokenize(sel){
+  var parts=[],cur='',d=0,q=null,sp=false;
+  sel=sel.trim();
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(d===0&&/\s/.test(ch)){if(cur){parts.push(cur);cur='';}sp=true;continue;}
+    if(d===0&&'>+~'.indexOf(ch)>=0){if(cur){parts.push(cur);cur='';}parts.push({c:ch});sp=false;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(sp){if(parts.length&&typeof parts[parts.length-1]==='string'&&!cur)parts.push({c:' '});sp=false;}
+    cur+=ch;
+  }
+  if(cur)parts.push(cur);
+  return parts;
+}
+function joinTok(t){return t.map(function(x){return typeof x==='string'?x:(x.c===' '?' ':' '+x.c+' ');}).join('').trim();}
+var PE=/::?(before|after|first-letter|first-line|placeholder|marker|selection)(?![\w-])/g;
+var ST=/:(hover|focus-visible|focus-within|focus|active|visited)(?![\w-])/g;
+function prep(g){
+  var pseudo=null,states=[];
+  var s=g.replace(PE,function(m,n){pseudo=n;return '\u0000';}).replace(ST,function(m,n){states.push(':'+n);return '\u0000';});
+  s=s.replace(/(^|[\s>+~(,])\u0000+/g,'$1*').replace(/\u0000/g,'');
+  return {s:s.trim(),pseudo:pseudo,states:states};
+}
+function extractHas(comp){
+  var k=comp.indexOf(':has('); if(k<0) return null;
+  var d=0; for(var j=k+4;j<comp.length;j++){ if(comp[j]==='(')d++; else if(comp[j]===')'){d--; if(d===0) return comp.slice(k+5,j).trim();} }
+  return null;
+}
+function anchors(el,comb,left,body){
+  var out=[], m=function(x){try{return x.matches(left);}catch(e){return false;}}, p;
+  if(comb===' '){for(p=el.parentElement;p&&p!==body;p=p.parentElement) if(m(p)) out.push(p);}
+  else if(comb==='>'){p=el.parentElement; if(p&&p!==body&&m(p)) out.push(p);}
+  else if(comb==='+'){p=el.previousElementSibling; if(p&&m(p)) out.push(p);}
+  else if(comb==='~'){for(p=el.previousElementSibling;p;p=p.previousElementSibling) if(m(p)) out.push(p);}
+  return out;
+}
+var FRAG=document.createDocumentFragment();
+function evaluate(body,sel){
+  var r={sel:sel,error:null,matched:new Set(),refs:new Map(),pseudo:null,states:[]};
+  var raw=(sel||'').trim();
+  if(!raw){r.error='empty';return r;}
+  if(raw.indexOf('&')>=0){r.error='amp';return r;}
+  var groups=splitTop(raw);
+  for(var gi=0;gi<groups.length;gi++){
+    var g=groups[gi];
+    try{FRAG.querySelector(g);}catch(e){r.error='invalid';return r;}
+    var p=prep(g), els;
+    try{ if(!p.s) throw 0; els=Array.prototype.slice.call(body.querySelectorAll(p.s)); }catch(e){r.error='invalid';return r;}
+    els.forEach(function(el){r.matched.add(el);});
+    if(p.pseudo) r.pseudo=p.pseudo;
+    p.states.forEach(function(s){if(r.states.indexOf(s)<0) r.states.push(s);});
+    var toks=tokenize(p.s);
+    if(toks.length>=3&&typeof toks[toks.length-2]==='object'){
+      var comb=toks[toks.length-2].c, left=joinTok(toks.slice(0,-2));
+      els.forEach(function(el){anchors(el,comb,left,body).forEach(function(a){if(!r.refs.has(a)) r.refs.set(a,'repère');});});
+    }
+    var last=toks[toks.length-1], has=typeof last==='string'?extractHas(last):null;
+    if(has&&!/:not\(/.test(last)){
+      els.forEach(function(el){try{
+        var found=/^>/.test(has)?el.querySelectorAll(':scope '+has):(/^[+~]/.test(has)?[]:el.querySelectorAll(has));
+        Array.prototype.forEach.call(found,function(f){r.refs.set(f,'condition');});
+      }catch(e){}});
+    }
+  }
+  return r;
+}
+
+/* ---------- Lecture en français ---------- */
+var PC={hover:'survolé par la souris',focus:'qui a le focus (clic ou Tab)','focus-visible':'qui a le focus clavier','focus-within':"qui contient l'élément qui a le focus",active:"pendant qu'on clique dessus",visited:'déjà visité',
+'first-child':'qui est le premier enfant de son parent','last-child':'qui est le dernier enfant de son parent','only-child':'qui est le seul enfant de son parent',
+'first-of-type':'qui est le premier de sa balise parmi ses frères','last-of-type':'qui est le dernier de sa balise parmi ses frères',
+empty:'vide',checked:'coché',disabled:'désactivé',enabled:'activé',root:'racine du document','placeholder-shown':'dont le placeholder est visible'};
+var PEL={before:'le pseudo-élément ::before (contenu ajouté au début, à l\'intérieur)',after:'le pseudo-élément ::after (contenu ajouté à la fin, à l\'intérieur)','first-letter':'la première lettre','first-line':'la première ligne',placeholder:"le texte d'aide (placeholder)",marker:'la puce',selection:'le texte sélectionné'};
+function ord(n){return n===1?'1er':n+'e';}
+function nth(arg,ofType){
+  var a=arg.trim().toLowerCase().replace(/\s+/g,'');
+  var scope=ofType?'parmi les frères de même balise':'parmi les enfants de son parent';
+  if(/^\d+$/.test(a)) return 'qui est le '+ord(+a)+' '+scope;
+  if(a==='odd'||a==='2n+1') return 'de rang impair (1er, 3e, 5e…) '+scope;
+  if(a==='even'||a==='2n') return 'de rang pair (2e, 4e, 6e…) '+scope;
+  var m=a.match(/^([+-]?\d*)n([+-]\d+)?$/);
+  if(m){
+    var A=(m[1]===''||m[1]==='+')?1:(m[1]==='-'?-1:parseInt(m[1],10)), B=m[2]?parseInt(m[2],10):0, ranks=[];
+    for(var n=0;n<40&&ranks.length<5;n++){var v=A*n+B; if(v>=1) ranks.push(v); else if(A<=0) break;}
+    ranks.sort(function(x,y){return x-y;});
+    return 'dont le rang '+scope+' vaut '+ranks.join(', ')+(A>0?'…':'');
+  }
+  return 'qui correspond à la formule <code>'+esc(arg)+'</code> '+scope;
+}
+function attrPhrase(n,op,v){
+  var N='<code>'+esc(n)+'</code>', V='<code>"'+esc(v)+'"</code>';
+  if(!op) return "qui a l'attribut "+N;
+  return {'=':'dont '+N+' vaut exactement '+V,'^=':'dont '+N+' commence par '+V,'$=':'dont '+N+' finit par '+V,'*=':'dont '+N+' contient '+V,'~=':'dont '+N+' contient le mot '+V,'|=':'dont '+N+' vaut '+V+' ou commence par « '+esc(v)+'- »'}[op];
+}
+function describeCompound(c){
+  var rest=c, tag=null, cls=[], ids=[], bits=[], pel=null, m, guard=0;
+  m=rest.match(/^(\*|[a-zA-Z][\w-]*)/); if(m){tag=m[1];rest=rest.slice(m[0].length);}
+  while(rest&&guard++<30){
+    if((m=rest.match(/^#([\w-]+)/))) ids.push(m[1]);
+    else if((m=rest.match(/^\.([\w-]+)/))) cls.push(m[1]);
+    else if((m=rest.match(/^\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\]\s]+))\s*)?\]/))) bits.push(attrPhrase(m[1],m[2],m[3]!=null?m[3]:(m[4]!=null?m[4]:m[5])));
+    else if((m=rest.match(/^(::?)([\w-]+)(\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\))?/))){
+      var name=m[2].toLowerCase(), arg=m[3]?m[3].slice(1,-1):null;
+      if(m[1]==='::'||(['before','after','first-letter','first-line'].indexOf(name)>=0)) pel=PEL[name]||('::'+esc(name));
+      else if(name==='nth-child') bits.push(nth(arg,false));
+      else if(name==='nth-of-type') bits.push(nth(arg,true));
+      else if(name==='not') bits.push('qui ne correspond PAS à <code>'+esc(arg)+'</code>');
+      else if(name==='has') bits.push('qui contient <code>'+esc(arg)+'</code>');
+      else if(name==='is'||name==='where') bits.push("qui correspond à l'un de <code>"+esc(arg)+'</code>');
+      else if(PC[name]) bits.push(PC[name]);
+      else bits.push('<code>:'+esc(name)+(arg!==null?'('+esc(arg)+')':'')+'</code>');
+    }
+    else return null;
+    rest=rest.slice(m[0].length);
+  }
+  var head=tag==='*'?"n'importe quel élément":(tag?'un <code>&lt;'+esc(tag)+'&gt;</code>':'un élément');
+  var parts=[];
+  if(ids.length) parts.push("avec l'id <code>#"+esc(ids[0])+'</code>');
+  if(cls.length===1) parts.push('avec la classe <code>.'+esc(cls[0])+'</code>');
+  else if(cls.length>1) parts.push('avec les classes '+cls.map(function(x){return '<code>.'+esc(x)+'</code>';}).join(' ET '));
+  parts=parts.concat(bits);
+  return {s:head+(parts.length?' '+parts.join(', '):''),pel:pel};
+}
+function describeGroup(g){
+  var toks=tokenize(g); if(!toks.length) return null;
+  var last=toks[toks.length-1]; if(typeof last!=='string') return null;
+  var d=describeCompound(last); if(!d) return null;
+  var out=d.s;
+  for(var k=toks.length-2;k>=1;k-=2){
+    var c=toks[k].c, prev=toks[k-1]; if(typeof prev!=='string') return null;
+    var pd=describeCompound(prev); if(!pd) return null;
+    var rel={' ':"qui se trouve quelque part à l'intérieur de",'>':"qui est l'enfant direct de",'+':'placé juste après','~':'placé après (même parent)'}[c];
+    out+=', '+rel+' '+pd.s;
+  }
+  out=out.replace(/ de un /g," d'un ");
+  if(d.pel) out='cible '+d.pel+' de : '+out;
+  return out;
+}
+function describe(sel){
+  var gs=splitTop(sel), res=[];
+  for(var k=0;k<gs.length;k++){var d=describeGroup(gs[k]); if(!d) return null; res.push(d.charAt(0).toUpperCase()+d.slice(1));}
+  return res.join('<br><b>OU</b> ');
+}
+function short(el){
+  var s=el.localName+(el.id?'#'+el.id:'')+Array.prototype.map.call(el.classList,function(c){return '.'+c;}).join('');
+  var t=clean(el.textContent).trim();
+  if(!t&&el.getAttribute('placeholder')) t=el.getAttribute('placeholder');
+  if(t) s+=' « '+(t.length>22?t.slice(0,21)+'…':t)+' »';
+  return s;
+}
+
+/* ---------- Surlignage ---------- */
+function addBadge(bx,text,cls){
+  var b=bx.querySelector(':scope > .bx-head > .bx-badges'); if(!b) return;
+  var s=document.createElement('span'); s.className='badge '+cls; s.textContent=text; b.appendChild(s);
+}
+function q(root,i){return root.querySelectorAll('[data-i="'+i+'"]');}
+function apply(root,r){
+  root.querySelectorAll('.sel,.ref,.cand').forEach(function(e){e.classList.remove('sel','ref','cand');});
+  root.querySelectorAll('.ln').forEach(function(l){l.classList.remove('on-sel','on-ref','on-cand');});
+  root.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+  root.querySelectorAll('.ghost').forEach(function(g){g.remove();});
+  if(r.error) return;
+  var special=r.states.length||r.pseudo, mk=special?'cand':'sel';
+  r.matched.forEach(function(el){
+    q(root,el._i).forEach(function(n){
+      n.classList.add(mk);
+      if(n.classList.contains('bx')) addBadge(n,special?(r.states.length?r.states.join(' '):'::'+r.pseudo):'✓ sélectionné',special?'b-cand':'b-sel');
+    });
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-'+mk);});
+    if(r.pseudo==='before'||r.pseudo==='after'){
+      root.querySelectorAll('.bx[data-i="'+el._i+'"]').forEach(function(bx){
+        var gh=document.createElement('div'); gh.className='ghost'; gh.textContent='::'+r.pseudo+' (contenu ajouté)';
+        var head=bx.querySelector(':scope > .bx-head');
+        if(r.pseudo==='before') bx.insertBefore(gh,head.nextSibling); else bx.appendChild(gh);
+      });
+    }
+  });
+  r.refs.forEach(function(label,el){
+    q(root,el._i).forEach(function(n){n.classList.add('ref'); if(n.classList.contains('bx')) addBadge(n,label,'b-ref');});
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-ref');});
+  });
+}
+function hoverSync(panes){
+  var cur=null;
+  function set(i){
+    if(cur!==null) q(panes,cur).forEach(function(n){n.classList.remove('hov');});
+    cur=i; if(i!==null) q(panes,i).forEach(function(n){n.classList.add('hov');});
+  }
+  panes.addEventListener('mouseover',function(e){var t=e.target.closest('[data-i]'); set(t?t.getAttribute('data-i'):null);});
+  panes.addEventListener('mouseleave',function(){set(null);});
+}
+
+/* ---------- Atelier ---------- */
+function Lab(host,cfg,key){
+  var id='in-'+key;
+  host.classList.add('lab');
+  host.innerHTML='<div class="lab-top"><div class="chips" role="group" aria-label="Sélecteurs à essayer"></div>'+
+    '<div class="try"><label for="'+id+'">'+esc(cfg.inputLabel||'Ton sélecteur')+'</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
+    '<div class="lab-panes'+(cfg.compact?' compact':'')+'"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code"></div></div>'+
+    '<div class="pane pane-box"><div class="pane-cap">Aperçu en boîtes · une boîte = une balise</div><div class="boxes"></div></div></div>'+
+    '<div class="lab-foot"><div class="read"></div><div class="verdict" role="status"></div><pre class="rule"></pre></div>';
+  var chipsEl=host.querySelector('.chips'), input=host.querySelector('input'), codeEl=host.querySelector('.code'), boxesEl=host.querySelector('.boxes'),
+      readEl=host.querySelector('.read'), verdictEl=host.querySelector('.verdict'), ruleEl=host.querySelector('.rule'), panes=host.querySelector('.lab-panes');
+  var body, chips=[];
+  hoverSync(panes);
+  function setHTML(html){body=parse(html);codeEl.innerHTML=renderCode(body);boxesEl.innerHTML=renderBoxes(body);}
+  function setChips(list){
+    chips=list;
+    chipsEl.innerHTML=list.map(function(c,k){return '<button type="button" class="chip" data-k="'+k+'" aria-pressed="false">'+esc(c.label||c.sel)+'</button>';}).join('');
+  }
+  function syncPressed(){
+    var v=input.value.trim();
+    chipsEl.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',chips[+b.getAttribute('data-k')].sel===v?'true':'false');});
+  }
+  function update(){
+    var sel=input.value, r=evaluate(body,sel);
+    apply(panes,r); syncPressed();
+    var k=-1; for(var j=0;j<chips.length;j++) if(chips[j].sel===sel.trim()) {k=j;break;}
+    var note=k>=0&&chips[k].note?'<div style="margin-top:4px">'+chips[k].note+'</div>':'';
+    if(r.error==='empty'){readEl.innerHTML='';verdictEl.innerHTML='Tape un sélecteur, ou clique sur un des exemples.';ruleEl.textContent='';return;}
+    if(r.error==='amp'){readEl.innerHTML='';verdictEl.innerHTML='<span class="err">Le &amp; n\'existe pas dans un sélecteur CSS classique.</span> C\'est une notation SCSS : voir la partie 2.';ruleEl.textContent='';return;}
+    if(r.error==='invalid'){readEl.innerHTML=note;verdictEl.innerHTML='<span class="err">Sélecteur invalide.</span> Le navigateur ignorerait toute la règle.';ruleEl.textContent='';return;}
+    var d=describe(sel.trim());
+    readEl.innerHTML=(d?'<b>Lecture :</b> '+d+'.':'')+note;
+    var list=body._all.filter(function(el){return r.matched.has(el);});
+    var special=r.states.length||r.pseudo, n=list.length, msg;
+    if(!n) msg='<b>Aucun élément</b> ne correspond.';
+    else if(r.states.length) msg='<b>'+n+' candidat'+(n>1?'s':'')+'</b> : stylé'+(n>1?'s':'')+' seulement pendant '+r.states.join(', ')+'.';
+    else if(r.pseudo) msg='<b>'+n+' élément'+(n>1?'s':'')+' hôte'+(n>1?'s':'')+'</b> : le style vise '+(PEL[r.pseudo]||'::'+r.pseudo)+' de '+(n>1?'chacun':'cet élément')+'.';
+    else msg='<b>'+n+' élément'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'')+'</b> :';
+    verdictEl.innerHTML=msg+' '+list.map(function(el){return '<span class="pill'+(special?' c':'')+'">'+esc(short(el))+'</span>';}).join('');
+    ruleEl.innerHTML='<span class="sx">'+esc(sel.trim())+'</span> {\n  background: jaune;   /* la règle CSS complète */\n}';
+  }
+  function select(k){input.value=chips[k].sel;update();}
+  chipsEl.addEventListener('click',function(e){var b=e.target.closest('.chip'); if(b) select(+b.getAttribute('data-k'));});
+  input.addEventListener('input',update);
+  setHTML(cfg.html); setChips(cfg.chips||[]);
+  if(chips.length) select(cfg.start||0); else update();
+  return {setHTML:setHTML,setChips:setChips,select:select,update:update};
+}
+
+/* ---------- Coloration du code statique ---------- */
+function hl(text){
+  var s=esc(text);
+  s=s.replace(/\/\*[\s\S]*?\*\//g,function(m){return '<span class="cm">'+m+'</span>';});
+  s=s.replace(/(^|[\s{;])([a-z-]+)(:\s)/g,'$1<span class="pr">$2</span>$3');
+  s=s.replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  s=s.replace(/([{}])/g,'<span class="br">$1</span>');
+  return s;
+}
+
+/* ---------- Mini compilateur Sass (imbrication + &) ---------- */
+function compile(src){
+  src=src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:"'])\/\/.*$/gm,'$1');
+  var i=0;
+  function block(){
+    var node={decls:[],kids:[]}, buf='';
+    while(i<src.length){
+      var ch=src[i++];
+      if(ch==='{'){var k=block(); k.raw=buf.trim().replace(/\s+/g,' '); buf=''; node.kids.push(k);}
+      else if(ch==='}'){if(buf.trim()) node.decls.push(buf.trim()); return node;}
+      else if(ch===';'){if(buf.trim()) node.decls.push(buf.trim()); buf='';}
+      else buf+=ch;
+    }
+    return node;
+  }
+  var root=block(), rules=[], errors=[];
+  function walk(node,parents,depth){
+    node.kids.forEach(function(k){
+      var parts=splitTop(k.raw||''), sel=[], trace=[];
+      parts.forEach(function(part){
+        if(!parents){
+          if(part.indexOf('&')>=0) errors.push('« '+part+' » : un & au premier niveau n\'a pas de parent à recopier (Sass refuse).');
+          sel.push(part); trace.push({kind:'root',part:part,res:part}); return;
+        }
+        parents.forEach(function(p){
+          var res;
+          if(part.indexOf('&')>=0){res=part.replace(/&/g,function(){return p;}); trace.push({kind:'amp',part:part,parent:p,res:res});}
+          else {res=p+' '+part; trace.push({kind:'space',part:part,parent:p,res:res});}
+          sel.push(res);
+        });
+      });
+      rules.push({sel:sel,decls:k.decls,depth:depth,trace:trace});
+      walk(k,sel,depth+1);
+    });
+  }
+  walk(root,null,0);
+  return {rules:rules,errors:errors};
+}
+function cssText(rules){
+  return rules.map(function(r){
+    return r.sel.join(',\n')+' {'+(r.decls.length?'\n'+r.decls.map(function(d){return '  '+d+';';}).join('\n')+'\n':' ')+'}';
+  }).join('\n\n');
+}
+function traceHTML(t){
+  var P='<mark class="par">'+esc(t.parent||'')+'</mark>';
+  if(t.kind==='root') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-root">premier niveau</span></div><div class="tr-how">Pas de parent : reste tel quel.</div><div class="tr-res">'+esc(t.res)+'</div></li>';
+  if(t.kind==='space') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-sp">pas de &amp; · règle 1</span></div><div class="tr-how">parent + espace + sélecteur</div><div class="tr-res">'+P+'<span class="spc">␣</span>'+esc(t.part)+'</div></li>';
+  var src=esc(t.part).replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  var res=esc(t.part).replace(/&amp;/g,P);
+  return '<li class="tr"><div class="tr-src"><code>'+src+'</code><span class="tg tg-amp">contient &amp; · règle 2</span></div><div class="tr-how"><span class="amp">&amp;</span> ← <code>'+esc(t.parent)+'</code>, rien d\'autre n\'est ajouté</div><div class="tr-res">'+res+'</div></li>';
+}
+
+
+
+/* ---------- Outils ---------- */
+function applyStyles(root,styles){
+  root.querySelectorAll('[data-t]').forEach(function(el){
+    el.removeAttribute('style');
+    var s=styles[el.getAttribute('data-t')];
+    if(s) Object.keys(s).forEach(function(p){ if(s[p]!=='—') el.style.setProperty(p,s[p]); });
+  });
+}
+function cssOf(names,styles){
+  return Object.keys(names).filter(function(k){return styles[k]&&Object.keys(styles[k]).some(function(p){return styles[k][p]!=='—';});}).map(function(k){
+    return names[k]+' {\n'+Object.keys(styles[k]).filter(function(p){return styles[k][p]!=='—';}).map(function(p){return '  '+p+': '+styles[k][p]+';';}).join('\n')+'\n}';
+  }).join('\n');
+}
+function merge(a,b){var o={}; [a||{},b||{}].forEach(function(src){Object.keys(src).forEach(function(k){o[k]=Object.assign({},o[k]||{},src[k]);});}); return o;}
+function W(el){return Math.round(el.getBoundingClientRect().width);}
+
+/* ---------- Terrain de jeu générique ---------- */
+var pgN=0;
+function Playground(host,cfg){
+  var id='pg'+(++pgN), state=cfg.controls.map(function(c){return c.v;});
+  host.className='pg';
+  host.innerHTML='<div class="pg-ctl">'+cfg.controls.map(function(c,k){
+    var cid=id+'-'+k, lab=c.label||c.p, who=c.who||(cfg.names&&cfg.names[c.t])||'';
+    var inp=c.r?'<input type="range" id="'+cid+'" min="'+c.r[0]+'" max="'+c.r[1]+'" step="'+(c.r[2]||1)+'" value="'+c.v+'"><output id="'+cid+'-o"></output>'
+      :'<select id="'+cid+'">'+c.o.map(function(o){return '<option'+(o===c.v?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';
+    return '<div class="pg-row"><label for="'+cid+'">'+(who?'<code>'+esc(who)+'</code>':'')+esc(lab)+'</label>'+inp+'</div>';
+  }).join('')+'</div><div class="pg-main"><div class="pg-stage">'+cfg.stage+'</div><div class="pg-note" role="status"></div></div><pre class="code pg-code"></pre>';
+  var stage=host.querySelector('.pg-stage'), note=host.querySelector('.pg-note'), code=host.querySelector('.pg-code');
+  function val(k){var c=cfg.controls[k]; return c.r?(state[k]+(c.r[3]||'')):state[k];}
+  function run(){
+    var S={}, ctl={};
+    cfg.controls.forEach(function(c,k){S[c.t+'.'+c.p]=val(k); if(c.t!=='_'){(ctl[c.t]=ctl[c.t]||{})[c.p]=val(k);} if(c.r){var o=document.getElementById(id+'-'+k+'-o'); if(o) o.textContent=val(k);} });
+    var styles=merge(cfg.base,ctl);
+    applyStyles(stage,styles);
+    if(cfg.apply) cfg.apply(S,stage);
+    code.innerHTML=hl(cfg.code?cfg.code(S):cssOf(cfg.names||{},styles));
+    if(cfg.note) requestAnimationFrame(function(){note.innerHTML=cfg.note(S,stage);});
+  }
+  host.querySelector('.pg-ctl').addEventListener('input',function(e){
+    var m=e.target.id.match(/-(\d+)$/); if(!m) return; var k=+m[1], c=cfg.controls[k];
+    state[k]=c.r?+e.target.value:e.target.value; run();
+  });
+  run();
+}
+
+/* ---------- Les terrains de jeu ---------- */
+var IT3='<div data-t="i" class="it">A</div><div data-t="i" class="it b">B</div><div data-t="i" class="it c">C</div>';
+var PGS={
+ box:{
+  stage:'<div class="parent-w" data-t="parent"><div class="bm"><div class="bm-m" data-t="m"><span class="bm-tag">margin</span><div class="bm-b" data-t="b"><span class="bm-tag">border</span><div class="bm-p" data-t="p"><span class="bm-tag">padding</span><div class="bm-c" data-t="c">contenu</div></div></div></div></div></div><p class="sum" id="bm-sum"></p>',
+  controls:[{t:'_',p:'box-sizing',o:['content-box','border-box'],v:'content-box',who:'.champ'},{t:'_',p:'width',r:[120,320,10,'px'],v:240,who:'.champ'},{t:'_',p:'padding',r:[0,40,1,'px'],v:16,who:'.champ'},{t:'_',p:'border',r:[0,12,1,'px'],v:2,who:'.champ'},{t:'_',p:'margin',r:[0,40,1,'px'],v:12,who:'.champ'}],
+  apply:function(S,st){
+    var w=parseInt(S['_.width']),p=parseInt(S['_.padding']),b=parseInt(S['_.border']),m=parseInt(S['_.margin']),bb=S['_.box-sizing']==='border-box';
+    var cw=bb?Math.max(0,w-2*p-2*b):w;
+    st.querySelector('.bm-m').style.padding=m+'px'; st.querySelector('.bm-b').style.padding=b+'px';
+    st.querySelector('.bm-p').style.padding=p+'px'; st.querySelector('.bm-c').style.width=cw+'px';
+    var tot=cw+2*p+2*b+2*m;
+    st.querySelector('#bm-sum').innerHTML='Contenu '+cw+' + padding '+(2*p)+' + bordure '+(2*b)+' + marge '+(2*m)+' = <b>'+tot+'px occupés</b> · le parent fait 320px '+(tot>320?'<span class="a-no">→ ça déborde</span>':'<span class="a-ok">→ ça rentre</span>');
+  },
+  code:function(S){return '.champ {\n  box-sizing: '+S['_.box-sizing']+';\n  width: '+S['_.width']+';\n  padding: '+S['_.padding']+';\n  border: '+S['_.border']+' solid;\n  margin: '+S['_.margin']+';\n}';},
+  note:function(S){return S['_.box-sizing']==='border-box'?'En <b>border-box</b>, <code>width</code> englobe padding et bordure : le contenu rétrécit.':'En <b>content-box</b>, <code>width</code> ne concerne que le contenu : padding et bordure s\'ajoutent.';}
+ },
+ display:{
+  stage:'<p class="txt">Texte avant '+IT3.replace(/<div/g,'<span').replace(/<\/div>/g,'</span>')+' texte après, qui continue sur la ligne.</p>',
+  names:{i:'.item'}, base:{i:{width:'120px','margin-top':'14px'}},
+  controls:[{t:'i',p:'display',o:['inline','inline-block','block','none'],v:'inline'}],
+  note:function(S){return {inline:'<b>inline</b> : les boîtes suivent le texte, la largeur et la marge du haut sont ignorées.','inline-block':'<b>inline-block</b> : toujours dans la ligne, mais largeur et marges sont respectées.',block:'<b>block</b> : chaque boîte prend sa propre ligne.',none:'<b>none</b> : les éléments n\'occupent plus aucune place.'}[S['i.display']];}
+ },
+ host:{
+  stage:'<div class="frame"><app-party-card data-t="h" class="appcard"><span class="pname">Dupont Marie</span> · <small>titulaire</small></app-party-card><span style="font-size:13px;color:var(--muted)"> ← texte à côté</span></div>',
+  names:{h:':host'}, base:{h:{width:'260px','margin-top':'10px'}},
+  controls:[{t:'h',p:'display',o:['— (défaut : inline)','block','flex','inline-block'],v:'— (défaut : inline)'}],
+  apply:function(S,st){var v=S['h.display']; var h=st.querySelector('[data-t=h]'); if(v.charAt(0)==='—') h.style.removeProperty('display');},
+  code:function(S){var v=S['h.display']; return '/* party-card.component.scss */\n:host {\n'+(v.charAt(0)==='—'?'  /* rien : le navigateur met display: inline */\n':'  display: '+v+';\n')+'  width: 260px;\n  margin-top: 10px;\n}';},
+  note:function(S,st){var w=W(st.querySelector('[data-t=h]')); return 'Largeur réelle de l\'hôte : <b>'+w+'px</b>'+(S['h.display'].charAt(0)==='—'?' (la largeur demandée est ignorée).':'.');}
+ },
+ collapse:{
+  stage:'<div class="mc-parent" data-t="parent"><p class="mc-p" data-t="a">Paragraphe A</p><p class="mc-p" data-t="b">Paragraphe B</p></div>',
+  names:{parent:'.parent',a:'.a',b:'.b'}, base:{parent:{'flex-direction':'column'}},
+  controls:[{t:'a',p:'margin-bottom',r:[0,40,1,'px'],v:24},{t:'b',p:'margin-top',r:[0,40,1,'px'],v:16},{t:'parent',p:'display',o:['block','flex'],v:'block'}],
+  note:function(S,st){
+    var a=st.querySelector('[data-t=a]').getBoundingClientRect(), b=st.querySelector('[data-t=b]').getBoundingClientRect(), gap=Math.round(b.top-a.bottom);
+    var x=parseInt(S['a.margin-bottom']), y=parseInt(S['b.margin-top']);
+    return 'Écart mesuré : <b>'+gap+'px</b> · somme des marges : '+(x+y)+'px · '+(gap===x+y?'<span class="a-ok">elles s\'additionnent</span>':'<span class="a-no">fusion : seule la plus grande ('+Math.max(x,y)+'px) compte</span>');
+  }
+ },
+ overflow:{
+  stage:'<div class="cardx ovl" data-t="card" style=""><div class="row">Testament · 12/03/2019</div><div class="row">Contrat de mariage · 02/06/2015</div><div class="row">Donation entre époux · 18/11/2020</div><div class="row">Cohabitation légale · 09/09/2012</div><div class="row">Biens mobiliers · 21/01/2023</div><div class="row">Immeuble à l\'étranger · 30/04/2021</div><div class="row">Un libellé extrêmement long qui ne tient pas sur une seule ligne de la carte</div></div><p style="font-size:13px;color:var(--muted);margin:6px 0 0">Bloc suivant de la page</p>',
+  names:{card:'.card'}, base:{card:{height:'118px'}},
+  controls:[{t:'card',p:'overflow',o:['visible','hidden','auto','scroll'],v:'visible'}],
+  note:function(S){return {visible:'<b>visible</b> (défaut) : le contenu déborde par-dessus le bloc suivant.',hidden:'<b>hidden</b> : le surplus est coupé, sans moyen de le voir.',auto:'<b>auto</b> : barres de défilement seulement si nécessaire. Le bon choix la plupart du temps.',scroll:'<b>scroll</b> : barres toujours présentes, même inutiles.'}[S['card.overflow']];}
+ },
+ flexaxis:{
+  stage:'<div class="frame" data-t="c" style="">'+IT3+'</div>',
+  names:{c:'.conteneur'}, base:{c:{display:'flex',height:'160px'}},
+  controls:[{t:'c',p:'flex-direction',o:['row','column','row-reverse'],v:'row'},{t:'c',p:'justify-content',o:['flex-start','center','flex-end','space-between','space-around','space-evenly'],v:'flex-start'},{t:'c',p:'align-items',o:['stretch','flex-start','center','flex-end'],v:'stretch'},{t:'c',p:'gap',r:[0,40,2,'px'],v:8}],
+  note:function(S){var col=S['c.flex-direction']==='column'; return 'Axe principal : <b>'+(col?'vertical ↓':'horizontal '+(S['c.flex-direction']==='row-reverse'?'←':'→'))+'</b> (justify-content) · axe secondaire : <b>'+(col?'horizontal →':'vertical ↓')+'</b> (align-items).';}
+ },
+ header:{
+  stage:'<div class="hdr" data-t="h"><div class="hdr-t"><b>Dossier 2026/0042</b><small>Succession · en cours</small></div><button type="button" class="mbtn alt" data-t="b1">Annuler</button><button type="button" class="mbtn">Enregistrer</button></div>',
+  names:{h:'.header',b1:'.cancel'}, base:{h:{display:'flex'}},
+  controls:[{t:'h',p:'justify-content',o:['flex-start','space-between'],v:'space-between'},{t:'b1',p:'margin-left',o:['0','auto'],v:'0'}],
+  note:function(S){return S['b1.margin-left']==='auto'?'<span class="a-ok">Les boutons sont groupés à droite</span> : la marge auto a pris tout l\'espace libre.':(S['h.justify-content']==='space-between'?'<span class="a-no">Les deux boutons sont séparés</span> : space-between répartit l\'espace entre les trois enfants.':'Tout est collé à gauche.');}
+ },
+ grow:{
+  stage:'<div class="frame" data-t="c"><div class="it" data-t="a">A</div><div class="it b" data-t="b">B</div><div class="it c" data-t="cc">C</div></div>',
+  names:{a:'.a',b:'.b',cc:'.c'}, base:{c:{display:'flex',gap:'8px'}},
+  controls:[{t:'a',p:'flex',o:['0 1 auto','1','2','0 0 120px'],v:'1'},{t:'b',p:'flex',o:['0 1 auto','1','2','0 0 120px'],v:'0 1 auto'},{t:'cc',p:'flex',o:['0 1 auto','1','2','0 0 120px'],v:'0 0 120px'}],
+  note:function(S,st){return 'Largeurs mesurées : A <b>'+W(st.querySelector('[data-t=a]'))+'px</b> · B <b>'+W(st.querySelector('[data-t=b]'))+'px</b> · C <b>'+W(st.querySelector('[data-t=cc]'))+'px</b>';}
+ },
+ minw:{
+  stage:'<div class="frame" data-t="f"><div class="hdr" data-t="row" style=""><div class="avatar"></div><div class="pname" data-t="n">Van den Bossche-Vandermeulen Marie-Christine Josephine</div><button type="button" class="mbtn alt">Modifier</button><button type="button" class="mbtn">Retirer</button></div></div>',
+  names:{n:'.name'}, base:{row:{display:'flex'},f:{overflow:'hidden'},n:{flex:'1'}},
+  controls:[{t:'f',p:'width',r:[260,640,10,'px'],v:420,label:'largeur de la carte'},{t:'n',p:'min-width',o:['auto','0'],v:'auto'}],
+  note:function(S,st){var f=st.querySelector('[data-t=f]').getBoundingClientRect(), btn=st.querySelectorAll('.mbtn')[1].getBoundingClientRect(); var out=btn.right>f.right-2;
+    return out?'<span class="a-no">Le bouton Retirer sort de la carte</span> : le nom refuse de rétrécir sous la largeur de son texte.':'<span class="a-ok">Tout tient</span> : le nom rétrécit et affiche « … ».';}
+ },
+ grid:{
+  stage:'<div class="frame" data-t="f"><div class="gform" data-t="g"><div class="mf"><small>Nom</small><span>Dupont</span></div><div class="mf"><small>Prénom</small><span>Marie</span></div><div class="mf" data-t="street"><small>Rue</small><span>Avenue des Arts 12</span></div><div class="mf"><small>Code postal</small><span>1000</span></div><div class="mf"><small>Commune</small><span>Bruxelles</span></div></div></div>',
+  names:{g:'.form',street:'.street'}, base:{g:{display:'grid'}},
+  controls:[{t:'f',p:'width',r:[260,720,10,'px'],v:560,label:'largeur du conteneur'},{t:'g',p:'grid-template-columns',o:['1fr 1fr','1fr 2fr','repeat(3, 1fr)','200px 1fr','repeat(auto-fit, minmax(180px, 1fr))'],v:'1fr 1fr'},{t:'g',p:'gap',r:[0,32,2,'px'],v:12},{t:'street',p:'grid-column',o:['auto','span 2','1 / -1'],v:'1 / -1'}],
+  note:function(S,st){var n=getComputedStyle(st.querySelector('[data-t=g]')).gridTemplateColumns.split(' ').length; return 'Colonnes créées : <b>'+n+'</b>.';}
+ },
+ vs:{
+  stage:'<div class="frame" data-t="f"><div class="cmp"><div><div class="cap">flex-wrap, flex: 1 1 160px</div><div class="cards" style="display:flex;flex-wrap:wrap"><div class="cardx" style="flex:1 1 160px">Carte 1</div><div class="cardx" style="flex:1 1 160px">Carte 2</div><div class="cardx" style="flex:1 1 160px">Carte 3</div><div class="cardx" style="flex:1 1 160px">Carte 4</div><div class="cardx" style="flex:1 1 160px">Carte 5</div></div></div><div><div class="cap">grid, repeat(auto-fill, minmax(160px, 1fr))</div><div class="cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))"><div class="cardx">Carte 1</div><div class="cardx">Carte 2</div><div class="cardx">Carte 3</div><div class="cardx">Carte 4</div><div class="cardx">Carte 5</div></div></div></div></div>',
+  controls:[{t:'f',p:'width',r:[300,720,10,'px'],v:560,label:'largeur du conteneur'}],
+  code:function(){return '.cards-flex {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 10px;\n}\n.cards-flex > .card { flex: 1 1 160px; }\n\n.cards-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));\n  gap: 10px;\n}';},
+  note:function(){return 'Avec flex, les cartes de la dernière ligne s\'étirent pour remplir la ligne. Avec grid, elles gardent la largeur des colonnes du dessus.';}
+ },
+ pos:{
+  stage:'<div class="frame" data-t="f" style=""><div style="padding:24px 0 8px"><div class="cardx" data-t="card">Carte « Testament » <span class="badge-n" data-t="badge">Nouveau</span><div style="font-size:13px;color:var(--muted)">Ajouté le 06/10/2026</div></div></div></div>',
+  names:{f:'.page',card:'.card',badge:'.badge'}, base:{f:{position:'relative'}},
+  controls:[{t:'card',p:'position',o:['relative','static'],v:'relative'},{t:'badge',p:'position',o:['static','relative','absolute'],v:'absolute'},{t:'badge',p:'top',r:[-12,30,1,'px'],v:-10},{t:'badge',p:'right',r:[-12,30,1,'px'],v:8}],
+  note:function(S){var p=S['badge.position']; if(p==='static') return '<b>static</b> : le badge reste dans le texte, top et right sont ignorés.'; if(p==='relative') return '<b>relative</b> : décalé depuis sa place normale, qui reste réservée.'; return S['card.position']==='relative'?'<b>absolute</b> dans une carte <b>relative</b> : le badge se cale sur le coin de la carte.':'<b>absolute</b> sans carte positionnée : le badge remonte jusqu\'au cadre (l\'ancêtre positionné suivant).';}
+ },
+ sticky:{
+  stage:'<div class="scrollf"><div class="sthead">Étape 3 · Biens immobiliers</div><div class="row">Parcelle 1 · Uccle · section A</div><div class="row">Parcelle 2 · Uccle · section B</div><div class="row">Parcelle 3 · Ixelles</div><div class="row">Parcelle 4 · Etterbeek</div><div class="row">Parcelle 5 · Forest</div><div class="row">Parcelle 6 · Anderlecht</div><div class="row">Parcelle 7 · Schaerbeek</div><div class="row">Parcelle 8 · Evere</div><div class="stfoot" data-t="foot"><button type="button" class="mbtn alt">Précédent</button><button type="button" class="mbtn">Suivant</button></div></div>',
+  names:{foot:'.step-actions'}, base:{foot:{bottom:'0'}},
+  controls:[{t:'foot',p:'position',o:['static','sticky'],v:'sticky'}],
+  note:function(S){return S['foot.position']==='sticky'?'Défile dans le cadre : les boutons restent collés en bas.':'Les boutons n\'apparaissent qu\'à la toute fin du défilement.';}
+ },
+ z:{
+  stage:'<div class="frame zst"><div class="zA" data-t="a"><b>Carte A</b> · menu ouvert<div class="zM" data-t="m"><div>Modifier</div><div>Dupliquer</div><div>Supprimer</div></div></div><div class="zB" data-t="b"><b>Carte B</b><br><span style="font-size:13px;color:var(--muted)">Le menu de A devrait passer par-dessus</span></div></div>',
+  names:{a:'.card-a',m:'.menu',b:'.card-b'},
+  controls:[{t:'m',p:'z-index',o:['1','10','9999'],v:'9999'},{t:'a',p:'z-index',o:['auto','1','3'],v:'1'},{t:'a',p:'transform',o:['none','translateZ(0)'],v:'none'},{t:'b',p:'z-index',o:['auto','2'],v:'2'}],
+  note:function(S){
+    var az=S['a.z-index'], ctx=az!=='auto'||S['a.transform']!=='none', bz=S['b.z-index']==='auto'?0:+S['b.z-index'];
+    if(!ctx){var mz=+S['m.z-index']; return (mz>bz?'<span class="a-ok">Le menu passe au-dessus</span>':'<span class="a-no">Le menu passe dessous</span>')+' : A ne crée pas de contexte, le menu (z-index '+mz+') se compare directement à B ('+bz+').';}
+    var aLevel=az==='auto'?0:+az, menuWins=aLevel>bz;
+    return 'A crée un <b>contexte</b> ('+(az!=='auto'?'z-index: '+az:'')+(az!=='auto'&&S['a.transform']!=='none'?' + ':'')+(S['a.transform']!=='none'?'transform':'')+'). Le menu y est enfermé : on compare A ('+aLevel+') et B ('+bz+'). '+(menuWins?'<span class="a-ok">A gagne, le menu passe dessus.</span>':'<span class="a-no">B gagne'+(aLevel===bz?' (égalité : B vient après dans le HTML)':'')+', le menu passe dessous, malgré son z-index.</span>');
+  }
+ },
+ units:{
+  stage:'<div class="frame" data-t="o" style="">Parent <span style="font-size:13px;color:var(--muted)">(texte du parent)</span><div style="margin-top:6px"><span data-t="i">Enfant</span></div></div>',
+  names:{o:'.parent',i:'.enfant'},
+  controls:[{t:'o',p:'font-size',o:['14px','18px','24px'],v:'18px'},{t:'i',p:'font-size',o:['1em','1.5em','1rem','1.5rem'],v:'1.5em'}],
+  note:function(S,st){var px=parseFloat(getComputedStyle(st.querySelector('[data-t=i]')).fontSize), root=parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var u=S['i.font-size']; return 'Taille calculée de l\'enfant : <b>'+Math.round(px*10)/10+'px</b> · '+(u.indexOf('rem')>0?u+' × '+root+'px (racine)':u+' × '+S['o.font-size']+' (parent)');}
+ },
+ cq:{
+  stage:'<div class="frame cq" data-t="f"><p class="cq-title">Adresse du titulaire</p><div class="cq-form"><div class="mf"><small>Nom</small><span>Dupont</span></div><div class="mf"><small>Prénom</small><span>Marie</span></div><div class="mf"><small>Code postal</small><span>1000</span></div><div class="mf"><small>Commune</small><span>Bruxelles</span></div></div></div>',
+  controls:[{t:'f',p:'width',r:[280,720,10,'px'],v:560,label:'largeur du conteneur (comme une page puis un dialog)'}],
+  code:function(){return '.wrapper { container-type: inline-size; }\n.title { font-size: clamp(16px, 5cqi, 30px); }\n@container (max-width: 460px) {\n  .form { grid-template-columns: 1fr; }\n}';},
+  note:function(S,st){var w=st.querySelector('[data-t=f]').clientWidth-20; return 'Largeur utile du conteneur : <b>'+w+'px</b> → '+(w<=460?'<b>1 colonne</b> (la container query s\'applique)':'<b>2 colonnes</b>');}
+ }
+};
+document.querySelectorAll('[data-pg]').forEach(function(h){var c=PGS[h.getAttribute('data-pg')]; if(c) Playground(h,c);});
+document.querySelectorAll('pre[data-hl]').forEach(function(p){p.innerHTML=hl(p.textContent);});
+
+/* ---------- Exercices : prédire ---------- */
+var solved=new Set();
+var PRED=[
+ {html:'<div class="frame" data-t="c" style="height:auto"><div class="it">A</div><div class="it b">B</div><div class="it c">C</div></div>',names:{c:'.row'},
+  v:[{c:{display:'flex','justify-content':'space-between'}},{c:{display:'flex','justify-content':'center',gap:'8px'}},{c:{display:'flex','justify-content':'flex-end',gap:'8px'}}],
+  x:'<code>space-between</code> colle le premier à gauche, le dernier à droite, et répartit le reste entre eux.'},
+ {html:'<div class="frame" data-t="c"><div class="it">A</div><div class="it b">B</div><div class="it c">C</div></div>',names:{c:'.col'},
+  v:[{c:{display:'flex','flex-direction':'column','align-items':'center',gap:'6px'}},{c:{display:'flex','flex-direction':'column',gap:'6px'}},{c:{display:'flex','align-items':'center',gap:'6px'}}],
+  x:'En colonne, l\'axe secondaire devient horizontal : <code>align-items: center</code> centre donc de gauche à droite.'},
+ {html:'<div class="frame" data-t="c"><div class="mf"><small>Nom</small><span>Dupont</span></div><div class="mf"><small>Description</small><span>Donation</span></div></div>',names:{c:'.form'},
+  v:[{c:{display:'grid','grid-template-columns':'1fr 2fr',gap:'8px'}},{c:{display:'grid','grid-template-columns':'2fr 1fr',gap:'8px'}},{c:{display:'grid','grid-template-columns':'1fr 1fr',gap:'8px'}}],
+  x:'<code>1fr 2fr</code> : la seconde colonne reçoit deux parts, elle est deux fois plus large.'},
+ {html:'<div class="frame" style="width:220px"><div class="mf" data-t="f"><small>Montant</small><span>1.250,00</span></div></div>',names:{f:'.field'},
+  v:[{f:{'box-sizing':'content-box',width:'100%',padding:'5px 24px 7px'}},{f:{'box-sizing':'border-box',width:'100%',padding:'5px 24px 7px'}},{f:{'box-sizing':'border-box',width:'60%',padding:'5px 24px 7px'}}],
+  x:'En <code>content-box</code>, 100% vaut la largeur du parent pour le seul contenu : le padding s\'ajoute et le champ déborde.'},
+ {html:'<div class="frame" style="position:relative;padding-top:26px"><div class="cardx" data-t="card">Carte <span class="badge-n" data-t="b">Nouveau</span></div></div>',names:{card:'.card',b:'.badge'},
+  v:[{card:{position:'static'},b:{position:'absolute',top:'4px',right:'4px'}},{card:{position:'relative'},b:{position:'absolute',top:'4px',right:'4px'}},{card:{position:'static'},b:{position:'relative',top:'4px',left:'4px'}}],
+  x:'La carte n\'est pas positionnée : le badge en <code>absolute</code> se cale sur le premier ancêtre positionné, ici le cadre extérieur.'}
+];
+var predHost=document.getElementById('pred');
+PRED.forEach(function(P,k){
+  var order=[[1,0,2],[2,1,0],[0,2,1],[1,2,0],[2,0,1]][k%5];
+  var box=document.createElement('div'); box.className='pred';
+  box.innerHTML='<div class="ex-head"><span class="ex-n">Prédire '+(k+1)+'</span><span class="ex-status"></span></div><div class="pred-q"><p>Quel rendu produit ce CSS ?</p><pre class="code solo">'+hl(cssOf(P.names,P.v[0]))+'</pre></div><div class="pred-opts">'+order.map(function(vi,j){return '<button type="button" class="pred-opt" data-v="'+vi+'" aria-pressed="false"><span class="ol">'+'ABC'[j]+'</span><div class="pv">'+P.html+'</div></button>';}).join('')+'</div><div class="ex-actions"><span class="ex-fb" role="status"></span></div><div class="ex-explain" hidden><p>'+P.x+'</p></div>';
+  predHost.appendChild(box);
+  box.querySelectorAll('.pred-opt').forEach(function(b){applyStyles(b.querySelector('.pv'),P.v[+b.getAttribute('data-v')]);});
+  box.querySelector('.pred-opts').addEventListener('click',function(e){
+    var b=e.target.closest('.pred-opt'); if(!b) return;
+    box.querySelectorAll('.pred-opt').forEach(function(x){x.classList.remove('good','bad');x.setAttribute('aria-pressed',x===b?'true':'false');});
+    var fb=box.querySelector('.ex-fb');
+    if(b.getAttribute('data-v')==='0'){b.classList.add('good');fb.textContent='Exact.';fb.className='ex-fb good';solved.add('p'+k);box.querySelector('.ex-status').textContent='✓ Réussi';upd();}
+    else {b.classList.add('bad');fb.textContent='Non, réessaie.';fb.className='ex-fb bad';}
+    box.querySelector('.ex-explain').hidden=false;
+  });
+});
+
+/* ---------- Exercices : réparer ---------- */
+var FIX=[
+ {goal:'Le titre reste à gauche, les deux boutons doivent être groupés à droite.',
+  html:'<div class="hdr" data-t="h"><div class="hdr-t"><b>Dossier 42</b><small>Fiscal</small></div><button type="button" class="mbtn alt" data-t="b1">Annuler</button><button type="button" class="mbtn" data-t="b2">Enregistrer</button></div>',
+  base:{h:{display:'flex'}},
+  opts:[{l:'.header { justify-content: center; }',s:{h:{'justify-content':'center'}}},{l:'.cancel { margin-left: auto; }',s:{b1:{'margin-left':'auto'}}},{l:'.header { text-align: right; }',s:{h:{'text-align':'right'}}},{l:'.header { justify-content: space-between; }',s:{h:{'justify-content':'space-between'}}}],ok:1,
+  x:'Une marge <code>auto</code> sur le premier bouton absorbe tout l\'espace libre et pousse le groupe à droite. <code>space-between</code> sépare les deux boutons ; <code>text-align</code> n\'agit pas sur des enfants flex.'},
+ {goal:'Le nom doit se couper avec « … », et le bouton Retirer doit rester dans la carte.',
+  html:'<div class="frame" style="width:300px;max-width:100%;overflow:hidden"><div class="hdr" data-t="row"><div class="avatar"></div><div class="pname" data-t="n">Van den Bossche-Vandermeulen Marie-Christine</div><button type="button" class="mbtn">Retirer</button></div></div>',
+  base:{row:{display:'flex'},n:{flex:'1'}},
+  opts:[{l:'.row { overflow: hidden; }',s:{row:{overflow:'hidden'}}},{l:'.name { width: 100%; }',s:{n:{width:'100%'}}},{l:'.name { min-width: 0; }',s:{n:{'min-width':'0'}}},{l:'.name { flex-shrink: 0; }',s:{n:{'flex-shrink':'0'}}}],ok:2,
+  x:'Un enfant flex ne rétrécit pas sous la largeur de son texte (<code>min-width: auto</code>). <code>min-width: 0</code> l\'autorise, et l\'ellipse apparaît.'},
+ {goal:'Nom et Prénom côte à côte, Rue sur toute la largeur en dessous.',
+  html:'<div class="gform" data-t="g"><div class="mf"><small>Nom</small><span>Dupont</span></div><div class="mf"><small>Prénom</small><span>Marie</span></div><div class="mf" data-t="s"><small>Rue</small><span>Avenue des Arts 12</span></div></div>',
+  base:{g:{display:'grid','grid-template-columns':'1fr 1fr',gap:'10px'}},
+  opts:[{l:'.street { width: 100%; }',s:{s:{width:'100%'}}},{l:'.street { grid-column: 1 / -1; }',s:{s:{'grid-column':'1 / -1'}}},{l:'.street { flex: 1; }',s:{s:{flex:'1'}}},{l:'.street { display: block; }',s:{s:{display:'block'}}}],ok:1,
+  x:'Dans une grille, la largeur d\'un élément est celle de sa cellule. <code>grid-column: 1 / -1</code> lui fait occuper toutes les colonnes.'},
+ {goal:'Le menu de la carte A doit passer au-dessus de la carte B. Attention : la carte A a un transform.',
+  html:'<div class="frame zst"><div class="zA" data-t="a"><b>Carte A</b> · menu ouvert<div class="zM" data-t="m"><div>Modifier</div><div>Dupliquer</div><div>Supprimer</div></div></div><div class="zB" data-t="b"><b>Carte B</b></div></div>',
+  base:{a:{transform:'translateZ(0)'},b:{'z-index':'1'}},
+  opts:[{l:'.menu { z-index: 99999; }',s:{m:{'z-index':'99999'}}},{l:'.card-a { z-index: 2; }',s:{a:{'z-index':'2'}}},{l:'.menu { position: fixed; }',s:{m:{position:'fixed'}}},{l:'.card-a { overflow: visible; }',s:{a:{overflow:'visible'}}}],ok:1,
+  x:'Le transform enferme le menu dans le contexte de A. Seul le niveau de A face à B compte : <code>z-index: 2</code> sur A bat le 1 de B. (Et <code>position: fixed</code> se cale sur A à cause du transform.)'},
+ {goal:'app-party-card doit faire 260px de large et avoir une marge au-dessus.',
+  html:'<div class="frame"><app-party-card data-t="h" class="appcard"><span class="pname">Dupont Marie</span></app-party-card> <span style="font-size:13px;color:var(--muted)">texte à côté</span></div>',
+  base:{h:{width:'260px','margin-top':'12px'}},
+  opts:[{l:':host { width: 260px !important; }',s:{h:{width:'260px'}}},{l:':host { display: block; }',s:{h:{display:'block'}}},{l:':host { max-width: 260px; }',s:{h:{'max-width':'260px'}}},{l:'.name { width: 260px; }',s:{}}],ok:1,
+  x:'L\'hôte est <code>inline</code> par défaut, donc largeur et marge verticale sont ignorées. Un <code>display: block</code> sur <code>:host</code> règle tout.'}
+];
+var fixHost=document.getElementById('fix');
+FIX.forEach(function(F,k){
+  var box=document.createElement('div'); box.className='pred';
+  box.innerHTML='<div class="ex-head"><span class="ex-n">Réparer '+(k+1)+'</span><span class="ex-status"></span></div><div class="pred-q"><p class="goal"><b>Objectif :</b> '+F.goal+'</p></div><div class="fixstage">'+F.html+'</div><div class="fixopts" role="radiogroup">'+F.opts.map(function(o,j){return '<label><input type="radio" name="fx'+k+'" value="'+j+'"><code>'+esc(o.l)+'</code></label>';}).join('')+'</div><div class="ex-actions"><button type="button" class="btn">Vérifier</button><span class="ex-fb" role="status"></span></div><div class="ex-explain" hidden><p>'+F.x+'</p></div>';
+  fixHost.appendChild(box);
+  var st=box.querySelector('.fixstage'); applyStyles(st,F.base);
+  box.querySelector('.fixopts').addEventListener('change',function(e){var j=+e.target.value; applyStyles(st,merge(F.base,F.opts[j].s)); box.querySelectorAll('.fixopts label').forEach(function(l){l.classList.remove('good','bad');});});
+  box.querySelector('.btn').addEventListener('click',function(){
+    var sel=box.querySelector('input:checked'), fb=box.querySelector('.ex-fb'); if(!sel){fb.textContent='Choisis une option.';fb.className='ex-fb';return;}
+    var j=+sel.value, labels=box.querySelectorAll('.fixopts label');
+    labels.forEach(function(l){l.classList.remove('good','bad');});
+    if(j===F.ok){labels[j].classList.add('good');fb.textContent='Réparé.';fb.className='ex-fb good';solved.add('f'+k);box.querySelector('.ex-status').textContent='✓ Réussi';upd();}
+    else {labels[j].classList.add('bad');fb.textContent='Pas encore, regarde l\'aperçu.';fb.className='ex-fb bad';}
+    box.querySelector('.ex-explain').hidden=false;
+  });
+});
+var total=PRED.length+FIX.length;
+document.querySelectorAll('.score-t').forEach(function(s){s.textContent=total;});
+function upd(){document.querySelectorAll('.score-n').forEach(function(s){s.textContent=solved.size;}); var m=document.getElementById('meter'); if(m) m.style.width=(solved.size/total*100)+'%';}
+upd();
+
+/* ---------- Sommaire ---------- */
+var toc=document.getElementById('toc');
+if(window.matchMedia&&window.matchMedia('(max-width:980px)').matches) toc.removeAttribute('open');
+var links={}; toc.querySelectorAll('a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(ents){ents.forEach(function(en){if(en.isIntersecting){Object.keys(links).forEach(function(k){links[k].removeAttribute('aria-current');}); var a=links[en.target.id]; if(a) a.setAttribute('aria-current','true');}});},{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('section.lesson').forEach(function(s){io.observe(s);});
+}
+})();
+</script>
+
+</body>
+</html>
