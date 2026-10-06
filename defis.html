@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Défis CSS Angular</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : sommaire collant à gauche, colonne de leçons à droite ; chaque atelier = HTML à gauche, boîtes à droite. Motif : le surligneur. */
+:root{
+  --paper:#F4F6F9; --surface:#FFFFFF; --surface-2:#ECF0F5; --ink:#172031; --muted:#5A6679; --line:#D6DCE5;
+  --mark:#FFE05A; --mark-ink:#3A2B00; --mark-edge:#D9AE00;
+  --ref:#2356D3; --ref-soft:rgba(35,86,211,.09);
+  --cand:#C2410C; --cand-soft:rgba(194,65,12,.09);
+  --ok:#157A3A; --ok-soft:rgba(21,122,58,.12); --bad:#BE2A31; --bad-soft:rgba(190,42,49,.10);
+  --syn-tag:#8B2C91; --syn-attr:#965700; --syn-val:#0A6C4E; --syn-text:#172031; --syn-punct:#7A8597;
+  --font-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+    --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+    --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+    --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+    --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+    --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1219; --surface:#151B25; --surface-2:#1C2431; --ink:#E5EAF1; --muted:#98A4B7; --line:#2A3445;
+  --mark:#EBCB33; --mark-ink:#1D1600; --mark-edge:#F6DC62;
+  --ref:#7FA7FF; --ref-soft:rgba(127,167,255,.12);
+  --cand:#FB9447; --cand-soft:rgba(251,148,71,.12);
+  --ok:#4FD983; --ok-soft:rgba(79,217,131,.14); --bad:#F77B7B; --bad-soft:rgba(247,123,123,.14);
+  --syn-tag:#E58FEA; --syn-attr:#F1B562; --syn-val:#62D5A9; --syn-text:#E5EAF1; --syn-punct:#7E8A9E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--ref)}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--surface-2);padding:.08em .35em;border-radius:4px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);gap:44px;max-width:1260px;margin:0 auto;padding-inline:24px;padding-block:28px 96px}
+main{min-width:0}
+
+/* Sommaire */
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:14px;padding-right:4px}
+.toc summary{display:none}
+.toc .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:18px 0 6px}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.toc a{display:flex;gap:8px;text-decoration:none;color:var(--ink);padding:3px 8px;border-radius:5px;line-height:1.35}
+.toc a span{font-family:var(--font-mono);font-size:12px;color:var(--muted);min-width:1.6em}
+.toc a:hover{background:var(--surface-2)}
+.toc a[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.toc a[aria-current="true"] span{color:inherit;opacity:.7}
+.toc .score{margin-top:18px;font-size:13px;color:var(--muted)}
+@media (max-width:980px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:8px;padding-inline:16px}
+  .toc{position:static;max-height:none;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 14px}
+  .toc summary{display:block;cursor:pointer;font-weight:600}
+}
+
+/* En-tête */
+.hero{padding-block:4px 30px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2.3rem,6vw,3.7rem);line-height:1.02;letter-spacing:-.025em;margin:.25em 0 .35em;text-wrap:balance}
+h1 .hl{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,transparent 92%);padding-inline:.06em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px;font-size:14px}
+.sw{display:inline-block;width:20px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:7px}
+.sw.sel{background:var(--mark);border:1px solid var(--mark-edge)}
+.sw.ref{border:2px dashed var(--ref)}
+.sw.cand{border:2px dotted var(--cand);background:var(--cand-soft)}
+
+/* Parties et leçons */
+.part{margin-block:52px 4px;padding:22px 24px;border-radius:12px;background:var(--ink);color:var(--paper)}
+.part .kicker{color:inherit;opacity:.65}
+.part h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;margin:.15em 0 .3em;letter-spacing:-.015em}
+.part p{margin:0;opacity:.85;max-width:66ch}
+.part code{background:transparent;color:inherit;border-color:currentColor}
+section.lesson{padding-block:38px;border-bottom:1px solid var(--line);scroll-margin-top:12px}
+.lesson-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.num{font-family:var(--font-mono);font-weight:600;font-size:14px;color:var(--muted);min-width:2em}
+.lesson h2{font-family:var(--font-display);font-weight:800;font-size:clamp(1.45rem,3.2vw,1.95rem);line-height:1.15;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.syntax{font-family:var(--font-mono);font-size:14px;color:var(--muted)}
+.lesson h3{font-size:1.08rem;font-weight:600;margin:30px 0 6px}
+.prose{max-width:70ch}
+.prose p{margin:.55em 0}
+.big{font-size:1.05em}
+.callout{border-left:3px solid var(--ref);background:var(--ref-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:74ch;margin:16px 0;font-size:15px}
+.callout.warn{border-color:var(--cand);background:var(--cand-soft)}
+.callout.good{border-color:var(--ok);background:var(--ok-soft)}
+.callout > b:first-child{display:block;margin-bottom:2px}
+pre.ascii{font-family:var(--font-mono);font-size:13px;line-height:1.6;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;overflow-x:auto;margin:16px 0;white-space:pre;color:var(--ink)}
+.a-ok{color:var(--ok);font-weight:600}.a-no{color:var(--bad);font-weight:600}.a-ref{color:var(--ref);font-weight:600}
+.a-sel{background:var(--mark);color:var(--mark-ink);padding:0 3px;border-radius:3px}
+.a-amp{color:var(--cand);font-weight:700}.a-dim{color:var(--muted)}.a-tag{color:var(--syn-tag)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table.t{border-collapse:collapse;font-size:14px;width:100%}
+.t th,.t td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+.t tr:last-child td{border-bottom:0}
+.t th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2)}
+.codes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0}
+.cblock{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.cblock .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px}
+pre.code{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:12px 14px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.cblock pre.code{background:transparent}
+pre.code.solo{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:14px 0}
+.amp{color:var(--cand);font-weight:700}
+.cm{color:var(--muted);font-style:italic}
+.pr{color:var(--syn-attr)}
+.br{color:var(--syn-punct)}
+
+/* Atelier */
+.lab{margin:20px 0 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.lab-top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{font-family:var(--font-mono);font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;white-space:pre-wrap}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.try{display:flex;align-items:center;gap:8px;flex:1 1 240px;max-width:380px;min-width:0}
+.try label{font-size:12px;color:var(--muted);white-space:nowrap}
+.try input{flex:1;min-width:0;font-family:var(--font-mono);font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,.bx:focus-visible,.toc a:focus-visible{outline:2px solid var(--ref);outline-offset:2px}
+.lab-panes{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.lab-panes.compact{grid-template-columns:minmax(0,1fr)}
+.lab-panes.compact .pane-code{display:none}
+.pane{min-width:0;padding:12px 14px}
+.pane-code{border-right:1px solid var(--line)}
+.pane-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+@media (max-width:760px){.lab-panes{grid-template-columns:minmax(0,1fr)}.pane-code{border-right:0;border-bottom:1px solid var(--line)}}
+.code{font-family:var(--font-mono);font-size:12.5px;line-height:1.8;overflow-x:auto}
+.ln{display:flex;white-space:pre;min-width:max-content}
+.gut{width:1.5em;flex:none;text-align:center;font-size:10px}
+.ln.on-sel .gut::before{content:"▶";color:var(--ink)}
+.ln.on-cand .gut::before{content:"▷";color:var(--cand)}
+.ln.on-ref:not(.on-sel):not(.on-cand) .gut::before{content:"◇";color:var(--ref)}
+.el{border-radius:3px}
+.el.sel{background:var(--mark);box-shadow:0 0 0 1px var(--mark-edge)}
+.code .el.sel span{color:var(--mark-ink)}
+.el.ref{outline:1.5px dashed var(--ref);outline-offset:1px}
+.el.cand{outline:1.5px dotted var(--cand);outline-offset:1px;background:var(--cand-soft)}
+.el.hov{text-decoration:underline;text-decoration-color:var(--muted);text-underline-offset:3px}
+.s-tag{color:var(--syn-tag)}.s-attr{color:var(--syn-attr)}.s-val{color:var(--syn-val)}.s-p{color:var(--syn-punct)}.s-text{color:var(--syn-text)}
+.s-cls{color:var(--syn-val)}.s-id{color:var(--syn-attr)}.s-attrb{color:var(--syn-attr);font-size:11px}
+.boxes{display:flex;flex-direction:column;gap:8px}
+.bx{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 8px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:background-color .15s,box-shadow .15s}
+.bx-head{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:12px;min-width:0}
+.bx-lbl{display:flex;flex-wrap:wrap;min-width:0;word-break:break-all}
+.bx-text{font-family:var(--font-body);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+.bx-badges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.badge{font-family:var(--font-body);font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap;line-height:1.6}
+.bx-kids{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:1px dashed var(--line);margin-left:2px}
+.bx-inl > .bx-kids{flex-direction:row;flex-wrap:wrap;align-items:center;border-left:0;padding-left:0;margin-left:0}
+.bx.sel{background:var(--mark);border-color:var(--mark-edge)}
+.bx.sel > .bx-head .bx-lbl span,.bx.sel > .bx-head .bx-text,.bx.sel > .bx-kids > .bx-text{color:var(--mark-ink)}
+.badge.b-sel{background:var(--ink);color:var(--paper)}
+.bx.ref{outline:2px dashed var(--ref);outline-offset:2px}
+.badge.b-ref{background:var(--ref);color:var(--surface)}
+.bx.cand{outline:2px dotted var(--cand);outline-offset:2px;background:var(--cand-soft)}
+.badge.b-cand{background:var(--cand);color:var(--surface)}
+.ghost{border:1.5px dashed var(--cand);color:var(--cand);font-family:var(--font-mono);font-size:11px;padding:2px 8px;border-radius:5px;align-self:flex-start;background:var(--surface)}
+.bx.hov{box-shadow:0 0 0 2px var(--muted)}
+.lab-foot{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:8px;font-size:14px}
+.read b,.verdict b{font-weight:600}
+.read code,.verdict code{white-space:normal}
+.verdict{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-family:var(--font-mono);font-size:12px;padding:2px 8px;border-radius:5px;background:var(--mark);color:var(--mark-ink)}
+.pill.c{background:var(--cand-soft);color:var(--cand);outline:1px dotted var(--cand)}
+.err{color:var(--bad);font-weight:600}
+.rule{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.rule .sx{color:var(--ink);font-weight:600}
+
+/* Démo vivante */
+.live{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0;background:var(--surface)}
+.live-stage{padding:18px;min-width:0}
+.live-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:10px}
+.live pre.code{background:var(--surface-2);border-left:1px solid var(--line)}
+@media (max-width:760px){.live{grid-template-columns:minmax(0,1fr)}.live pre.code{border-left:0;border-top:1px solid var(--line)}}
+
+/* Transformateur SCSS */
+.xf{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin:20px 0 0}
+.xf-col{min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.xf-col + .xf-col{border-left:1px solid var(--line)}
+@media (max-width:760px){.xf{grid-template-columns:minmax(0,1fr)}.xf-col + .xf-col{border-left:0;border-top:1px solid var(--line)}}
+.xf textarea{width:100%;min-height:250px;font-family:var(--font-mono);font-size:13px;line-height:1.6;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink);padding:12px;resize:vertical;tab-size:2}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:500 12.5px var(--font-body);padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.trace{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tr{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;display:grid;gap:3px;min-width:0}
+.tr-src{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tr code{white-space:normal;overflow-wrap:anywhere}
+.tg{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px}
+.tg-amp{background:var(--cand-soft);color:var(--cand)}
+.tg-sp{background:var(--ref-soft);color:var(--ref)}
+.tg-root{background:var(--surface-2);color:var(--muted)}
+.tr-how{color:var(--muted)}
+.tr-res{font-family:var(--font-mono);font-size:13px;overflow-wrap:anywhere}
+mark.par{background:var(--ref-soft);color:var(--ref);border-bottom:2px solid var(--ref);padding:0 2px;border-radius:2px}
+.spc{color:var(--cand);font-weight:700}
+.xf-err{color:var(--bad);font-size:13px}
+pre.css-out{font-family:var(--font-mono);font-size:13px;line-height:1.6;margin:0;padding:10px 12px;background:var(--surface-2);border-radius:8px;overflow-x:auto;white-space:pre;color:var(--ink)}
+.sub-cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* Cartes d'erreurs */
+.errc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px;margin:18px 0}
+.errc h3{margin:0 0 6px}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0}
+.duo > div{min-width:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.duo .cap{font-size:12px;font-weight:600;padding:6px 12px;border-bottom:1px solid var(--line)}
+.duo .no .cap{background:var(--bad-soft);color:var(--bad)}
+.duo .yes .cap{background:var(--ok-soft);color:var(--ok)}
+.duo .out{font-family:var(--font-mono);font-size:13px;padding:8px 12px;border-top:1px dashed var(--line);overflow-wrap:anywhere}
+.errc .lab{margin-bottom:0}
+
+/* Exercices */
+.scorebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.meter{flex:1 1 200px;max-width:320px;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.ex{border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:18px 0;overflow:hidden}
+.ex-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ex-n{font-weight:600}
+.lvl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:1px 9px;border-radius:999px;border:1px solid currentColor}
+.lvl-1{color:var(--ok)}.lvl-2{color:var(--ref)}.lvl-3{color:var(--cand)}.lvl-4{color:var(--bad)}
+.ex-status{margin-left:auto;font-size:13px;font-weight:600;color:var(--ok)}
+.ex-q{padding:12px 14px 4px}
+.ex-q p{margin:.3em 0}
+.ex-tip{font-size:13px;color:var(--muted)}
+.ex .bx,.ex .el{cursor:pointer}
+.bx.picked{background:var(--ref-soft);border-color:var(--ref);box-shadow:inset 0 0 0 1px var(--ref)}
+.el.picked{background:var(--ref-soft);box-shadow:0 0 0 1px var(--ref)}
+.badge.b-pick{background:var(--ref);color:var(--surface)}
+.bx.r-ok{background:var(--ok-soft);border-color:var(--ok)}
+.bx.r-miss{outline:2px dashed var(--ok);outline-offset:2px}
+.bx.r-wrong{background:var(--bad-soft);border-color:var(--bad)}
+.el.r-ok{background:var(--ok-soft);box-shadow:0 0 0 1px var(--ok)}
+.el.r-miss{outline:1.5px dashed var(--ok);outline-offset:1px}
+.el.r-wrong{background:var(--bad-soft);box-shadow:0 0 0 1px var(--bad)}
+.badge.b-ok{background:var(--ok);color:var(--surface)}
+.badge.b-wrong{background:var(--bad);color:var(--surface)}
+.badge.b-miss{background:transparent;color:var(--ok);outline:1.5px dashed var(--ok)}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.btn{font:600 14px var(--font-body);padding:7px 14px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+.ex-fb{font-size:14px;font-weight:600}
+.ex-fb.good{color:var(--ok)}.ex-fb.bad{color:var(--bad)}
+.ex-explain{padding:0 14px 14px;font-size:14.5px;max-width:78ch}
+.ex-explain p{margin:.4em 0}
+footer{margin-top:48px;color:var(--muted);font-size:13px}
+.topnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.topnav a{font:600 13px var(--font-body);padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none;background:var(--surface)}
+.topnav a:hover{border-color:var(--muted)}
+.topnav a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+<style>
+.dl-list a{align-items:baseline}
+.dl-list a .st{margin-left:auto;font-size:12px;color:var(--ok);font-weight:700}
+.dl-list a[aria-current="true"] .st{color:inherit}
+.dhead{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:6px}
+.dhead .lvl{font-size:11px}
+.dstat{margin-left:auto;font-weight:700;color:var(--ok);font-size:14px}
+.ticket{border:1px solid var(--line);border-left:4px solid var(--ref);border-radius:0 10px 10px 0;background:var(--surface);padding:12px 16px;margin:14px 0;max-width:78ch}
+.ticket .tid{font:600 12px var(--font-mono);color:var(--ref)}
+.ticket p{margin:.35em 0}
+.stages{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:12px 0}
+.stagebox{min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.stagebox .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px}
+.stagebox .sv{padding:12px;overflow-x:auto}
+@media (max-width:820px){.stages{grid-template-columns:minmax(0,1fr)}}
+.editor{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;margin:12px 0}
+.editor .cap{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.editor textarea{display:block;width:100%;min-height:190px;border:0;padding:12px 14px;font:13.5px/1.6 var(--font-mono);background:var(--surface);color:var(--ink);resize:vertical;tab-size:2}
+.editor textarea:focus-visible{outline:2px solid var(--ref);outline-offset:-2px}
+.ed-actions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface-2)}
+.results{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:12px 0}
+@media (max-width:820px){.results{grid-template-columns:minmax(0,1fr)}}
+.rbox{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 14px;min-width:0}
+.rbox h3{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rlist li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;font-size:14px;align-items:start}
+.rlist .ic{font-weight:700;text-align:center}
+.rlist li.ok .ic{color:var(--ok)}.rlist li.ko .ic{color:var(--bad)}.rlist li.na .ic{color:var(--muted)}
+.rlist small{display:block;color:var(--muted);font-size:12.5px}
+.win{border:1px solid var(--ok);background:var(--ok-soft);border-radius:12px;padding:12px 16px;margin:12px 0;font-weight:600;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.dnav{display:flex;justify-content:space-between;gap:8px;margin:18px 0;flex-wrap:wrap}
+details.more{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:10px 0}
+details.more summary{cursor:pointer;padding:9px 12px;font-weight:600;font-size:14px}
+details.more > div{padding:0 12px 12px}
+.prog{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+</style>
+
+</head>
+<body>
+<div class="shell">
+<details class="toc" open id="toc">
+  <summary>Liste des défis</summary>
+  <div id="dlist"></div>
+  <div class="score">Réussis : <b class="score-n">0</b> / <span class="score-t">0</span></div>
+</details>
+
+<main>
+<header class="hero" style="padding-bottom:20px">
+  <nav class="topnav" aria-label="Parties du cours"><a href="index.html">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html">2 · Angular &amp; Material</a><a href="layout.html">3 · Mise en page</a><a href="defis.html" aria-current="page">4 · Défis</a></nav>
+  <div class="kicker">Partie 4 · Mettre les mains dans le code</div>
+  <h1>Les <span class="hl">défis</span></h1>
+  <p class="lead">Chaque défi est un ticket. Tu écris le CSS ou le SCSS, ton rendu s'affiche à côté de la cible, et des vérifications mesurent le vrai rendu : positions, tailles, styles calculés. Certaines règles d'équipe s'appliquent aussi (pas de <code>!important</code>, pas de classe interne de Material…). Ta progression et ton code restent enregistrés dans ce navigateur.</p>
+  <div class="prog"><span>Réussis : <b class="score-n">0</b> / <span class="score-t">0</span></span><div class="meter" aria-hidden="true"><i id="meter"></i></div></div>
+</header>
+<div id="view"></div>
+</main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var clean=function(t){return t.replace(/\s+/g,' ');};
+var VOID=new Set(['input','img','br','hr','meta','link']);
+var INLINE=new Set(['span','a','em','strong','b','i','code','small','label','img','input','button','mark']);
+
+/* ---------- Parsing ---------- */
+function parse(html){
+  var doc=new DOMParser().parseFromString('<!doctype html><html><body>'+html+'</body></html>','text/html');
+  var body=doc.body, n=0;
+  body._all=Array.prototype.slice.call(body.querySelectorAll('*'));
+  body._all.forEach(function(el){el._i=n++;});
+  return body;
+}
+
+/* ---------- Rendu code ---------- */
+function attrsHTML(el){
+  return Array.prototype.map.call(el.attributes,function(a){
+    return ' <span class="s-attr">'+esc(a.name)+'</span>'+(a.value!==''?'<span class="s-p">=</span><span class="s-val">"'+esc(a.value)+'"</span>':'');
+  }).join('');
+}
+function openTag(el){return '<span class="s-p">&lt;</span><span class="s-tag">'+el.localName+'</span>'+attrsHTML(el)+'<span class="s-p">&gt;</span>';}
+function closeTag(el){return '<span class="s-p">&lt;/</span><span class="s-tag">'+el.localName+'</span><span class="s-p">&gt;</span>';}
+function inlineable(el){
+  if(VOID.has(el.localName)) return true;
+  for(var k=0;k<el.children.length;k++){var c=el.children[k]; if(!INLINE.has(c.localName)||c.children.length) return false;}
+  return clean(el.outerHTML).length<=74;
+}
+function inlineHTML(el){
+  var s='<span class="el" data-i="'+el._i+'">'+openTag(el);
+  if(VOID.has(el.localName)) return s+'</span>';
+  var nodes=el.childNodes;
+  for(var k=0;k<nodes.length;k++){
+    var n=nodes[k];
+    if(n.nodeType===3){var t=clean(n.textContent); if(k===0) t=t.replace(/^ /,''); if(k===nodes.length-1) t=t.replace(/ $/,''); if(t) s+='<span class="s-text">'+esc(t)+'</span>';}
+    else if(n.nodeType===1) s+=inlineHTML(n);
+  }
+  return s+closeTag(el)+'</span>';
+}
+function renderCode(body){
+  var out=[];
+  function walk(el,d){
+    if(inlineable(el)){out.push({i:el._i,d:d,h:inlineHTML(el)});return;}
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+openTag(el)+'</span>'});
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) out.push({i:null,d:d+1,h:'<span class="s-text">'+esc(t)+'</span>'});}
+      else if(n.nodeType===1) walk(n,d+1);
+    });
+    out.push({i:el._i,d:d,h:'<span class="el" data-i="'+el._i+'">'+closeTag(el)+'</span>'});
+  }
+  Array.prototype.forEach.call(body.children,function(el){walk(el,0);});
+  return out.map(function(l){return '<div class="ln"'+(l.i!==null?' data-li="'+l.i+'"':'')+'><span class="gut"></span><span class="lc">'+'  '.repeat(l.d)+l.h+'</span></div>';}).join('');
+}
+
+/* ---------- Rendu boîtes ---------- */
+function boxHTML(el){
+  var elKids=Array.prototype.slice.call(el.children);
+  var inline=elKids.length>0&&elKids.every(function(c){return INLINE.has(c.localName);});
+  var label='<span class="s-tag">'+el.localName+'</span>'+(el.id?'<span class="s-id">#'+esc(el.id)+'</span>':'')+
+    Array.prototype.map.call(el.classList,function(c){return '<span class="s-cls">.'+esc(c)+'</span>';}).join('')+
+    Array.prototype.filter.call(el.attributes,function(a){return a.name!=='class'&&a.name!=='id';}).map(function(a){return '<span class="s-attrb">&nbsp;['+esc(a.name)+(a.value!==''?'="'+esc(a.value)+'"':'')+']</span>';}).join('');
+  var head, kids='';
+  if(!elKids.length){
+    var t=clean(el.textContent).trim();
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span>'+(t?'<span class="bx-text">'+esc(t)+'</span>':'')+'<span class="bx-badges"></span></div>';
+  } else {
+    head='<div class="bx-head"><span class="bx-lbl">'+label+'</span><span class="bx-badges"></span></div>';
+    Array.prototype.forEach.call(el.childNodes,function(n){
+      if(n.nodeType===3){var t=clean(n.textContent).trim(); if(t) kids+='<span class="bx-text">'+esc(t)+'</span>';}
+      else if(n.nodeType===1) kids+=boxHTML(n);
+    });
+    kids='<div class="bx-kids">'+kids+'</div>';
+  }
+  return '<div class="bx'+(inline?' bx-inl':'')+'" data-i="'+el._i+'">'+head+kids+'</div>';
+}
+function renderBoxes(body){return Array.prototype.map.call(body.children,boxHTML).join('');}
+
+/* ---------- Analyse de sélecteur ---------- */
+function splitTop(sel){
+  var out=[],cur='',d=0,q=null;
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(ch===','&&d===0){out.push(cur.trim());cur='';continue;}
+    cur+=ch;
+  }
+  if(cur.trim())out.push(cur.trim());
+  return out;
+}
+function tokenize(sel){
+  var parts=[],cur='',d=0,q=null,sp=false;
+  sel=sel.trim();
+  for(var k=0;k<sel.length;k++){var ch=sel[k];
+    if(q){cur+=ch;if(ch===q)q=null;continue;}
+    if(ch==='"'||ch==="'"){q=ch;cur+=ch;continue;}
+    if(d===0&&/\s/.test(ch)){if(cur){parts.push(cur);cur='';}sp=true;continue;}
+    if(d===0&&'>+~'.indexOf(ch)>=0){if(cur){parts.push(cur);cur='';}parts.push({c:ch});sp=false;continue;}
+    if(ch==='('||ch==='[')d++; else if(ch===')'||ch===']')d--;
+    if(sp){if(parts.length&&typeof parts[parts.length-1]==='string'&&!cur)parts.push({c:' '});sp=false;}
+    cur+=ch;
+  }
+  if(cur)parts.push(cur);
+  return parts;
+}
+function joinTok(t){return t.map(function(x){return typeof x==='string'?x:(x.c===' '?' ':' '+x.c+' ');}).join('').trim();}
+var PE=/::?(before|after|first-letter|first-line|placeholder|marker|selection)(?![\w-])/g;
+var ST=/:(hover|focus-visible|focus-within|focus|active|visited)(?![\w-])/g;
+function prep(g){
+  var pseudo=null,states=[];
+  var s=g.replace(PE,function(m,n){pseudo=n;return '\u0000';}).replace(ST,function(m,n){states.push(':'+n);return '\u0000';});
+  s=s.replace(/(^|[\s>+~(,])\u0000+/g,'$1*').replace(/\u0000/g,'');
+  return {s:s.trim(),pseudo:pseudo,states:states};
+}
+function extractHas(comp){
+  var k=comp.indexOf(':has('); if(k<0) return null;
+  var d=0; for(var j=k+4;j<comp.length;j++){ if(comp[j]==='(')d++; else if(comp[j]===')'){d--; if(d===0) return comp.slice(k+5,j).trim();} }
+  return null;
+}
+function anchors(el,comb,left,body){
+  var out=[], m=function(x){try{return x.matches(left);}catch(e){return false;}}, p;
+  if(comb===' '){for(p=el.parentElement;p&&p!==body;p=p.parentElement) if(m(p)) out.push(p);}
+  else if(comb==='>'){p=el.parentElement; if(p&&p!==body&&m(p)) out.push(p);}
+  else if(comb==='+'){p=el.previousElementSibling; if(p&&m(p)) out.push(p);}
+  else if(comb==='~'){for(p=el.previousElementSibling;p;p=p.previousElementSibling) if(m(p)) out.push(p);}
+  return out;
+}
+var FRAG=document.createDocumentFragment();
+function evaluate(body,sel){
+  var r={sel:sel,error:null,matched:new Set(),refs:new Map(),pseudo:null,states:[]};
+  var raw=(sel||'').trim();
+  if(!raw){r.error='empty';return r;}
+  if(raw.indexOf('&')>=0){r.error='amp';return r;}
+  var groups=splitTop(raw);
+  for(var gi=0;gi<groups.length;gi++){
+    var g=groups[gi];
+    try{FRAG.querySelector(g);}catch(e){r.error='invalid';return r;}
+    var p=prep(g), els;
+    try{ if(!p.s) throw 0; els=Array.prototype.slice.call(body.querySelectorAll(p.s)); }catch(e){r.error='invalid';return r;}
+    els.forEach(function(el){r.matched.add(el);});
+    if(p.pseudo) r.pseudo=p.pseudo;
+    p.states.forEach(function(s){if(r.states.indexOf(s)<0) r.states.push(s);});
+    var toks=tokenize(p.s);
+    if(toks.length>=3&&typeof toks[toks.length-2]==='object'){
+      var comb=toks[toks.length-2].c, left=joinTok(toks.slice(0,-2));
+      els.forEach(function(el){anchors(el,comb,left,body).forEach(function(a){if(!r.refs.has(a)) r.refs.set(a,'repère');});});
+    }
+    var last=toks[toks.length-1], has=typeof last==='string'?extractHas(last):null;
+    if(has&&!/:not\(/.test(last)){
+      els.forEach(function(el){try{
+        var found=/^>/.test(has)?el.querySelectorAll(':scope '+has):(/^[+~]/.test(has)?[]:el.querySelectorAll(has));
+        Array.prototype.forEach.call(found,function(f){r.refs.set(f,'condition');});
+      }catch(e){}});
+    }
+  }
+  return r;
+}
+
+/* ---------- Lecture en français ---------- */
+var PC={hover:'survolé par la souris',focus:'qui a le focus (clic ou Tab)','focus-visible':'qui a le focus clavier','focus-within':"qui contient l'élément qui a le focus",active:"pendant qu'on clique dessus",visited:'déjà visité',
+'first-child':'qui est le premier enfant de son parent','last-child':'qui est le dernier enfant de son parent','only-child':'qui est le seul enfant de son parent',
+'first-of-type':'qui est le premier de sa balise parmi ses frères','last-of-type':'qui est le dernier de sa balise parmi ses frères',
+empty:'vide',checked:'coché',disabled:'désactivé',enabled:'activé',root:'racine du document','placeholder-shown':'dont le placeholder est visible'};
+var PEL={before:'le pseudo-élément ::before (contenu ajouté au début, à l\'intérieur)',after:'le pseudo-élément ::after (contenu ajouté à la fin, à l\'intérieur)','first-letter':'la première lettre','first-line':'la première ligne',placeholder:"le texte d'aide (placeholder)",marker:'la puce',selection:'le texte sélectionné'};
+function ord(n){return n===1?'1er':n+'e';}
+function nth(arg,ofType){
+  var a=arg.trim().toLowerCase().replace(/\s+/g,'');
+  var scope=ofType?'parmi les frères de même balise':'parmi les enfants de son parent';
+  if(/^\d+$/.test(a)) return 'qui est le '+ord(+a)+' '+scope;
+  if(a==='odd'||a==='2n+1') return 'de rang impair (1er, 3e, 5e…) '+scope;
+  if(a==='even'||a==='2n') return 'de rang pair (2e, 4e, 6e…) '+scope;
+  var m=a.match(/^([+-]?\d*)n([+-]\d+)?$/);
+  if(m){
+    var A=(m[1]===''||m[1]==='+')?1:(m[1]==='-'?-1:parseInt(m[1],10)), B=m[2]?parseInt(m[2],10):0, ranks=[];
+    for(var n=0;n<40&&ranks.length<5;n++){var v=A*n+B; if(v>=1) ranks.push(v); else if(A<=0) break;}
+    ranks.sort(function(x,y){return x-y;});
+    return 'dont le rang '+scope+' vaut '+ranks.join(', ')+(A>0?'…':'');
+  }
+  return 'qui correspond à la formule <code>'+esc(arg)+'</code> '+scope;
+}
+function attrPhrase(n,op,v){
+  var N='<code>'+esc(n)+'</code>', V='<code>"'+esc(v)+'"</code>';
+  if(!op) return "qui a l'attribut "+N;
+  return {'=':'dont '+N+' vaut exactement '+V,'^=':'dont '+N+' commence par '+V,'$=':'dont '+N+' finit par '+V,'*=':'dont '+N+' contient '+V,'~=':'dont '+N+' contient le mot '+V,'|=':'dont '+N+' vaut '+V+' ou commence par « '+esc(v)+'- »'}[op];
+}
+function describeCompound(c){
+  var rest=c, tag=null, cls=[], ids=[], bits=[], pel=null, m, guard=0;
+  m=rest.match(/^(\*|[a-zA-Z][\w-]*)/); if(m){tag=m[1];rest=rest.slice(m[0].length);}
+  while(rest&&guard++<30){
+    if((m=rest.match(/^#([\w-]+)/))) ids.push(m[1]);
+    else if((m=rest.match(/^\.([\w-]+)/))) cls.push(m[1]);
+    else if((m=rest.match(/^\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(?:"([^"]*)"|'([^']*)'|([^\]\s]+))\s*)?\]/))) bits.push(attrPhrase(m[1],m[2],m[3]!=null?m[3]:(m[4]!=null?m[4]:m[5])));
+    else if((m=rest.match(/^(::?)([\w-]+)(\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\))?/))){
+      var name=m[2].toLowerCase(), arg=m[3]?m[3].slice(1,-1):null;
+      if(m[1]==='::'||(['before','after','first-letter','first-line'].indexOf(name)>=0)) pel=PEL[name]||('::'+esc(name));
+      else if(name==='nth-child') bits.push(nth(arg,false));
+      else if(name==='nth-of-type') bits.push(nth(arg,true));
+      else if(name==='not') bits.push('qui ne correspond PAS à <code>'+esc(arg)+'</code>');
+      else if(name==='has') bits.push('qui contient <code>'+esc(arg)+'</code>');
+      else if(name==='is'||name==='where') bits.push("qui correspond à l'un de <code>"+esc(arg)+'</code>');
+      else if(PC[name]) bits.push(PC[name]);
+      else bits.push('<code>:'+esc(name)+(arg!==null?'('+esc(arg)+')':'')+'</code>');
+    }
+    else return null;
+    rest=rest.slice(m[0].length);
+  }
+  var head=tag==='*'?"n'importe quel élément":(tag?'un <code>&lt;'+esc(tag)+'&gt;</code>':'un élément');
+  var parts=[];
+  if(ids.length) parts.push("avec l'id <code>#"+esc(ids[0])+'</code>');
+  if(cls.length===1) parts.push('avec la classe <code>.'+esc(cls[0])+'</code>');
+  else if(cls.length>1) parts.push('avec les classes '+cls.map(function(x){return '<code>.'+esc(x)+'</code>';}).join(' ET '));
+  parts=parts.concat(bits);
+  return {s:head+(parts.length?' '+parts.join(', '):''),pel:pel};
+}
+function describeGroup(g){
+  var toks=tokenize(g); if(!toks.length) return null;
+  var last=toks[toks.length-1]; if(typeof last!=='string') return null;
+  var d=describeCompound(last); if(!d) return null;
+  var out=d.s;
+  for(var k=toks.length-2;k>=1;k-=2){
+    var c=toks[k].c, prev=toks[k-1]; if(typeof prev!=='string') return null;
+    var pd=describeCompound(prev); if(!pd) return null;
+    var rel={' ':"qui se trouve quelque part à l'intérieur de",'>':"qui est l'enfant direct de",'+':'placé juste après','~':'placé après (même parent)'}[c];
+    out+=', '+rel+' '+pd.s;
+  }
+  out=out.replace(/ de un /g," d'un ");
+  if(d.pel) out='cible '+d.pel+' de : '+out;
+  return out;
+}
+function describe(sel){
+  var gs=splitTop(sel), res=[];
+  for(var k=0;k<gs.length;k++){var d=describeGroup(gs[k]); if(!d) return null; res.push(d.charAt(0).toUpperCase()+d.slice(1));}
+  return res.join('<br><b>OU</b> ');
+}
+function short(el){
+  var s=el.localName+(el.id?'#'+el.id:'')+Array.prototype.map.call(el.classList,function(c){return '.'+c;}).join('');
+  var t=clean(el.textContent).trim();
+  if(!t&&el.getAttribute('placeholder')) t=el.getAttribute('placeholder');
+  if(t) s+=' « '+(t.length>22?t.slice(0,21)+'…':t)+' »';
+  return s;
+}
+
+/* ---------- Surlignage ---------- */
+function addBadge(bx,text,cls){
+  var b=bx.querySelector(':scope > .bx-head > .bx-badges'); if(!b) return;
+  var s=document.createElement('span'); s.className='badge '+cls; s.textContent=text; b.appendChild(s);
+}
+function q(root,i){return root.querySelectorAll('[data-i="'+i+'"]');}
+function apply(root,r){
+  root.querySelectorAll('.sel,.ref,.cand').forEach(function(e){e.classList.remove('sel','ref','cand');});
+  root.querySelectorAll('.ln').forEach(function(l){l.classList.remove('on-sel','on-ref','on-cand');});
+  root.querySelectorAll('.bx-badges').forEach(function(b){b.textContent='';});
+  root.querySelectorAll('.ghost').forEach(function(g){g.remove();});
+  if(r.error) return;
+  var special=r.states.length||r.pseudo, mk=special?'cand':'sel';
+  r.matched.forEach(function(el){
+    q(root,el._i).forEach(function(n){
+      n.classList.add(mk);
+      if(n.classList.contains('bx')) addBadge(n,special?(r.states.length?r.states.join(' '):'::'+r.pseudo):'✓ sélectionné',special?'b-cand':'b-sel');
+    });
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-'+mk);});
+    if(r.pseudo==='before'||r.pseudo==='after'){
+      root.querySelectorAll('.bx[data-i="'+el._i+'"]').forEach(function(bx){
+        var gh=document.createElement('div'); gh.className='ghost'; gh.textContent='::'+r.pseudo+' (contenu ajouté)';
+        var head=bx.querySelector(':scope > .bx-head');
+        if(r.pseudo==='before') bx.insertBefore(gh,head.nextSibling); else bx.appendChild(gh);
+      });
+    }
+  });
+  r.refs.forEach(function(label,el){
+    q(root,el._i).forEach(function(n){n.classList.add('ref'); if(n.classList.contains('bx')) addBadge(n,label,'b-ref');});
+    root.querySelectorAll('.ln[data-li="'+el._i+'"]').forEach(function(l){l.classList.add('on-ref');});
+  });
+}
+function hoverSync(panes){
+  var cur=null;
+  function set(i){
+    if(cur!==null) q(panes,cur).forEach(function(n){n.classList.remove('hov');});
+    cur=i; if(i!==null) q(panes,i).forEach(function(n){n.classList.add('hov');});
+  }
+  panes.addEventListener('mouseover',function(e){var t=e.target.closest('[data-i]'); set(t?t.getAttribute('data-i'):null);});
+  panes.addEventListener('mouseleave',function(){set(null);});
+}
+
+/* ---------- Atelier ---------- */
+function Lab(host,cfg,key){
+  var id='in-'+key;
+  host.classList.add('lab');
+  host.innerHTML='<div class="lab-top"><div class="chips" role="group" aria-label="Sélecteurs à essayer"></div>'+
+    '<div class="try"><label for="'+id+'">'+esc(cfg.inputLabel||'Ton sélecteur')+'</label><input id="'+id+'" spellcheck="false" autocomplete="off" autocapitalize="off"></div></div>'+
+    '<div class="lab-panes'+(cfg.compact?' compact':'')+'"><div class="pane pane-code"><div class="pane-cap">HTML</div><div class="code"></div></div>'+
+    '<div class="pane pane-box"><div class="pane-cap">Aperçu en boîtes · une boîte = une balise</div><div class="boxes"></div></div></div>'+
+    '<div class="lab-foot"><div class="read"></div><div class="verdict" role="status"></div><pre class="rule"></pre></div>';
+  var chipsEl=host.querySelector('.chips'), input=host.querySelector('input'), codeEl=host.querySelector('.code'), boxesEl=host.querySelector('.boxes'),
+      readEl=host.querySelector('.read'), verdictEl=host.querySelector('.verdict'), ruleEl=host.querySelector('.rule'), panes=host.querySelector('.lab-panes');
+  var body, chips=[];
+  hoverSync(panes);
+  function setHTML(html){body=parse(html);codeEl.innerHTML=renderCode(body);boxesEl.innerHTML=renderBoxes(body);}
+  function setChips(list){
+    chips=list;
+    chipsEl.innerHTML=list.map(function(c,k){return '<button type="button" class="chip" data-k="'+k+'" aria-pressed="false">'+esc(c.label||c.sel)+'</button>';}).join('');
+  }
+  function syncPressed(){
+    var v=input.value.trim();
+    chipsEl.querySelectorAll('.chip').forEach(function(b){b.setAttribute('aria-pressed',chips[+b.getAttribute('data-k')].sel===v?'true':'false');});
+  }
+  function update(){
+    var sel=input.value, r=evaluate(body,sel);
+    apply(panes,r); syncPressed();
+    var k=-1; for(var j=0;j<chips.length;j++) if(chips[j].sel===sel.trim()) {k=j;break;}
+    var note=k>=0&&chips[k].note?'<div style="margin-top:4px">'+chips[k].note+'</div>':'';
+    if(r.error==='empty'){readEl.innerHTML='';verdictEl.innerHTML='Tape un sélecteur, ou clique sur un des exemples.';ruleEl.textContent='';return;}
+    if(r.error==='amp'){readEl.innerHTML='';verdictEl.innerHTML='<span class="err">Le &amp; n\'existe pas dans un sélecteur CSS classique.</span> C\'est une notation SCSS : voir la partie 2.';ruleEl.textContent='';return;}
+    if(r.error==='invalid'){readEl.innerHTML=note;verdictEl.innerHTML='<span class="err">Sélecteur invalide.</span> Le navigateur ignorerait toute la règle.';ruleEl.textContent='';return;}
+    var d=describe(sel.trim());
+    readEl.innerHTML=(d?'<b>Lecture :</b> '+d+'.':'')+note;
+    var list=body._all.filter(function(el){return r.matched.has(el);});
+    var special=r.states.length||r.pseudo, n=list.length, msg;
+    if(!n) msg='<b>Aucun élément</b> ne correspond.';
+    else if(r.states.length) msg='<b>'+n+' candidat'+(n>1?'s':'')+'</b> : stylé'+(n>1?'s':'')+' seulement pendant '+r.states.join(', ')+'.';
+    else if(r.pseudo) msg='<b>'+n+' élément'+(n>1?'s':'')+' hôte'+(n>1?'s':'')+'</b> : le style vise '+(PEL[r.pseudo]||'::'+r.pseudo)+' de '+(n>1?'chacun':'cet élément')+'.';
+    else msg='<b>'+n+' élément'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'')+'</b> :';
+    verdictEl.innerHTML=msg+' '+list.map(function(el){return '<span class="pill'+(special?' c':'')+'">'+esc(short(el))+'</span>';}).join('');
+    ruleEl.innerHTML='<span class="sx">'+esc(sel.trim())+'</span> {\n  background: jaune;   /* la règle CSS complète */\n}';
+  }
+  function select(k){input.value=chips[k].sel;update();}
+  chipsEl.addEventListener('click',function(e){var b=e.target.closest('.chip'); if(b) select(+b.getAttribute('data-k'));});
+  input.addEventListener('input',update);
+  setHTML(cfg.html); setChips(cfg.chips||[]);
+  if(chips.length) select(cfg.start||0); else update();
+  return {setHTML:setHTML,setChips:setChips,select:select,update:update};
+}
+
+/* ---------- Coloration du code statique ---------- */
+function hl(text){
+  var s=esc(text);
+  s=s.replace(/\/\*[\s\S]*?\*\//g,function(m){return '<span class="cm">'+m+'</span>';});
+  s=s.replace(/(^|[\s{;])([a-z-]+)(:\s)/g,'$1<span class="pr">$2</span>$3');
+  s=s.replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  s=s.replace(/([{}])/g,'<span class="br">$1</span>');
+  return s;
+}
+
+/* ---------- Mini compilateur Sass (imbrication + &) ---------- */
+function compile(src){
+  src=src.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:"'])\/\/.*$/gm,'$1');
+  var i=0;
+  function block(){
+    var node={decls:[],kids:[]}, buf='';
+    while(i<src.length){
+      var ch=src[i++];
+      if(ch==='{'){var k=block(); k.raw=buf.trim().replace(/\s+/g,' '); buf=''; node.kids.push(k);}
+      else if(ch==='}'){if(buf.trim()) node.decls.push(buf.trim()); return node;}
+      else if(ch===';'){if(buf.trim()) node.decls.push(buf.trim()); buf='';}
+      else buf+=ch;
+    }
+    return node;
+  }
+  var root=block(), rules=[], errors=[];
+  function walk(node,parents,depth){
+    node.kids.forEach(function(k){
+      var parts=splitTop(k.raw||''), sel=[], trace=[];
+      parts.forEach(function(part){
+        if(!parents){
+          if(part.indexOf('&')>=0) errors.push('« '+part+' » : un & au premier niveau n\'a pas de parent à recopier (Sass refuse).');
+          sel.push(part); trace.push({kind:'root',part:part,res:part}); return;
+        }
+        parents.forEach(function(p){
+          var res;
+          if(part.indexOf('&')>=0){res=part.replace(/&/g,function(){return p;}); trace.push({kind:'amp',part:part,parent:p,res:res});}
+          else {res=p+' '+part; trace.push({kind:'space',part:part,parent:p,res:res});}
+          sel.push(res);
+        });
+      });
+      rules.push({sel:sel,decls:k.decls,depth:depth,trace:trace});
+      walk(k,sel,depth+1);
+    });
+  }
+  walk(root,null,0);
+  return {rules:rules,errors:errors};
+}
+function cssText(rules){
+  return rules.map(function(r){
+    return r.sel.join(',\n')+' {'+(r.decls.length?'\n'+r.decls.map(function(d){return '  '+d+';';}).join('\n')+'\n':' ')+'}';
+  }).join('\n\n');
+}
+function traceHTML(t){
+  var P='<mark class="par">'+esc(t.parent||'')+'</mark>';
+  if(t.kind==='root') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-root">premier niveau</span></div><div class="tr-how">Pas de parent : reste tel quel.</div><div class="tr-res">'+esc(t.res)+'</div></li>';
+  if(t.kind==='space') return '<li class="tr"><div class="tr-src"><code>'+esc(t.part)+'</code><span class="tg tg-sp">pas de &amp; · règle 1</span></div><div class="tr-how">parent + espace + sélecteur</div><div class="tr-res">'+P+'<span class="spc">␣</span>'+esc(t.part)+'</div></li>';
+  var src=esc(t.part).replace(/&amp;/g,'<span class="amp">&amp;</span>');
+  var res=esc(t.part).replace(/&amp;/g,P);
+  return '<li class="tr"><div class="tr-src"><code>'+src+'</code><span class="tg tg-amp">contient &amp; · règle 2</span></div><div class="tr-how"><span class="amp">&amp;</span> ← <code>'+esc(t.parent)+'</code>, rien d\'autre n\'est ajouté</div><div class="tr-res">'+res+'</div></li>';
+}
+
+
+
+/* ---------- Réécriture Angular (Emulated) ---------- */
+var FILES={css:{name:'styles.css'},scss:{name:'composant.scss'},g:{name:'styles.scss (global)',id:null},p:{name:'dossier.component.scss',id:'p'},c:{name:'party-card.component.scss',id:'c'}};
+function addAttr(comp,attr){var d=0,qt=null;for(var k=0;k<comp.length;k++){var ch=comp[k];if(qt){if(ch===qt)qt=null;continue;}if(ch==='"'||ch==="'"){qt=ch;continue;}if(ch==='['||ch==='(')d++;else if(ch===']'||ch===')')d--;else if(ch===':'&&d===0)return comp.slice(0,k)+attr+comp.slice(k);}return comp+attr;}
+function closeParen(s,start){var d=0;for(var k=start;k<s.length;k++){if(s[k]==='(')d++;else if(s[k]===')'){d--;if(d===0)return k;}}return s.length-1;}
+function emulateGroup(g,id){
+  var CA='[_ngcontent-'+id+']',HA='[_nghost-'+id+']',toks=tokenize(g),out=[],deep=false,ctx=null;
+  for(var k=0;k<toks.length;k++){var t=toks[k];
+    if(typeof t!=='string'){out.push(t);continue;}
+    if(t==='::ng-deep'){deep=true;if(toks[k+1]&&typeof toks[k+1]==='object'&&toks[k+1].c===' ')k++;continue;}
+    if(deep){out.push(t);continue;}
+    if(t.indexOf(':host-context(')===0){var e=closeParen(t,13);ctx=t.slice(14,e);out.push(addAttr(t.slice(e+1),HA));continue;}
+    if(/^:host(?![\w-])/.test(t)){var rest=t.slice(5),inner='';if(rest[0]==='('){var e2=closeParen(rest,0);inner=rest.slice(1,e2);rest=rest.slice(e2+1);}out.push(addAttr(inner+rest,HA));continue;}
+    out.push(addAttr(t,CA));}
+  while(out.length&&typeof out[0]==='object')out.shift();
+  var s=joinTok(out); return ctx!==null?[ctx+s,ctx+' '+s]:[s];
+}
+function emulate(sel,id){if(!id)return splitTop(sel);var r=[];splitTop(sel).forEach(function(g){r=r.concat(emulateGroup(g,id));});return r;}
+function ngHL(s){return esc(s).replace(/\[_ng(content|host)-[a-z]\]/g,function(m){return '<span class="ng">'+m+'</span>';});}
+function stripComments(s){return s.replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:"'])\/\/.*$/gm,'$1');}
+
+/* code utilisateur → CSS réellement appliqué */
+function toCSS(ch,code){
+  if(ch.mode==='css') return {css:code,sels:[],errors:[]};
+  var c=compile(code), id=ch.mode==='scss'?null:FILES[ch.mode].id, sels=[], parts=[];
+  c.rules.forEach(function(r){
+    var fin=[]; r.sel.forEach(function(s){(id?emulate(s,id):[s]).forEach(function(f){if(fin.indexOf(f)<0)fin.push(f);});});
+    fin.forEach(function(f){if(sels.indexOf(f)<0)sels.push(f);});
+    if(r.decls.length) parts.push(fin.join(',\n')+' {\n'+r.decls.map(function(d){return '  '+d+';';}).join('\n')+'\n}');
+  });
+  return {css:parts.join('\n\n'),sels:sels,errors:c.errors};
+}
+
+/* ---------- Décor partagé (spécificité 0 grâce à :where) ---------- */
+var BASE=':host{display:block;position:relative}'+
+'.root{font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif;color:var(--ink);background:var(--surface-2);border:1px dashed var(--muted);border-radius:10px;padding:10px;max-width:100%}'+
+':where(.bx *){display:block;border:1px solid var(--line);border-radius:6px;padding:4px 8px;margin:4px 0;font:12.5px "JetBrains Mono",monospace;background-color:var(--surface);color:var(--ink);text-decoration:none}'+
+':where(.bx * *){margin-left:14px}'+
+':where(.it){background:var(--surface);border:1.5px solid var(--ref);border-radius:6px;padding:8px 12px;font:600 13px "JetBrains Mono",monospace}'+
+':where(.mf){border:1px solid var(--muted);border-radius:5px;padding:5px 10px 7px;background:var(--surface);min-width:0}'+
+':where(.mf small){display:block;font-size:11px;color:var(--muted);line-height:1.3}'+
+':where(.mf span){display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+':where(.mbtn){font:600 13px "IBM Plex Sans",sans-serif;padding:7px 14px;border-radius:999px;background:var(--ref);color:var(--surface);border:1px solid var(--ref);white-space:nowrap}'+
+':where(.mbtn.alt){background:transparent;color:var(--ref);border-color:var(--line)}'+
+':where(.hdr,.row,.list,.box,.wrap){background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}'+
+':where(.box){height:160px}'+
+':where(.hdr-t b){display:block;font-size:16px}:where(.hdr-t small){color:var(--muted);font-size:12px}'+
+':where(.avatar){width:36px;height:36px;border-radius:50%;background:var(--ref-soft);border:1px solid var(--ref);flex:none}'+
+':where(.pname){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}'+
+':where(.cardx){background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}'+
+':where(.badge-n){background:var(--cand);color:var(--surface);font:700 11px "IBM Plex Sans",sans-serif;padding:2px 8px;border-radius:999px}'+
+':where(.sub){font-size:13px;color:var(--muted)}'+
+':where(.scrollf){display:block;height:200px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}'+
+':where(.scrollf .r){padding:10px 12px;border-bottom:1px solid var(--line)}'+
+':where(.stephead){padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--line);font-weight:600;font-size:13px}'+
+':where(.footer){display:flex;justify-content:flex-end;gap:8px;padding:10px 12px;background:var(--surface-2);border-top:1px solid var(--line)}'+
+':where(.zst){position:relative;height:220px}'+
+':where(.card-a,.card-b){position:absolute;left:12px;right:12px;border-radius:8px;padding:10px 12px;border:1.5px solid}'+
+':where(.card-a){top:10px;height:90px;background:var(--surface);border-color:var(--ref);transform:translateZ(0)}'+
+':where(.card-b){top:110px;height:96px;background:var(--surface-2);border-color:var(--cand);z-index:1}'+
+':where(.menu){position:absolute;left:40px;top:50px;width:170px;background:var(--surface);border:1.5px solid var(--ok);border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.18)}'+
+':where(.menu div){padding:6px 10px;border-bottom:1px solid var(--line)}'+
+':where(.cq-title){font-weight:700;margin:0 0 8px}'+
+':where(.dossier,.archive){display:block;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}'+
+':where(.title){margin:0 0 8px;font-size:16px}'+
+':where(mat-form-field){display:inline-block;border:1px solid var(--muted);border-radius:5px;padding:4px 8px;background:var(--surface)}'+
+':where(.mat-mdc-text-field-wrapper){padding:4px 6px;border-radius:4px}'+
+':where(.mdc-floating-label){display:block;font-size:11px;color:var(--muted)}'+
+':where(input){font:inherit;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);width:160px}'+
+':where(app-party-card){border:1.5px solid var(--ok);border-radius:8px;padding:12px;background:var(--surface)}'+
+':where(.mdc-button){font:600 12px "IBM Plex Sans",sans-serif;margin-left:8px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ref)}'+
+':where(.cdk-overlay-container){display:block;margin-top:12px;padding-top:8px;border-top:1px dashed var(--muted)}'+
+':where(.cdk-overlay-container)::before{content:"cdk-overlay-container · en bas du body";display:block;font:11px "JetBrains Mono",monospace;color:var(--muted);margin-bottom:6px}'+
+':where(.mat-mdc-select-panel){display:block;border:1px solid var(--line);border-radius:6px;background:var(--surface);margin-bottom:8px}'+
+':where(.mat-mdc-select-panel)::before{content:attr(data-l);display:block;font:11px "JetBrains Mono",monospace;color:var(--muted);padding:4px 12px}'+
+':where(mat-option){display:flex;align-items:center;min-height:48px;padding:0 12px;border-top:1px solid var(--line)}';
+
+/* ---------- Aides pour contraintes ---------- */
+function NO(re,l){return {l:l,f:function(code){return !re.test(code);}};}
+function YES(re,l){return {l:l,f:function(code){return re.test(code);}};}
+var C_IMP=NO(/!important/i,'pas de !important');
+var C_MDC=NO(/\.mat-mdc-|\.mdc-/,'pas de classe interne Material (.mat-mdc-*, .mdc-*)');
+var C_DEEP=NO(/::ng-deep/,'pas de ::ng-deep');
+var C_AMP=YES(/&/,'écrit en imbriqué avec &');
+function C_SCOPED(id){return {l:'pas de fuite globale : chaque sélecteur reste attaché au composant (::ng-deep précédé de :host)',f:function(code,sels){return sels.length>0&&sels.every(function(s){return s.indexOf('[_nghost-'+id+']')>=0||s.indexOf('[_ngcontent-'+id+']')>=0;});}};}
+var GOLD='rgb(255, 215, 0)';
+
+/* ---------- Les défis ---------- */
+var DOM_P='<app-dossier _nghost-p="">\n<div class="dossier" _ngcontent-p="">\n<h2 class="title" _ngcontent-p="">Dossier 42</h2>\n<mat-form-field class="mat-mdc-form-field amount" data-k="field" _ngcontent-p="">\n<div class="mat-mdc-text-field-wrapper" data-k="wrap">\n<label class="mdc-floating-label"><mat-label _ngcontent-p="">Montant</mat-label></label>\n<input matinput="" class="mat-mdc-input-element" data-k="input" _ngcontent-p="" value="1.250,00">\n</div>\n</mat-form-field>\n<app-party-card class="card" data-k="card" _ngcontent-p="" _nghost-c="">\n<span class="name" _ngcontent-c="">Dupont Marie</span>\n<button class="mdc-button" _ngcontent-c=""><span class="mdc-button__label">Retirer</span></button>\n</app-party-card>\n</div>\n</app-dossier>';
+var FORM4='<div class="mf" data-k="n"><small>Nom</small><span>Dupont</span></div><div class="mf" data-k="p"><small>Prénom</small><span>Marie</span></div><div class="mf" data-k="cp"><small>Code postal</small><span>1000</span></div><div class="mf" data-k="c"><small>Commune</small><span>Bruxelles</span></div>';
+function sameRow(x,a,b){return Math.abs(x.r(a).t-x.r(b).t)<4;}
+function below(x,a,b){return x.r(b).t>=x.r(a).b-1;}
+
+var CH=[
+/* ---- Sélecteurs ---- */
+{id:'S1',part:'Sélecteurs',lvl:1,title:'Enfants directs seulement',mode:'css',
+ ticket:'Mets <code>background: gold</code> uniquement sur les <code>.child</code> qui sont des <b>enfants directs</b> de <code>.parent</code>.',
+ html:'<div class="bx">\n<div class="parent">div.parent\n<p class="child">p.child · A</p>\n<div class="box">div.box\n<p class="child">p.child · B</p>\n</div>\n</div>\n<p class="child">p.child · C</p>\n</div>',
+ starter:'.child {\n  background: gold;\n}',solution:'.parent > .child {\n  background: gold;\n}',
+ checks:[{l:'Seul A est doré',f:function(x){return x.styled('background-color',GOLD,'.parent > .child');}}],cons:[C_IMP],
+ hint:'L\'espace veut dire « descendant à toute profondeur ». Un autre symbole limite à un seul niveau (partie 1, leçon 6).'},
+{id:'S2',part:'Sélecteurs',lvl:1,title:'Le bouton principal',mode:'css',
+ ticket:'Dore les éléments qui ont <b>à la fois</b> la classe <code>btn</code> et la classe <code>primary</code>.',
+ html:'<div class="bx">\n<button class="btn">button.btn</button>\n<button class="btn primary">button.btn.primary</button>\n<div class="btn">div.btn\n<span class="primary">span.primary</span>\n</div>\n<button class="primary btn">button.primary.btn</button>\n</div>',
+ starter:'.btn .primary {\n  background: gold;\n}',solution:'.btn.primary {\n  background: gold;\n}',
+ checks:[{l:'Les deux boutons qui ont btn ET primary sont dorés, rien d\'autre',f:function(x){return x.styled('background-color',GOLD,'.btn.primary');}}],cons:[C_IMP],
+ hint:'Un espace entre deux classes cherche l\'une DANS l\'autre. Pour le même élément, les classes sont collées.'},
+{id:'S3',part:'Sélecteurs',lvl:1,title:'L\'intro sous chaque titre',mode:'css',
+ ticket:'Dore uniquement le paragraphe placé <b>juste après</b> un <code>h2</code>.',
+ html:'<div class="bx">\n<p>p · Préambule</p>\n<h2>h2 · Titre 1</h2>\n<p>p · Intro 1</p>\n<p>p · Suite</p>\n<h2>h2 · Titre 2</h2>\n<hr>\n<p>p · Après le trait</p>\n<h2>h2 · Titre 3</h2>\n<p>p · Intro 3</p>\n</div>',
+ starter:'h2 ~ p {\n  background: gold;\n}',solution:'h2 + p {\n  background: gold;\n}',
+ checks:[{l:'Intro 1 et Intro 3 dorés, rien d\'autre',f:function(x){return x.styled('background-color',GOLD,'h2 + p');}}],cons:[C_IMP],
+ hint:'<code>~</code> prend tous les frères suivants. Il existe un symbole pour le seul voisin collé.'},
+{id:'S4',part:'Sélecteurs',lvl:2,title:'Liens sécurisés',mode:'css',
+ ticket:'Dore les liens dont l\'adresse commence par <code>https</code>. Le HTML n\'a aucune classe.',
+ html:'<div class="bx">\n<a href="https://angular.dev">a · https://angular.dev</a>\n<a href="http://exemple.be">a · http://exemple.be</a>\n<a href="/dossiers/42">a · /dossiers/42</a>\n<a href="https://material.angular.dev">a · https://material.angular.dev</a>\n<button>button</button>\n</div>',
+ starter:'a {\n  background: gold;\n}',solution:'a[href^="https"] {\n  background: gold;\n}',
+ checks:[{l:'Les deux liens https dorés, rien d\'autre',f:function(x){return x.styled('background-color',GOLD,'a[href^="https"]');}}],cons:[C_IMP],
+ hint:'Un sélecteur d\'attribut avec un opérateur « commence par » (partie 1, leçon 10).'},
+{id:'S5',part:'Sélecteurs',lvl:2,title:'Tous sauf le dernier',mode:'css',
+ ticket:'Dans chaque liste, dore toutes les lignes <b>sauf la dernière</b> (on y mettra une bordure de séparation).',
+ html:'<div class="bx">\n<ul>ul\n<li>li · Un</li>\n<li>li · Deux</li>\n<li>li · Trois</li>\n</ul>\n<ul>ul\n<li>li · Quatre</li>\n<li>li · Cinq</li>\n</ul>\n</div>',
+ starter:'li {\n  background: gold;\n}',solution:'li:not(:last-child) {\n  background: gold;\n}',
+ checks:[{l:'Un, Deux et Quatre dorés',f:function(x){return x.styled('background-color',GOLD,'li:not(:last-child)');}}],cons:[C_IMP],
+ hint:'Combine une pseudo-classe de position avec <code>:not()</code>.'},
+{id:'S6',part:'Sélecteurs',lvl:3,title:'La carte qui a un badge',mode:'css',
+ ticket:'Dore les <code>.card</code> qui <b>contiennent</b> un <code>.badge</code>, où qu\'il soit à l\'intérieur.',
+ html:'<div class="bx">\n<div class="card">div.card · A\n<span class="badge">span.badge</span>\n</div>\n<div class="card">div.card · B</div>\n<div class="card">div.card · C\n<div class="body">div.body\n<span class="badge">span.badge</span>\n</div>\n</div>\n</div>',
+ starter:'.card .badge {\n  background: gold;\n}',solution:'.card:has(.badge) {\n  background: gold;\n}',
+ checks:[{l:'Les cartes A et C dorées (pas les badges)',f:function(x){return x.styled('background-color',GOLD,'.card:has(.badge)');}}],cons:[C_IMP],
+ hint:'Le sujet est la carte, pas le badge. Une pseudo-classe permet de choisir un élément selon ce qu\'il contient.'},
+{id:'S7',part:'SCSS',lvl:2,title:'L\'onglet actif, avec &',mode:'scss',
+ ticket:'Dans le bloc <code>.tab</code>, dore <b>l\'onglet lui-même</b> quand il a la classe <code>active</code>. Pas un enfant actif.',
+ html:'<div class="bx">\n<div class="tab active">div.tab.active</div>\n<div class="tab">div.tab\n<span class="active">span.active</span>\n</div>\n<div class="tab">div.tab</div>\n</div>',
+ starter:'.tab {\n  .active {\n    background: gold;\n  }\n}',solution:'.tab {\n  &.active {\n    background: gold;\n  }\n}',
+ checks:[{l:'Seul l\'onglet actif est doré',f:function(x){return x.styled('background-color',GOLD,'.tab.active');}}],cons:[C_IMP,C_AMP],
+ hint:'Sans &, Sass ajoute un espace. Le & collé à la classe parle du même élément.'},
+{id:'S8',part:'SCSS',lvl:3,title:'Une seule flèche par lien',mode:'scss',
+ ticket:'Ajoute « ↗ » après chaque lien <code>.external</code>, <b>une seule fois</b> par lien, même si le lien contient d\'autres balises.',
+ html:'<p><a class="external" data-k="l1" href="#">Docs <b>Angular</b> <em>v21</em></a></p>\n<p><a class="external" data-k="l2" href="#">Material</a></p>\n<p><a data-k="l3" href="#">Lien interne</a></p>',
+ starter:'.external {\n  ::after {\n    content: " ↗";\n  }\n}',solution:'.external {\n  &::after {\n    content: " ↗";\n  }\n}',
+ checks:[
+  {l:'Chaque lien .external a sa flèche',f:function(x){return x.$$('.external').every(function(a){return x.cs(a,'content','::after').indexOf('↗')>=0;});}},
+  {l:'Aucune flèche sur les balises à l\'intérieur des liens',f:function(x){return x.$$('.external *').every(function(e){return x.cs(e,'content','::after').indexOf('↗')<0;});}},
+  {l:'Pas de flèche sur le lien interne',f:function(x){return x.cs('[data-k=l3]','content','::after').indexOf('↗')<0;}}],
+ cons:[C_IMP,C_AMP],hint:'<code>::after</code> sans & devient « le ::after de chaque descendant ».'},
+{id:'S9',part:'SCSS',lvl:3,title:'BEM avec &__',mode:'scss',
+ ticket:'Dore les éléments <code>.card__title</code> en écrivant la règle <b>dans</b> le bloc <code>.card</code>, avec la notation BEM.',
+ html:'<div class="bx">\n<div class="card">div.card\n<h3 class="title">h3.title</h3>\n<h3 class="card__title">h3.card__title</h3>\n</div>\n<h3 class="card__title">h3.card__title (hors carte)</h3>\n</div>',
+ starter:'.card {\n  .title {\n    background: gold;\n  }\n}',solution:'.card {\n  &__title {\n    background: gold;\n  }\n}',
+ checks:[{l:'Les deux .card__title dorés, pas .title',f:function(x){return x.styled('background-color',GOLD,'.card__title');}}],cons:[C_IMP,YES(/&__title/,'utilise &__title')],
+ hint:'Le & peut être collé à du texte : Sass fabrique alors un nouveau nom de classe.'},
+/* ---- Angular ---- */
+{id:'N1',part:'Angular',lvl:1,title:'Montant aligné à droite',mode:'p',
+ ticket:'Dans <code>dossier.component.scss</code>, aligne à droite le texte saisi dans le champ Montant.',
+ html:DOM_P,starter:'mat-form-field {\n  \n}',solution:'mat-form-field {\n  input {\n    text-align: right;\n  }\n}',
+ checks:[{l:'Le texte de l\'input est aligné à droite',f:function(x){return x.cs('[data-k=input]','text-align')==='right';}}],cons:[C_IMP,C_MDC,C_DEEP],
+ hint:'L\'input est écrit dans ton template, entre les balises de mat-form-field : c\'est du contenu projeté, il porte ton attribut (partie 2, leçon 3).'},
+{id:'N2',part:'Angular',lvl:2,title:'Le fond de la zone de saisie',mode:'p',
+ ticket:'Mets un fond <code>#eef</code> sur la zone interne du champ (<code>.mat-mdc-text-field-wrapper</code>, créée par Material). L\'effet doit rester limité à ce composant.',
+ html:DOM_P,starter:'mat-form-field {\n  .mat-mdc-text-field-wrapper {\n    background: #eef;\n  }\n}',solution:':host ::ng-deep {\n  .mat-mdc-text-field-wrapper {\n    background: #eef;\n  }\n}',
+ checks:[{l:'La zone interne a le fond #eef',f:function(x){return x.cs('[data-k=wrap]','background-color')==='rgb(238, 238, 255)';}}],cons:[C_IMP,C_SCOPED('p')],
+ hint:'Le wrapper n\'a pas ton attribut. Il faut dire à Angular d\'arrêter d\'en ajouter, mais sans quitter ton composant.'},
+{id:'N3',part:'Angular',lvl:2,title:'La carte compacte',mode:'c',
+ ticket:'Dans <code>party-card.component.scss</code> : la carte a un padding de 12px, et de <b>4px</b> quand le parent lui ajoute la classe <code>compact</code>.',
+ html:'<div class="dossier" _ngcontent-p="">\n<app-party-card class="card compact" data-k="a" _ngcontent-p="" _nghost-c="">\n<span class="name" _ngcontent-c="">Carte compacte</span>\n</app-party-card>\n<app-party-card class="card" data-k="b" _ngcontent-p="" _nghost-c="">\n<span class="name" _ngcontent-c="">Carte normale</span>\n</app-party-card>\n</div>',
+ starter:':host {\n  padding: 12px;\n\n  /* et en mode compact ? */\n}',solution:':host {\n  padding: 12px;\n}\n\n:host(.compact) {\n  padding: 4px;\n}',
+ checks:[{l:'La carte compacte a 4px de padding',f:function(x){return x.cs('[data-k=a]','padding-top')==='4px';}},{l:'La carte normale garde 12px',f:function(x){return x.cs('[data-k=b]','padding-top')==='12px';}}],cons:[C_IMP,C_DEEP],
+ hint:'Une forme de <code>:host</code> accepte une condition entre parenthèses.'},
+{id:'N4',part:'Angular',lvl:3,title:'En gras, seulement dans un dossier',mode:'c',
+ ticket:'Dans <code>party-card.component.scss</code> : le nom est en gras (700) <b>seulement</b> quand la carte se trouve dans un <code>.dossier</code>. Ailleurs, il reste normal.',
+ html:'<div class="dossier" _ngcontent-p="">\n<app-party-card class="card" _ngcontent-p="" _nghost-c="">\n<span class="name" data-k="a" _ngcontent-c="">Dans le dossier</span>\n</app-party-card>\n</div>\n<div class="archive" _ngcontent-x="">\n<app-party-card class="card" _ngcontent-x="" _nghost-c="">\n<span class="name" data-k="b" _ngcontent-c="">Dans les archives</span>\n</app-party-card>\n</div>',
+ starter:'.name {\n  font-weight: 700;\n}',solution:':host-context(.dossier) .name {\n  font-weight: 700;\n}',
+ checks:[{l:'Gras dans le dossier',f:function(x){return x.cs('[data-k=a]','font-weight')==='700';}},{l:'Normal dans les archives',f:function(x){return x.cs('[data-k=b]','font-weight')==='400';}}],cons:[C_IMP,C_DEEP],
+ hint:'L\'enfant ne voit pas ses ancêtres avec <code>:host</code>, mais une variante regarde tout le contexte autour de lui.'},
+{id:'N5',part:'Angular',lvl:2,title:'Options compactes, un seul panneau',mode:'g',
+ ticket:'Dans <code>styles.scss</code> (global) : les options doivent faire 32px de haut minimum, <b>uniquement</b> dans le panneau des articles (le <code>mat-select</code> a <code>panelClass="article-panel"</code>).',
+ html:'<div class="cdk-overlay-container">\n<div class="mat-mdc-select-panel article-panel" data-l="panelClass : article-panel">\n<mat-option class="mat-mdc-option" data-k="a1">029 · Droits d\'enregistrement</mat-option>\n<mat-option class="mat-mdc-option" data-k="a2">193 · Réduction</mat-option>\n</div>\n<div class="mat-mdc-select-panel party-panel" data-l="panelClass : party-panel">\n<mat-option class="mat-mdc-option" data-k="b1">Dupont Marie</mat-option>\n<mat-option class="mat-mdc-option" data-k="b2">Martin Paul</mat-option>\n</div>\n</div>',
+ starter:'.mat-mdc-option {\n  min-height: 32px;\n}',solution:'.article-panel {\n  .mat-mdc-option {\n    min-height: 32px;\n  }\n}',
+ checks:[{l:'Options des articles à 32px',f:function(x){return x.cs('[data-k=a1]','min-height')==='32px'&&x.cs('[data-k=a2]','min-height')==='32px';}},{l:'Options des parties inchangées (48px)',f:function(x){return x.cs('[data-k=b1]','min-height')==='48px';}}],cons:[C_IMP,C_DEEP],
+ hint:'Ta panelClass est la seule chose que tu contrôles dans l\'overlay : sers-t\'en comme ancêtre.'},
+{id:'N6',part:'Angular',lvl:2,title:'16px au-dessus de la carte',mode:'p',
+ ticket:'Dans <code>dossier.component.scss</code> : la carte <code>app-party-card</code> doit être <b>sous</b> le champ, avec <b>16px</b> d\'écart.',
+ html:DOM_P,starter:'app-party-card {\n  margin-top: 16px;\n}',solution:'app-party-card {\n  display: block;\n  margin-top: 16px;\n}',
+ checks:[{l:'La carte est sous le champ',f:function(x){return below(x,'[data-k=field]','[data-k=card]');}},{l:'Écart de 16px (±1)',f:function(x){var g=Math.round(x.r('[data-k=card]').t-x.r('[data-k=field]').b);return {ok:Math.abs(g-16)<=1,msg:'écart mesuré : '+g+'px'};}}],cons:[C_IMP,C_DEEP],
+ hint:'Une balise de composant est inline par défaut : les marges verticales sont ignorées (partie 3, leçon 2). Le plus propre serait <code>:host { display: block }</code> dans party-card ; ici tu n\'as que le fichier du parent.'},
+{id:'N7',part:'Angular',lvl:3,title:'Un réglage exposé au parent',mode:'c',
+ ticket:'Dans <code>party-card.component.scss</code> : le parent doit pouvoir régler la graisse du nom avec la variable <code>--party-name-weight</code> (400 par défaut). Ici, le parent a mis 700 sur la première carte.',
+ html:'<div class="dossier" _ngcontent-p="">\n<app-party-card class="card" style="--party-name-weight: 700" _ngcontent-p="" _nghost-c="">\n<span class="name" data-k="a" _ngcontent-c="">Réglée par le parent</span>\n</app-party-card>\n<app-party-card class="card" _ngcontent-p="" _nghost-c="">\n<span class="name" data-k="b" _ngcontent-c="">Par défaut</span>\n</app-party-card>\n</div>',
+ starter:'.name {\n  font-weight: 400;\n}',solution:'.name {\n  font-weight: var(--party-name-weight, 400);\n}',
+ checks:[{l:'Première carte : 700',f:function(x){return x.cs('[data-k=a]','font-weight')==='700';}},{l:'Seconde carte : 400 par défaut',f:function(x){return x.cs('[data-k=b]','font-weight')==='400';}}],cons:[C_IMP,C_DEEP,YES(/var\(\s*--party-name-weight/,'utilise var(--party-name-weight…)')],
+ hint:'<code>var(--nom, valeur-par-défaut)</code>. Les variables héritées traversent l\'encapsulation.'},
+/* ---- Mise en page ---- */
+{id:'L1',part:'Mise en page',lvl:1,title:'Actions groupées à droite',mode:'css',w:440,
+ ticket:'En-tête du dossier : le titre à gauche, les deux boutons <b>côte à côte</b>, collés à droite.',
+ html:'<div class="hdr" data-k="h">\n<div class="hdr-t" data-k="t"><b>Dossier 42</b><small>Fiscal</small></div>\n<button class="mbtn alt cancel" data-k="b1">Annuler</button>\n<button class="mbtn" data-k="b2">Enregistrer</button>\n</div>',
+ starter:'.hdr {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}',solution:'.hdr {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.cancel {\n  margin-left: auto;\n}',
+ checks:[
+  {l:'Tout est sur une ligne',f:function(x){return Math.abs(x.r('[data-k=t]').cy-x.r('[data-k=b2]').cy)<8;}},
+  {l:'Le titre est à gauche',f:function(x){return x.r('[data-k=t]').l-x.r('[data-k=h]').l<=16;}},
+  {l:'Enregistrer touche le bord droit',f:function(x){return x.r('[data-k=h]').r-x.r('[data-k=b2]').r<=16;}},
+  {l:'Les boutons sont côte à côte (écart ≤ 16px)',f:function(x){var g=x.r('[data-k=b2]').l-x.r('[data-k=b1]').r;return {ok:g>=0&&g<=16,msg:'écart : '+Math.round(g)+'px'};}}],cons:[C_IMP],
+ hint:'Avec trois enfants, space-between écarte aussi les deux boutons. Une marge <code>auto</code> sur le premier bouton absorbe tout l\'espace libre.'},
+{id:'L2',part:'Mise en page',lvl:1,title:'Centré dans la boîte',mode:'css',w:440,
+ ticket:'Centre l\'élément horizontalement <b>et</b> verticalement dans <code>.box</code>.',
+ html:'<div class="box" data-k="box">\n<div class="it" data-k="i">Centré</div>\n</div>',starter:'.box {\n  \n}',solution:'.box {\n  display: grid;\n  place-items: center;\n}',
+ checks:[{l:'Centré horizontalement',f:function(x){return x.near(x.r('[data-k=i]').cx,x.r('[data-k=box]').cx,2);}},{l:'Centré verticalement',f:function(x){return x.near(x.r('[data-k=i]').cy,x.r('[data-k=box]').cy,2);}},{l:'L\'élément garde sa taille naturelle',f:function(x){return x.r('[data-k=i]').w<x.r('[data-k=box]').w/2;}}],cons:[C_IMP,NO(/margin/,'sans margin')],
+ hint:'<code>display: flex</code> + deux propriétés d\'alignement, ou <code>display: grid</code> + une seule.'},
+{id:'L3',part:'Mise en page',lvl:1,title:'Le champ prend la place restante',mode:'css',w:440,
+ ticket:'Ligne de recherche : le champ occupe <b>tout l\'espace libre</b>, le bouton garde sa taille, collé au bord droit.',
+ html:'<div class="row" data-k="row">\n<div class="mf search" data-k="f"><small>Rechercher</small><span>Nom, NN…</span></div>\n<button class="mbtn" data-k="b">Chercher</button>\n</div>',
+ starter:'.row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}',solution:'.row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.search {\n  flex: 1;\n}',
+ checks:[{l:'Sur une seule ligne',f:function(x){return Math.abs(x.r('[data-k=f]').cy-x.r('[data-k=b]').cy)<8;}},{l:'Le bouton touche le bord droit',f:function(x){return x.r('[data-k=row]').r-x.r('[data-k=b]').r<=16;}},{l:'Le bouton garde sa taille naturelle (< 130px)',f:function(x){return x.r('[data-k=b]').w<130;}},{l:'Écart champ-bouton entre 4 et 16px',f:function(x){var g=x.r('[data-k=b]').l-x.r('[data-k=f]').r;return g>=4&&g<=16;}}],cons:[C_IMP,NO(/(^|[\s;{])width\s*:/m,'sans width fixe')],
+ hint:'Une seule propriété <code>flex</code> sur le champ (partie 3, leçon 6).'},
+{id:'L4',part:'Mise en page',lvl:2,title:'Le nom trop long',mode:'css',w:300,
+ ticket:'Le nom doit se couper avec « … » et le bouton Retirer doit rester <b>dans</b> la carte.',
+ html:'<div class="row" data-k="row">\n<div class="avatar"></div>\n<div class="info" data-k="i">\n<div class="pname" data-k="n">Van den Bossche-Vandermeulen Marie-Christine</div>\n<div class="sub">Titulaire</div>\n</div>\n<button class="mbtn" data-k="b">Retirer</button>\n</div>',
+ starter:'.row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.info {\n  flex: 1;\n}',solution:'.row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.info {\n  flex: 1;\n  min-width: 0;\n}',
+ checks:[{l:'Le bouton reste dans la carte',f:function(x){return x.r('[data-k=b]').r<=x.r('[data-k=row]').r+0.5;}},{l:'Le nom est coupé avec « … »',f:function(x){var n=x.$('[data-k=n]');return n.scrollWidth>n.clientWidth+1;}},{l:'Le nom reste lisible (> 60px)',f:function(x){return x.r('[data-k=i]').w>60;}}],cons:[C_IMP,NO(/overflow/,'sans toucher à overflow'),NO(/(^|[\s;{])width\s*:/m,'sans width fixe')],
+ hint:'Le bloc <code>.info</code> est l\'enfant flex : par défaut, il ne rétrécit pas sous la largeur du texte qu\'il contient (partie 3, leçon 7).'},
+{id:'L5',part:'Mise en page',lvl:2,title:'Formulaire en deux colonnes',mode:'css',w:440,
+ ticket:'Nom et Prénom côte à côte, Rue sur <b>toute la largeur</b>, puis Code postal et Commune côte à côte. 10px d\'écart partout.',
+ html:'<div class="form" data-k="form">\n<div class="mf" data-k="n"><small>Nom</small><span>Dupont</span></div>\n<div class="mf" data-k="p"><small>Prénom</small><span>Marie</span></div>\n<div class="mf street" data-k="s"><small>Rue</small><span>Avenue des Arts 12</span></div>\n<div class="mf" data-k="cp"><small>Code postal</small><span>1000</span></div>\n<div class="mf" data-k="c"><small>Commune</small><span>Bruxelles</span></div>\n</div>',
+ starter:'.form {\n  \n}',solution:'.form {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 10px;\n}\n.street {\n  grid-column: 1 / -1;\n}',
+ checks:[{l:'Nom et Prénom sur la même ligne',f:function(x){return sameRow(x,'[data-k=n]','[data-k=p]')&&x.r('[data-k=p]').l>x.r('[data-k=n]').r;}},{l:'Rue sur toute la largeur',f:function(x){return x.near(x.r('[data-k=s]').w,x.r('[data-k=form]').w,2);}},{l:'Code postal et Commune sur la même ligne, sous Rue',f:function(x){return sameRow(x,'[data-k=cp]','[data-k=c]')&&below(x,'[data-k=s]','[data-k=cp]');}},{l:'Écart de 10px entre Nom et Prénom',f:function(x){return x.near(x.r('[data-k=p]').l-x.r('[data-k=n]').r,10,1);}}],cons:[C_IMP,YES(/grid/,'utilise grid')],
+ hint:'Deux colonnes sur le parent, puis une seule propriété sur Rue (partie 3, leçon 8).'},
+{id:'L6',part:'Mise en page',lvl:3,title:'Responsive sans media query',mode:'css',
+ ticket:'Les champs se rangent <b>sur plusieurs colonnes</b> dans un conteneur large et passent <b>sur une seule</b> dans un conteneur de 320px, <b>sans</b> <code>@media</code> ni <code>@container</code>. Chaque champ fait au moins 180px.',
+ html:'<div class="form" data-k="form">\n'+FORM4+'\n</div>',
+ starter:'.form {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 10px;\n}',solution:'.form {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));\n  gap: 10px;\n}',
+ checks:[{l:'À 600px : Nom et Prénom côte à côte',f:function(x){return x.at(600,function(){return sameRow(x,'[data-k=n]','[data-k=p]');});}},{l:'À 320px : une seule colonne',f:function(x){return x.at(320,function(){return below(x,'[data-k=n]','[data-k=p]');});}},{l:'Aucun champ sous 180px à 400px',f:function(x){return x.at(400,function(){return x.$$('.mf').every(function(e){return x.r(e).w>=179;});});}}],
+ cons:[C_IMP,NO(/@media/,'pas de @media'),NO(/@container/,'pas de @container')],hint:'<code>repeat()</code>, <code>auto-fit</code> et <code>minmax()</code> ensemble.'},
+{id:'L7',part:'Mise en page',lvl:2,title:'Espacer sans marges',mode:'css',w:440,
+ ticket:'Les cartes doivent être espacées de 16px, sans espace en trop sous la dernière, et <b>sans aucune marge</b> (règle d\'équipe).',
+ html:'<div class="list" data-k="l">\n<div class="cardx" data-k="a">Testament · 12/03/2019</div>\n<div class="cardx" data-k="b">Contrat de mariage · 02/06/2015</div>\n<div class="cardx" data-k="c">Donation · 18/11/2020</div>\n</div>',
+ starter:'.cardx {\n  margin-bottom: 16px;\n}',solution:'.list {\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n}',
+ checks:[{l:'16px entre la 1re et la 2e',f:function(x){return x.near(x.r('[data-k=b]').t-x.r('[data-k=a]').b,16,1);}},{l:'16px entre la 2e et la 3e',f:function(x){return x.near(x.r('[data-k=c]').t-x.r('[data-k=b]').b,16,1);}},{l:'Pas d\'espace en trop sous la dernière',f:function(x){return x.r('[data-k=l]').b-x.r('[data-k=c]').b<=12;}}],cons:[C_IMP,NO(/margin/,'pas de margin')],
+ hint:'L\'espacement se décide sur le parent, avec <code>gap</code>.'},
+{id:'L8',part:'Mise en page',lvl:2,title:'Le badge dans le coin',mode:'css',w:440,
+ ticket:'Le badge « Nouveau » doit être posé à cheval sur le <b>coin supérieur droit de la carte</b> (au plus 12px du bord droit, à cheval sur le bord du haut).',
+ html:'<div style="padding-top:22px">\n<div class="cardx" data-k="card">Testament <span class="badge-n" data-k="b">Nouveau</span>\n<div class="sub">Ajouté le 06/10/2026</div>\n</div>\n</div>',
+ starter:'.badge-n {\n  position: absolute;\n  top: -8px;\n  right: 8px;\n}',solution:'.cardx {\n  position: relative;\n}\n.badge-n {\n  position: absolute;\n  top: -8px;\n  right: 8px;\n}',
+ checks:[{l:'Le badge touche le bord du haut de la carte',f:function(x){var b=x.r('[data-k=b]'),c=x.r('[data-k=card]');return b.t<=c.t+2&&b.b>=c.t-2;}},{l:'Le badge est près du bord droit de la carte',f:function(x){var b=x.r('[data-k=b]'),c=x.r('[data-k=card]');return b.r<=c.r+2&&c.r-b.r<=12;}}],cons:[C_IMP],
+ hint:'<code>absolute</code> se cale sur l\'ancêtre positionné le plus proche (partie 3, leçon 10).'},
+{id:'L9',part:'Mise en page',lvl:2,title:'Les boutons du stepper toujours visibles',mode:'css',w:440,
+ ticket:'Pendant qu\'on fait défiler l\'étape, les boutons Précédent / Suivant doivent rester visibles <b>en bas du cadre</b>.',
+ html:'<div class="scrollf" data-k="sc">\n<div class="stephead">Étape 3 · Biens immobiliers</div>\n<div class="r">Parcelle 1 · Uccle</div><div class="r">Parcelle 2 · Ixelles</div><div class="r">Parcelle 3 · Etterbeek</div><div class="r">Parcelle 4 · Forest</div><div class="r">Parcelle 5 · Anderlecht</div><div class="r">Parcelle 6 · Evere</div><div class="r">Parcelle 7 · Schaerbeek</div>\n<div class="footer" data-k="f"><button class="mbtn alt">Précédent</button><button class="mbtn">Suivant</button></div>\n</div>',
+ starter:'.footer {\n  /* reste visible en bas pendant le défilement */\n}',solution:'.footer {\n  position: sticky;\n  bottom: 0;\n}',
+ checks:[{l:'Boutons visibles en bas, cadre en haut du défilement',f:function(x){var sc=x.$('[data-k=sc]'),o=sc.scrollTop;sc.scrollTop=0;var ok=x.near(x.r('[data-k=f]').b,x.r(sc).b-1,3);sc.scrollTop=o;return ok;}},{l:'Toujours en bas à mi-défilement',f:function(x){var sc=x.$('[data-k=sc]'),o=sc.scrollTop;sc.scrollTop=60;var ok=x.near(x.r('[data-k=f]').b,x.r(sc).b-1,3);sc.scrollTop=o;return ok;}}],cons:[C_IMP,NO(/position\s*:\s*(fixed|absolute)/,'sans fixed ni absolute')],
+ hint:'Une valeur de <code>position</code> colle à son conteneur qui défile.'},
+{id:'L10',part:'Mise en page',lvl:3,title:'Le menu passe dessous',mode:'css',w:440,
+ ticket:'Le menu ouvert dans la carte A doit passer <b>au-dessus</b> de la carte B. La carte A a un <code>transform</code> (dans le décor) et la carte B un <code>z-index: 1</code>. Garde l\'aperçu visible à l\'écran pour ce test.',
+ html:'<div class="zst">\n<div class="card-a" data-k="a"><b>Carte A</b> · menu ouvert\n<div class="menu" data-k="m"><div>Modifier</div><div>Dupliquer</div><div>Supprimer</div></div>\n</div>\n<div class="card-b" data-k="b"><b>Carte B</b></div>\n</div>',
+ starter:'.menu {\n  z-index: 9999;\n}',solution:'.card-a {\n  z-index: 2;\n}',
+ checks:[{l:'Le menu est visible là où il recouvre la carte B',f:function(x){var m=x.r('[data-k=m]'),b=x.r('[data-k=b]');var px=(m.l+m.r)/2,py=(Math.max(m.t,b.t)+m.b)/2;var el=x.hit(px,py);if(!el)return {ok:false,msg:'fais défiler pour garder l\'aperçu visible, puis réessaie'};return x.$('[data-k=m]').contains(el);}}],cons:[C_IMP],
+ hint:'Le transform enferme le menu dans le contexte de la carte A. C\'est A qu\'il faut comparer à B (partie 3, leçon 11).'},
+{id:'L11',part:'Mise en page',lvl:2,title:'Le champ qui dépasse',mode:'css',w:360,
+ ticket:'Le champ montant a <code>width: 100%</code> et <code>padding: 6px 24px</code> (non modifiables). Il dépasse de sa carte : corrige-le sans toucher à la largeur ni au padding.',
+ extra:'.amount{width:100%;padding:6px 24px;border:1px solid var(--muted);border-radius:5px;background:var(--surface);font:inherit;color:var(--ink)}',
+ extraShow:'.amount {\n  width: 100%;\n  padding: 6px 24px;\n  border: 1px solid;\n}',
+ html:'<div class="cardx" data-k="card">\n<div class="sub">Montant</div>\n<input class="amount" data-k="f" value="1.250,00">\n</div>',
+ starter:'.amount {\n  \n}',solution:'.amount {\n  box-sizing: border-box;\n}',
+ checks:[{l:'Le champ ne dépasse pas de la carte',f:function(x){var c=x.$('[data-k=card]'),cr=x.r(c),cs=getComputedStyle(c);return x.r('[data-k=f]').r<=cr.r-parseFloat(cs.paddingRight)-parseFloat(cs.borderRightWidth)+0.5;}},{l:'Il occupe toujours toute la largeur disponible',f:function(x){var c=x.$('[data-k=card]'),cs=getComputedStyle(c);return x.near(x.r('[data-k=f]').w,c.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),1.5);}}],cons:[C_IMP,NO(/width/,'sans toucher à width'),NO(/padding/,'sans toucher au padding')],
+ hint:'Une seule propriété change ce que <code>width</code> mesure (partie 3, leçon 1).'},
+{id:'L12',part:'Mise en page',lvl:3,title:'S\'adapter à son conteneur',mode:'css',
+ ticket:'Le formulaire passe à <b>une colonne</b> quand <b>son conteneur</b> <code>.wrap</code> fait moins de 460px (comme dans un dialog), et reste à deux colonnes au-delà. La fenêtre ne doit pas compter.',
+ extra:'.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}',extraShow:'.form {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 10px;\n}',
+ html:'<div class="wrap" data-k="w">\n<p class="cq-title">Adresse du titulaire</p>\n<div class="form" data-k="form">\n'+FORM4+'\n</div>\n</div>',
+ starter:'.wrap {\n  \n}',solution:'.wrap {\n  container-type: inline-size;\n}\n\n@container (max-width: 460px) {\n  .form {\n    grid-template-columns: 1fr;\n  }\n}',
+ checks:[{l:'Conteneur de 640px : deux colonnes',f:function(x){return x.at(640,function(){return sameRow(x,'[data-k=n]','[data-k=p]');});}},{l:'Conteneur de 380px : une colonne',f:function(x){return x.at(380,function(){return below(x,'[data-k=n]','[data-k=p]');});}}],cons:[C_IMP,YES(/@container/,'utilise @container'),NO(/@media/,'pas de @media')],
+ hint:'Deux étapes : déclarer <code>.wrap</code> comme conteneur, puis écrire la condition (partie 3, leçon 12).'}
+];
+
+/* ---------- Progression (navigateur) ---------- */
+var KEY='css-angular-defis-v1', ST={s:{},c:{}};
+try{var raw=localStorage.getItem(KEY); if(raw) ST=JSON.parse(raw)||ST; ST.s=ST.s||{}; ST.c=ST.c||{};}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST));}catch(e){}}
+var LVN={1:'Facile',2:'Moyen',3:'Difficile'};
+
+/* ---------- Sommaire ---------- */
+function renderList(cur){
+  var groups={}, order=[]; CH.forEach(function(c,i){if(!groups[c.part]){groups[c.part]=[];order.push(c.part);} groups[c.part].push(i);});
+  document.getElementById('dlist').innerHTML=order.map(function(g){return '<div class="grp">'+esc(g)+'</div><ol class="dl-list">'+groups[g].map(function(i){var c=CH[i];return '<li><a href="#'+c.id+'"'+(i===cur?' aria-current="true"':'')+'><span>'+(i+1)+'</span>'+esc(c.title)+'<span class="st">'+(ST.s[c.id]?'✓':'')+'</span></a></li>';}).join('')+'</ol>';}).join('');
+  var n=CH.filter(function(c){return ST.s[c.id];}).length;
+  document.querySelectorAll('.score-n').forEach(function(e){e.textContent=n;});
+  document.querySelectorAll('.score-t').forEach(function(e){e.textContent=CH.length;});
+  var m=document.getElementById('meter'); if(m) m.style.width=(n/CH.length*100)+'%';
+}
+
+/* ---------- Scène (Shadow DOM) ---------- */
+function makeStage(host,ch){
+  var sr; try{sr=host.attachShadow({mode:'open'});}catch(e){host.textContent='Ce navigateur ne gère pas le Shadow DOM.';return null;}
+  sr.innerHTML='<style>'+BASE+(ch.extra||'')+'</style><style class="u"></style><div class="root"'+(ch.w?' style="width:'+ch.w+'px"':'')+'>'+ch.html+'</div>';
+  return {sr:sr,root:sr.querySelector('.root'),setCSS:function(css){sr.querySelector('.u').textContent=css;}};
+}
+function makeCtx(sr,root){
+  var R=function(e){var a=root.getBoundingClientRect(),b=e.getBoundingClientRect();return {l:b.left-a.left,t:b.top-a.top,r:b.right-a.left,b:b.bottom-a.top,w:b.width,h:b.height,cx:(b.left+b.right)/2-a.left,cy:(b.top+b.bottom)/2-a.top};};
+  var x={
+    $:function(s){return root.querySelector(s);},
+    $$:function(s){return Array.prototype.slice.call(root.querySelectorAll(s));},
+    r:function(s){return R(typeof s==='string'?root.querySelector(s):s);},
+    cs:function(s,p,ps){var e=typeof s==='string'?root.querySelector(s):s;return getComputedStyle(e,ps||null).getPropertyValue(p).trim();},
+    near:function(a,b,t){return Math.abs(a-b)<=(t==null?2:t);},
+    at:function(w,fn){var ow=root.style.width,om=root.style.maxWidth;root.style.width=w+'px';root.style.maxWidth='none';try{return fn();}finally{root.style.width=ow;root.style.maxWidth=om;}},
+    styled:function(prop,val,expSel){var exp=new Set(x.$$(expSel)),miss=0,extra=0;x.$$('*').forEach(function(e){var on=getComputedStyle(e).getPropertyValue(prop).trim()===val;if(on&&!exp.has(e))extra++;if(!on&&exp.has(e))miss++;});return {ok:!miss&&!extra,msg:(exp.size-miss)+'/'+exp.size+' attendus'+(extra?' · '+extra+' en trop':'')};},
+    hit:function(px,py){var a=root.getBoundingClientRect();return sr.elementFromPoint?sr.elementFromPoint(a.left+px,a.top+py):null;}
+  };
+  return x;
+}
+function runChecks(ch,stage,code,sels){
+  var x=makeCtx(stage.sr,stage.root), res=[], allOk=true;
+  ch.checks.forEach(function(c){var r; try{r=c.f(x);}catch(e){r={ok:false,msg:'erreur pendant le test'};} if(typeof r==='boolean') r={ok:r}; if(!r.ok) allOk=false; res.push({l:c.l,ok:r.ok,msg:r.msg});});
+  var clean=stripComments(code), cres=(ch.cons||[]).map(function(c){var ok=false;try{ok=c.f(clean,sels);}catch(e){} if(!ok) allOk=false; return {l:c.l,ok:ok};});
+  return {checks:res,cons:cres,ok:allOk};
+}
+
+/* ---------- Vue d'un défi ---------- */
+var view=document.getElementById('view'), timer=null;
+function show(i){
+  var ch=CH[i]; renderList(i);
+  var isScss=ch.mode!=='css', file=ch.mode==='css'?'CSS':(ch.mode==='scss'?'SCSS':'SCSS · '+FILES[ch.mode].name);
+  view.innerHTML='<section class="lesson" style="padding-top:20px">'+
+    '<div class="dhead"><span class="num">'+(i+1)+' / '+CH.length+'</span><span class="kicker">'+esc(ch.part)+'</span><span class="lvl lvl-'+ch.lvl+'">'+LVN[ch.lvl]+'</span><span class="dstat" id="dstat">'+(ST.s[ch.id]?'✓ Réussi':'')+'</span></div>'+
+    '<h2 style="font-family:var(--font-display);font-weight:800;font-size:clamp(1.45rem,3.2vw,1.95rem);margin:0">'+esc(ch.title)+'</h2>'+
+    '<div class="ticket"><div class="tid">TICKET '+ch.id+'</div><p>'+ch.ticket+'</p></div>'+
+    '<div class="stages"><div class="stagebox"><div class="cap"><span>Cible</span><span>ce qu\'on attend</span></div><div class="sv" id="sv-t"></div></div><div class="stagebox"><div class="cap"><span>Ton résultat</span><span>en direct</span></div><div class="sv" id="sv-u"></div></div></div>'+
+    (ch.extraShow?'<details class="more"><summary>CSS déjà présent, non modifiable</summary><div><pre class="code solo">'+hl(ch.extraShow)+'</pre></div></details>':'')+
+    '<div class="editor"><div class="cap"><label for="ed">Ton '+esc(file)+'</label><span>Tab = indentation</span></div><textarea id="ed" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>'+
+    '<div class="ed-actions"><button type="button" class="btn alt" id="b-reset">Recommencer</button><button type="button" class="btn alt" id="b-hint">Indice</button><button type="button" class="btn alt" id="b-sol">Voir la solution</button></div></div>'+
+    '<div id="hint" class="callout" hidden><b>Indice</b>'+ch.hint+'</div>'+
+    '<div id="sol" hidden><details class="more" open><summary>Solution</summary><div><pre class="code solo">'+hl(ch.solution)+'</pre><button type="button" class="btn alt" id="b-use">Mettre la solution dans l\'éditeur</button></div></details></div>'+
+    (isScss?'<details class="more" id="gen"><summary>CSS envoyé au navigateur</summary><div><pre class="code solo" id="gen-out"></pre><div class="xf-err" id="gen-err"></div></div></details>':'')+
+    '<div class="results"><div class="rbox"><h3>Vérifications du rendu</h3><ul class="rlist" id="r-checks"></ul></div><div class="rbox"><h3>Règles d\'équipe</h3><ul class="rlist" id="r-cons"></ul></div></div>'+
+    '<div id="win"></div>'+
+    '<div class="dnav">'+(i>0?'<a class="btn alt" href="#'+CH[i-1].id+'" style="text-decoration:none">← '+esc(CH[i-1].title)+'</a>':'<span></span>')+(i<CH.length-1?'<a class="btn alt" href="#'+CH[i+1].id+'" style="text-decoration:none">'+esc(CH[i+1].title)+' →</a>':'')+'</div></section>';
+  var tgt=makeStage(document.getElementById('sv-t'),ch), usr=makeStage(document.getElementById('sv-u'),ch);
+  if(!tgt||!usr) return;
+  tgt.setCSS(toCSS(ch,ch.solution).css);
+  var ed=document.getElementById('ed');
+  ed.value=ST.c[ch.id]!=null?ST.c[ch.id]:ch.starter;
+  function evalNow(){
+    var code=ed.value, t=toCSS(ch,code); usr.setCSS(t.css);
+    if(isScss){document.getElementById('gen-out').innerHTML=ch.mode==='scss'?hl(t.css):ngHL(t.css);document.getElementById('gen-err').textContent=t.errors.join(' ');}
+    var r=runChecks(ch,usr,code,t.sels);
+    document.getElementById('r-checks').innerHTML=r.checks.map(function(c){return '<li class="'+(c.ok?'ok':'ko')+'"><span class="ic">'+(c.ok?'✓':'✗')+'</span><span>'+esc(c.l)+(c.msg?'<small>'+esc(c.msg)+'</small>':'')+'</span></li>';}).join('');
+    document.getElementById('r-cons').innerHTML=r.cons.length?r.cons.map(function(c){return '<li class="'+(c.ok?'ok':'ko')+'"><span class="ic">'+(c.ok?'✓':'✗')+'</span><span>'+esc(c.l)+'</span></li>';}).join(''):'<li class="na"><span class="ic">·</span><span>Aucune</span></li>';
+    ST.c[ch.id]=code;
+    if(r.ok){ if(!ST.s[ch.id]){ST.s[ch.id]=true;} document.getElementById('dstat').textContent='✓ Réussi';
+      document.getElementById('win').innerHTML='<div class="win">✓ Défi réussi : toutes les vérifications passent.'+(i<CH.length-1?' <a class="btn" href="#'+CH[i+1].id+'" style="text-decoration:none">Défi suivant →</a>':' Tu as terminé la série.')+'</div>';}
+    else document.getElementById('win').innerHTML='';
+    save(); renderList(i);
+  }
+  ed.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(evalNow,220);});
+  ed.addEventListener('keydown',function(e){if(e.key==='Tab'&&!e.shiftKey){e.preventDefault();var s=ed.selectionStart;ed.setRangeText('  ',s,ed.selectionEnd,'end');clearTimeout(timer);timer=setTimeout(evalNow,220);}});
+  document.getElementById('b-reset').addEventListener('click',function(){ed.value=ch.starter;evalNow();});
+  document.getElementById('b-hint').addEventListener('click',function(){var h=document.getElementById('hint');h.hidden=!h.hidden;});
+  document.getElementById('b-sol').addEventListener('click',function(){var s=document.getElementById('sol');s.hidden=!s.hidden;});
+  document.getElementById('b-use').addEventListener('click',function(){ed.value=ch.solution;evalNow();});
+  requestAnimationFrame(evalNow);
+}
+function route(){
+  var id=(location.hash||'').slice(1), i=0;
+  for(var k=0;k<CH.length;k++) if(CH[k].id===id){i=k;break;}
+  show(i);
+  if(id) window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+var toc=document.getElementById('toc');
+if(window.matchMedia&&window.matchMedia('(max-width:980px)').matches) toc.removeAttribute('open');
+toc.addEventListener('click',function(e){if(e.target.closest('a')&&window.matchMedia&&window.matchMedia('(max-width:980px)').matches) toc.removeAttribute('open');});
+window.__DEFIS__={CH:CH,toCSS:toCSS,makeStage:makeStage,runChecks:runChecks};
+route();
+})();
+</script>
+
+</body>
+</html>

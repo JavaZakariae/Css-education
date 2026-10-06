@@ -386,7 +386,7 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 
 <main>
 <header class="hero">
-  <nav class="topnav" aria-label="Parties du cours"><a href="index.html">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html">2 · Angular &amp; Material</a><a href="layout.html" aria-current="page">3 · Mise en page</a></nav>
+  <nav class="topnav" aria-label="Parties du cours"><a href="index.html">1 · Sélecteurs CSS &amp; SCSS</a><a href="angular.html">2 · Angular &amp; Material</a><a href="layout.html" aria-current="page">3 · Mise en page</a><a href="defis.html">4 · Défis</a></nav>
   <div class="kicker">Partie 3 · Ce que fait la règle, une fois qu'elle a touché l'élément</div>
   <h1>La <span class="hl">mise en page</span>, en manipulant</h1>
   <p class="lead">Les parties 1 et 2 répondaient à « quels éléments ma règle touche-t-elle ? ». Celle-ci répond à « pourquoi c'est placé, espacé ou dimensionné comme ça ? ». Chaque leçon est un terrain de jeu : change une valeur à gauche, regarde les boîtes bouger, et lis le CSS généré en dessous.</p>
@@ -465,9 +465,9 @@ footer{margin-top:48px;color:var(--muted);font-size:13px}
 <!-- 7 -->
 <section class="lesson" id="l7">
   <div class="lesson-head"><span class="num">7</span><h2>Le fix le plus utile de flexbox : min-width: 0</h2></div>
-  <div class="prose"><p>Une ligne de partie : avatar, nom, boutons. Avec un nom très long, le nom refuse de rétrécir et pousse les boutons hors de la carte, même avec <code>text-overflow: ellipsis</code>. La raison : un enfant flex a <code>min-width: auto</code> par défaut, il ne descend jamais sous la largeur de son texte. Réduis la largeur, puis passe <code>min-width</code> à 0.</p></div>
+  <div class="prose"><p>Une ligne de partie : avatar, bloc <code>.info</code> (nom + rôle), boutons. Avec un nom très long, le bloc refuse de rétrécir et pousse les boutons hors de la carte, même si le nom a <code>text-overflow: ellipsis</code>. La raison : un enfant flex a <code>min-width: auto</code> par défaut, il ne descend jamais sous la largeur du texte qu'il contient. Réduis la largeur, puis passe <code>min-width</code> à 0 sur <code>.info</code>.</p></div>
   <div data-pg="minw"></div>
-  <div class="callout good"><b>À retenir</b>Texte qui déborde dans un flex ou un grid → <code>min-width: 0</code> sur l'enfant qui contient le texte. Dans un grid, l'équivalent est <code>minmax(0, 1fr)</code> au lieu de <code>1fr</code>.</div>
+  <div class="callout good"><b>À retenir</b>Texte qui déborde dans un flex ou un grid → <code>min-width: 0</code> sur l'<b>enfant flex</b> qui contient le texte. Dans un grid, l'équivalent est <code>minmax(0, 1fr)</code> au lieu de <code>1fr</code>. Subtilité : si l'enfant flex a lui-même <code>overflow: hidden</code>, son minimum automatique vaut déjà 0. Le bug apparaît quand l'ellipse est posée sur un élément <i>à l'intérieur</i>, ce qui est le cas le plus courant.</div>
 </section>
 
 <!-- 8 -->
@@ -1085,8 +1085,8 @@ var PGS={
   note:function(S,st){return 'Largeurs mesurées : A <b>'+W(st.querySelector('[data-t=a]'))+'px</b> · B <b>'+W(st.querySelector('[data-t=b]'))+'px</b> · C <b>'+W(st.querySelector('[data-t=cc]'))+'px</b>';}
  },
  minw:{
-  stage:'<div class="frame" data-t="f"><div class="hdr" data-t="row" style=""><div class="avatar"></div><div class="pname" data-t="n">Van den Bossche-Vandermeulen Marie-Christine Josephine</div><button type="button" class="mbtn alt">Modifier</button><button type="button" class="mbtn">Retirer</button></div></div>',
-  names:{n:'.name'}, base:{row:{display:'flex'},f:{overflow:'hidden'},n:{flex:'1'}},
+  stage:'<div class="frame" data-t="f"><div class="hdr" data-t="row" style=""><div class="avatar"></div><div data-t="n"><div class="pname">Van den Bossche-Vandermeulen Marie-Christine Josephine</div><small style="color:var(--muted);font-size:12px">Titulaire</small></div><button type="button" class="mbtn alt">Modifier</button><button type="button" class="mbtn">Retirer</button></div></div>',
+  names:{n:'.info'}, base:{row:{display:'flex'},f:{overflow:'hidden'},n:{flex:'1'}},
   controls:[{t:'f',p:'width',r:[260,640,10,'px'],v:420,label:'largeur de la carte'},{t:'n',p:'min-width',o:['auto','0'],v:'auto'}],
   note:function(S,st){var f=st.querySelector('[data-t=f]').getBoundingClientRect(), btn=st.querySelectorAll('.mbtn')[1].getBoundingClientRect(); var out=btn.right>f.right-2;
     return out?'<span class="a-no">Le bouton Retirer sort de la carte</span> : le nom refuse de rétrécir sous la largeur de son texte.':'<span class="a-ok">Tout tient</span> : le nom rétrécit et affiche « … ».';}
@@ -1187,10 +1187,10 @@ var FIX=[
   opts:[{l:'.header { justify-content: center; }',s:{h:{'justify-content':'center'}}},{l:'.cancel { margin-left: auto; }',s:{b1:{'margin-left':'auto'}}},{l:'.header { text-align: right; }',s:{h:{'text-align':'right'}}},{l:'.header { justify-content: space-between; }',s:{h:{'justify-content':'space-between'}}}],ok:1,
   x:'Une marge <code>auto</code> sur le premier bouton absorbe tout l\'espace libre et pousse le groupe à droite. <code>space-between</code> sépare les deux boutons ; <code>text-align</code> n\'agit pas sur des enfants flex.'},
  {goal:'Le nom doit se couper avec « … », et le bouton Retirer doit rester dans la carte.',
-  html:'<div class="frame" style="width:300px;max-width:100%;overflow:hidden"><div class="hdr" data-t="row"><div class="avatar"></div><div class="pname" data-t="n">Van den Bossche-Vandermeulen Marie-Christine</div><button type="button" class="mbtn">Retirer</button></div></div>',
+  html:'<div class="frame" style="width:300px;max-width:100%;overflow:hidden"><div class="hdr" data-t="row"><div class="avatar"></div><div data-t="n"><div class="pname">Van den Bossche-Vandermeulen Marie-Christine</div><small style="color:var(--muted);font-size:12px">Titulaire</small></div><button type="button" class="mbtn">Retirer</button></div></div>',
   base:{row:{display:'flex'},n:{flex:'1'}},
-  opts:[{l:'.row { overflow: hidden; }',s:{row:{overflow:'hidden'}}},{l:'.name { width: 100%; }',s:{n:{width:'100%'}}},{l:'.name { min-width: 0; }',s:{n:{'min-width':'0'}}},{l:'.name { flex-shrink: 0; }',s:{n:{'flex-shrink':'0'}}}],ok:2,
-  x:'Un enfant flex ne rétrécit pas sous la largeur de son texte (<code>min-width: auto</code>). <code>min-width: 0</code> l\'autorise, et l\'ellipse apparaît.'},
+  opts:[{l:'.row { overflow: hidden; }',s:{row:{overflow:'hidden'}}},{l:'.info { width: 100%; }',s:{n:{width:'100%'}}},{l:'.info { min-width: 0; }',s:{n:{'min-width':'0'}}},{l:'.info { flex-shrink: 0; }',s:{n:{'flex-shrink':'0'}}}],ok:2,
+  x:'<code>.info</code> est l\'enfant flex. Il ne rétrécit pas sous la largeur du texte qu\'il contient (<code>min-width: auto</code>). <code>min-width: 0</code> l\'autorise, et l\'ellipse du nom apparaît.'},
  {goal:'Nom et Prénom côte à côte, Rue sur toute la largeur en dessous.',
   html:'<div class="gform" data-t="g"><div class="mf"><small>Nom</small><span>Dupont</span></div><div class="mf"><small>Prénom</small><span>Marie</span></div><div class="mf" data-t="s"><small>Rue</small><span>Avenue des Arts 12</span></div></div>',
   base:{g:{display:'grid','grid-template-columns':'1fr 1fr',gap:'10px'}},
